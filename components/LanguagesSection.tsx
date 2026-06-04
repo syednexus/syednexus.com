@@ -4,21 +4,25 @@ return(
 
 <section
 id="languages"
-className="px-8 md:px-24 lg:px-40 py-10"
+className="px-8 md:px-24 lg:px-40 py-16"
 >
 
+<h2 className="text-3xl font-bold">
 
-<h2 className="text-4xl font-bold">
-
-Languages
+Languages & Technical Exposure
 
 </h2>
 
 
-<div className="grid md:grid-cols-2 gap-6 mt-10">
+<div className="grid md:grid-cols-2 gap-6 mt-8">
 
 
-<div className="border border-gray-800 rounded-xl p-6">
+<div className="
+border border-gray-800 
+rounded-xl 
+p-6
+bg-[#07111f]
+">
 
 <h3 className="text-xl">
 
@@ -27,13 +31,13 @@ Spoken Languages
 </h3>
 
 
-<ul className="mt-5 space-y-2 text-gray-400">
+<ul className="mt-5 space-y-3 text-gray-400">
 
-<li>English</li>
+<li>• English — Professional working proficiency</li>
 
-<li>Hindi</li>
+<li>• Hindi — Fluent</li>
 
-<li>Urdu</li>
+<li>• Urdu — Fluent</li>
 
 </ul>
 
@@ -44,37 +48,48 @@ Spoken Languages
 
 
 
-<div className="border border-gray-800 rounded-xl p-6">
+<div className="
+border border-gray-800
+rounded-xl
+p-6
+bg-[#07111f]
+">
 
 <h3 className="text-xl">
 
-Programming Exposure
+Programming & Scripting Exposure
 
 </h3>
 
 
-<ul className="mt-5 space-y-2 text-gray-400">
+<p className="text-gray-400 mt-4">
 
-<li>Python basics</li>
+Languages and technologies explored through coursework,
+labs and personal projects.
 
-<li>HTML & CSS</li>
+</p>
 
-<li>JavaScript / TypeScript basics</li>
 
-<li>Ruby basics</li>
+<ul className="mt-5 space-y-3 text-gray-400">
+
+<li>• Python — Fundamentals</li>
+
+<li>• HTML & CSS — Fundamentals</li>
+
+<li>• JavaScript / TypeScript — Learning</li>
+
+<li>• Ruby — Basic exposure</li>
 
 </ul>
 
 
 </div>
-
 
 
 </div>
 
 
 </section>
-
 
 );
 
