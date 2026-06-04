@@ -1,6 +1,17 @@
 export default function Navigation(){
 
-return (
+const links=[
+["About","#about"],
+["Journey","#journey"],
+["Skills","#skills"],
+["Certifications","#certifications"],
+["Projects","#projects"],
+["Lab","#lab"],
+["Contact","#contact"],
+];
+
+
+return(
 
 <nav className="
 fixed top-0 left-0 w-full
@@ -19,34 +30,30 @@ Syed Nexus
 </h1>
 
 
-<div className="hidden md:flex gap-6 text-gray-400">
+
+<div className="hidden md:flex gap-6 text-gray-400 text-sm">
 
 
-<a className="hover:text-blue-400 transition" href="#about">
-About
+{links.map((link)=>(
+
+<a
+key={link[0]}
+href={link[1]}
+className="hover:text-blue-400 transition"
+>
+
+{link[0]}
+
 </a>
 
-<a className="hover:text-blue-400 transition" href="#journey">
-Journey
-</a>
-
-<a className="hover:text-blue-400 transition" href="#skills">
-Skills
-</a>
-
-<a className="hover:text-blue-400 transition" href="#lab">
-Lab
-</a>
-
-<a className="hover:text-blue-400 transition" href="#contact">
-Contact
-</a>
+))}
 
 
 </div>
 
 
 </nav>
+
 
 );
 

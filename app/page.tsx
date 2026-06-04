@@ -6,7 +6,7 @@ import SkillsSection from "@/components/SkillsSection";
 import LabSection from "@/components/LabSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
-
+import CertificationsSection from "@/components/CertificationsSection";     
 
 export default function Home() {
 
@@ -25,13 +25,15 @@ export default function Home() {
 
       <SkillsSection />
 
+      <CertificationsSection />
+
       <LabSection />
 
       <ContactSection />
 
       <Footer />
 
-
+      
     </main>
 
   );

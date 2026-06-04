@@ -19,11 +19,14 @@ Syed Mohiuddin
 </h1>
 
 
-<h2 className="mt-6 text-2xl text-gray-300">
+<p className="mt-6 max-w-3xl text-gray-400 text-lg leading-8">
 
-Cybersecurity Student • Healthcare Background
+Cybersecurity student with a healthcare background,
+developing practical knowledge in networking, systems,
+security fundamentals and infrastructure through academic
+learning and hands-on projects.
 
-</h2>
+</p>
 
 
 
