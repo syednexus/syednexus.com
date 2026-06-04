@@ -7,6 +7,10 @@ import LabSection from "@/components/LabSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import CertificationsSection from "@/components/CertificationsSection";     
+import ProjectsSection from "@/components/ProjectsSection";
+import LanguagesSection from "@/components/LanguagesSection";
+
+
 
 export default function Home() {
 
@@ -14,25 +18,27 @@ export default function Home() {
 
     <main className="min-h-screen bg-[#050B14] text-white">
 
+<Navigation />
 
-      <Navigation />
+<MainHero />
 
-      <MainHero />
+<AboutSection />
 
-      <AboutSection />
+<JourneySection />
 
-      <JourneySection />
+<SkillsSection />
 
-      <SkillsSection />
+<CertificationsSection />
 
-      <CertificationsSection />
+<ProjectsSection />
 
-      <LabSection />
+<LabSection />
 
-      <ContactSection />
+<LanguagesSection />
 
-      <Footer />
+<ContactSection />
 
+<Footer />
       
     </main>
 
