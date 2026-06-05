@@ -13,9 +13,6 @@ import LanguagesSection from "../LanguagesSection";
 import ContactSection from "../ContactSection";
 import Footer from "../Footer";
 
-import ModeSwitcher from "../core/ModeSwitcher";
-
-
 
 type Props={
 
@@ -61,13 +58,33 @@ relative
 <Footer/>
 
 
-<ModeSwitcher
 
-current="defender"
 
-setMode={setMode}
+<button
 
-/>
+onClick={()=>setMode("lab")}
+
+className="
+fixed
+bottom-6
+right-6
+border
+border-green-400
+text-green-300
+bg-black/70
+px-5
+py-3
+rounded-lg
+hover:bg-green-500/10
+"
+
+>
+
+⚔ Nexus Lab
+
+</button>
+
+
 
 
 </main>

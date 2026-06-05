@@ -20,12 +20,14 @@ Infrastructure
 skills:`
 
 Security:
+
 Linux
 Networking
 Web Security Fundamentals
 
 Programming:
-Python 
+
+Python
 HTML/CSS
 JavaScript/TypeScript basics
 Ruby basics
@@ -37,11 +39,39 @@ projects:`
 
 Syed Nexus Portfolio
 
+Technologies:
+
 Next.js
+TypeScript
 Vercel Deployment
 Cloudflare DNS
+
+
+Cybersecurity Labs:
+
+Linux Practice
+Networking
+Security Tools
+
+`,
+
+
+certifications:`
+
+CERTIFICATION ARCHIVE
+
+
+✓ Cisco Foundations of Cybersecurity
+
+✓ TryHackMe Cyber Security 101
+
+
+Status:
+
+Verified ✓
+
 
 `
 
 
-}
+};
