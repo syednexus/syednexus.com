@@ -67,7 +67,7 @@ export default function ProjectsSection() {
           <div
             key={project.title}
             className="
-            border border-gray-800
+            border border-slate-700/60 bg-slate-900/50
             rounded-xl
             p-6
             hover:border-blue-500

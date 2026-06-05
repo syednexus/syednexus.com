@@ -1,47 +1,61 @@
-import Navigation from "@/components/Navigation";
-import MainHero from "@/components/MainHero";
-import AboutSection from "@/components/AboutSection";
-import JourneySection from "@/components/JourneySection";
-import SkillsSection from "@/components/SkillsSection";
-import LabSection from "@/components/LabSection";
-import ContactSection from "@/components/ContactSection";
-import Footer from "@/components/Footer";
-import CertificationsSection from "@/components/CertificationsSection";     
-import ProjectsSection from "@/components/ProjectsSection";
-import LanguagesSection from "@/components/LanguagesSection";
+"use client";
+
+import { useState } from "react";
+
+import NexusGateway from "@/components/core/NexusGateway";
+import NexusLab from "@/components/lab/NexusLab";
+import DefenderConsole from "@/components/defender/DefenderConsole";
+
+
+export default function Home(){
+
+
+const [mode,setMode] =
+useState<"gateway"|"defender"|"lab">("gateway");
 
 
 
-export default function Home() {
+if(mode==="gateway"){
 
-  return (
+return (
 
-    <main className="min-h-screen bg-[#050B14] text-white">
+<NexusGateway
 
-<Navigation />
+setMode={setMode}
 
-<MainHero />
+/>
 
-<AboutSection />
+);
 
-<JourneySection />
+}
 
-<SkillsSection />
 
-<CertificationsSection />
 
-<ProjectsSection />
+if(mode==="lab"){
 
-<LabSection />
+return (
 
-<LanguagesSection />
+<NexusLab
 
-<ContactSection />
+setMode={setMode}
 
-<Footer />
-      
-    </main>
+/>
 
-  );
+);
+
+}
+
+
+
+return (
+
+<DefenderConsole
+
+setMode={setMode}
+
+/>
+
+);
+
 
 }

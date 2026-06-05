@@ -4,7 +4,7 @@ const links=[
 ["About","#about"],
 ["Journey","#journey"],
 ["Skills","#skills"],
-["Certifications","#certifications"],
+["Certs","#certifications"],
 ["Projects","#projects"],
 ["Lab","#lab"],
 ["Contact","#contact"],
@@ -18,9 +18,9 @@ fixed top-0 left-0 w-full
 flex justify-between items-center
 px-8 md:px-24 lg:px-40
 py-5
-bg-[#050B14]/80
+bg-[#08111f]/80
 backdrop-blur
-border-b border-gray-900
+border-b border-slate-800
 z-50
 ">
 

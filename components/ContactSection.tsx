@@ -1,14 +1,46 @@
 export default function ContactSection(){
 
+
+const contacts=[
+
+{
+name:"Email",
+value:"syed@syednexus.com"
+},
+
+{
+name:"GitHub",
+value:"github.com/syednexus"
+},
+
+{
+name:"LinkedIn",
+value:"linkedin.com/in/syedmohiuddin7"
+}
+
+];
+
+
+
 return(
 
 <section
 id="contact"
-className="px-8 md:px-24 lg:px-40 py-20"
+
+className="
+px-6
+sm:px-10
+md:px-24
+lg:px-40
+py-20
+"
 >
 
 
-<h2 className="text-4xl font-bold">
+<h2 className="
+text-4xl
+font-bold
+">
 
 Connect
 
@@ -16,102 +48,63 @@ Connect
 
 
 
-<div className="grid md:grid-cols-3 gap-6 mt-10">
+<div className="
+grid
+grid-cols-1
+md:grid-cols-2
+xl:grid-cols-3
+gap-8
+mt-12
+">
 
 
-<a
-href="mailto:syed@syednexus.com"
+{contacts.map(item=>(
+
+
+<div
+
+key={item.name}
+
 className="
-border border-gray-800
+border
+border-slate-700
 rounded-xl
-p-6
-hover:border-blue-500
+p-8
+bg-slate-900/40
+hover:border-cyan-400
 transition
+min-h-36
 "
+
+
 >
 
 
-<h3 className="text-xl">
+<h3 className="
+text-2xl
+">
 
-Email
+{item.name}
 
 </h3>
 
 
-<p className="text-gray-400 mt-3">
+<p className="
+text-slate-400
+mt-5
+break-all
+">
 
-syed@syednexus.com
-
-</p>
-
-
-</a>
-
-
-
-
-<a
-href="https://github.com/syednexus"
-target="_blank"
-className="
-border border-gray-800
-rounded-xl
-p-6
-hover:border-blue-500
-transition
-"
->
-
-
-<h3 className="text-xl">
-
-GitHub
-
-</h3>
-
-
-<p className="text-gray-400 mt-3">
-
-github.com/syednexus
+{item.value}
 
 </p>
 
 
-</a>
+
+</div>
 
 
-
-
-
-<a
-href="https://linkedin.com/in/syedmohiuddin7"
-target="_blank"
-className="
-border border-gray-800
-rounded-xl
-p-6
-hover:border-blue-500
-transition
-"
->
-
-
-<h3 className="text-xl">
-
-LinkedIn
-
-</h3>
-
-
-<p className="text-gray-400 mt-3">
-
-linkedin.com/in/syedmohiuddin7
-
-</p>
-
-
-</a>
-
+))}
 
 
 </div>
@@ -120,6 +113,7 @@ linkedin.com/in/syedmohiuddin7
 </section>
 
 
-);
+)
+
 
 }

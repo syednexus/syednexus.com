@@ -36,7 +36,8 @@ Currently Learning
 <div
 key={skill}
 className="
-border border-gray-800
+border border-slate-700/60
+bg-slate-900/50
 rounded-xl
 p-5
 text-center

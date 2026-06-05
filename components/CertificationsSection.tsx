@@ -17,7 +17,7 @@ export default function CertificationsSection() {
       <div className="grid md:grid-cols-2 gap-6 mt-10">
 
 
-        <div className="border border-gray-800 rounded-xl p-6 hover:border-blue-500 transition">
+        <div className="border border-slate-700/60 bg-slate-900/50 rounded-xl p-6 hover:border-blue-500 transition">
 
           <h3 className="text-xl">
 
