@@ -1,6 +1,8 @@
 "use client";
 
+
 import { useEffect, useState } from "react";
+
 
 import Terminal from "./Terminal";
 import NodeMap from "./NodeMap";
@@ -9,30 +11,116 @@ import SystemLog from "./SystemLog";
 import BootScreen from "./BootScreen";
 import StatusBar from "./StatusBar";
 import RootPanel from "./RootPanel";
+import LabIdentity from "./LabIdentity";
+import SecurityArsenal from "./SecurityArsenal";
+
+
+import SystemSwitcher from "@/components/core/SystemSwitcher";
+
+
+import { Mode } from "@/types/mode";
+import { AccessLevel } from "@/types/access";
+
+
+
 
 type Props={
 
-setMode:(mode:"gateway"|"defender"|"lab")=>void;
+setMode:(mode:Mode)=>void;
+
+access:AccessLevel;
+
+setAccess:(access:AccessLevel)=>void;
 
 };
 
 
-export default function NexusLab({setMode}:Props){
 
 
-const [booted,setBooted]=useState(false);
 
-const [unlocked,setUnlocked]=useState<string[]>([]);
 
-const [completed,setCompleted]=useState(false);
+export default function NexusLab({
+
+setMode,
+
+access,
+
+setAccess
+
+}:Props){
+
+
+
+
+
+
+const [booted,setBooted]=useState(
+
+access==="root" || access==="owner"
+
+);
+
+
+
+
+
+const [unlocked,setUnlocked]=useState<string[]>(
+
+access==="root" || access==="owner"
+
+?
+
+[
+"IDENTITY",
+"SKILLS",
+"PROJECTS",
+"CERTS"
+]
+
+:
+
+[]
+
+);
+
+
+
+
+
+
+
+const [completed,setCompleted]=useState(
+
+access==="root" || access==="owner"
+
+);
+
+
+
+
+
 
 
 const [logs,setLogs]=useState<string[]>([
 
-"System boot complete",
-"Guest session initialized"
+
+access==="owner"
+
+?
+
+"[OWNER] Administrator session restored"
+
+:
+
+"[+] Guest session initialized"
+
 
 ]);
+
+
+
+
+
 
 
 
@@ -40,7 +128,9 @@ const [logs,setLogs]=useState<string[]>([
 function unlock(name:string){
 
 
+
 setUnlocked(prev=>{
+
 
 
 if(prev.includes(name)){
@@ -48,6 +138,9 @@ if(prev.includes(name)){
 return prev;
 
 }
+
+
+
 
 
 setLogs(old=>[
@@ -59,10 +152,15 @@ setLogs(old=>[
 ]);
 
 
+
+
+
 return [...prev,name];
 
 
+
 });
+
 
 
 }
@@ -70,13 +168,28 @@ return [...prev,name];
 
 
 
+
+
+
+
+
+
+// Visitor completed all missions = ROOT read only
+
 useEffect(()=>{
 
 
-if(unlocked.length===4 && !completed){
+
+if(unlocked.length>=4 && !completed){
+
 
 
 setCompleted(true);
+
+
+
+setAccess("root");
+
 
 
 setLogs(prev=>[
@@ -85,21 +198,83 @@ setLogs(prev=>[
 
 "[ROOT] Vault reconstruction complete",
 
-"[ROOT] Full profile access granted"
+"[ROOT] Read-only profile access granted"
 
 ]);
+
 
 
 }
 
 
-},[unlocked,completed]);
+
+},[unlocked,completed,setAccess]);
+
+
+
+
+
+
+
+
+
+// Password success = OWNER admin
+
+
+useEffect(()=>{
+
+
+
+if(access==="owner"){
+
+
+
+setUnlocked([
+
+"IDENTITY",
+
+"SKILLS",
+
+"PROJECTS",
+
+"CERTS"
+
+]);
+
+
+
+
+setCompleted(true);
+
+
+
+
+setLogs(prev=>[
+
+...prev,
+
+"[OWNER] Administrator privileges activated"
+
+]);
+
+
+
+}
+
+
+
+},[access]);
+
+
+
+
 
 
 
 
 
 if(!booted){
+
 
 
 return(
@@ -113,7 +288,13 @@ complete={()=>setBooted(true)}
 );
 
 
+
 }
+
+
+
+
+
 
 
 
@@ -125,18 +306,22 @@ return(
 
 min-h-screen
 
-bg-gradient-to-br
+bg-linear-to-br
 
-from-[#06111f]
+from-[#020617]
 
-via-[#0b2145]
+via-[#081b33]
 
-to-[#24103f]
+to-[#14091f]
 
 text-white
 
-
 ">
+
+
+
+
+
 
 
 <StatusBar
@@ -150,7 +335,33 @@ setMode={setMode}
 
 
 
+
+
+
+
 <section className="
+
+p-6
+
+space-y-6
+
+">
+
+
+
+
+
+<LabIdentity/>
+
+
+
+
+
+
+
+
+
+<div className="
 
 grid
 
@@ -158,14 +369,27 @@ grid-cols-12
 
 gap-6
 
-p-6
+">
 
-min-h-[calc(100vh-4rem)]
+
+
+
+
+
+
+<div className="
+
+col-span-12
+
+xl:col-span-3
+
+space-y-6
 
 ">
 
 
-<div className="col-span-3">
+
+
 
 
 <MissionPanel
@@ -176,51 +400,12 @@ unlocked={unlocked}
 
 
 
-{completed && (
-
-<div className="
-
-mt-6
-
-border
-
-border-green-400
-
-rounded-xl
-
-p-5
-
-bg-green-500/10
-
-font-mono
-
-">
 
 
-<h3 className="text-green-300">
-
-ROOT ACCESS GRANTED
-
-</h3>
+<SecurityArsenal/>
 
 
-<p className="text-sm mt-3">
 
-Nexus identity reconstruction completed.
-
-</p>
-
-
-<p className="text-xs mt-4 text-gray-300">
-
-All encrypted archives recovered.
-
-</p>
-
-
-</div>
-
-)}
 
 
 
@@ -230,9 +415,16 @@ All encrypted archives recovered.
 
 
 
+
+
+
+
+
 <div className="
 
-col-span-6
+col-span-12
+
+xl:col-span-6
 
 flex
 
@@ -243,16 +435,40 @@ justify-center
 ">
 
 
+
+
+
 {
+
 completed
+
 ?
-<RootPanel/>
+
+<RootPanel
+
+access={access}
+
+/>
+
 :
+
 <NodeMap unlocked={unlocked}/>
+
 }
 
 
+
+
+
+
+
 </div>
+
+
+
+
+
+
 
 
 
@@ -260,20 +476,53 @@ completed
 
 <div className="
 
-col-span-3
+col-span-12
+
+xl:col-span-3
 
 space-y-5
 
 ">
 
 
+
+
+
+
 <SystemLog logs={logs}/>
 
 
-<Terminal unlock={unlock}/>
+
+
+
+
+
+<Terminal
+
+unlock={unlock}
+
+setAccess={setAccess}
+
+/>
+
+
+
+
 
 
 </div>
+
+
+
+
+
+
+
+
+
+</div>
+
+
 
 
 
@@ -282,9 +531,31 @@ space-y-5
 
 
 
+
+
+
+
+
+
+<SystemSwitcher
+
+current="lab"
+
+setMode={setMode}
+
+/>
+
+
+
+
+
+
+
 </main>
 
+
 );
+
 
 
 }

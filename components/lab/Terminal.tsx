@@ -1,41 +1,64 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+
+import { useState,useRef,useEffect } from "react";
+
+import { admin } from "@/data/admin";
+
+import { AccessLevel } from "@/types/access";
 
 
-type Props = {
+
+
+type Props={
 
 unlock:(x:string)=>void;
+
+setAccess:(x:AccessLevel)=>void;
 
 };
 
 
 
-export default function Terminal({unlock}:Props){
+
+
+
+export default function Terminal({
+
+unlock,
+
+setAccess
+
+}:Props){
+
 
 
 const [input,setInput]=useState("");
 
 const [loading,setLoading]=useState(false);
 
-const [root,setRoot]=useState(false);
+const [owner,setOwner]=useState(false);
+
+const [awaitingPassword,setAwaitingPassword]=useState(false);
 
 
 
 const [history,setHistory]=useState<string[]>([
 
-"Nexus Secure Shell v1.0",
-"Connection established.",
-"Type 'help' to begin."
+"Nexus Red Team Console v3.0",
+
+"Encrypted session established.",
+
+"Type 'help' for available commands."
 
 ]);
 
 
 
+const bottomRef=useRef<HTMLDivElement>(null);
 
-const bottomRef = useRef<HTMLDivElement>(null);
+const inputRef=useRef<HTMLInputElement>(null);
 
-const inputRef = useRef<HTMLInputElement>(null);
 
 
 
@@ -54,7 +77,6 @@ behavior:"smooth"
 inputRef.current?.focus();
 
 
-
 },[history,loading]);
 
 
@@ -65,7 +87,8 @@ inputRef.current?.focus();
 
 
 
-async function run(){
+
+async function execute(){
 
 
 
@@ -80,8 +103,8 @@ return;
 const cmd=input.trim();
 
 
-
 setInput("");
+
 
 
 
@@ -89,28 +112,197 @@ setHistory(prev=>[
 
 ...prev,
 
-`${root ? "root@nexus:~#" : "guest@nexus:~$"} ${cmd}`
+`${owner ? "owner@nexus:~#" : "guest@nexus:~$"} ${
+awaitingPassword ? "********" : cmd
+}`
 
 ]);
 
 
 
 
+
+
+
+
+
+
+/* PASSWORD CHECK */
+
+
+if(awaitingPassword){
+
+
+
+const savedPassword=
+
+localStorage.getItem("nexus_password")
+
+||
+
+admin.security.password;
+
+
+
+
+if(cmd===savedPassword){
+
+
+
+setOwner(true);
+
+
+setAwaitingPassword(false);
+
+
+/* IMPORTANT */
+setAccess("owner");
+
+
+
+
+
+setHistory(prev=>[
+
+...prev,
+
+`
+[OWNER ACCESS GRANTED]
+
+Administrator identity confirmed.
+
+SYSTEM STATUS:
+✓ Sentinel online
+✓ MedCore online
+✓ Nexus Lab unlocked
+
+OWNER SESSION ACTIVE
+`
+
+]);
+
+
+
+}
+
+
+else{
+
+
+setAwaitingPassword(false);
+
+
+setHistory(prev=>[
+
+...prev,
+
+"[ACCESS DENIED] Invalid owner credential"
+
+]);
+
+
+}
+
+
+
+
+return;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+/* COMMANDS */
+
+
+
+if(cmd==="clear"){
+
+
+setHistory([
+
+"Nexus Red Team Console v3.0"
+
+]);
+
+
+return;
+
+
+}
+
+
+
+
+
+
+if(
+
+cmd==="sudo unlock" ||
+
+cmd==="nexus --root"
+
+){
+
+
+
+setAwaitingPassword(true);
+
+
+
+setHistory(prev=>[
+
+...prev,
+
+`
+OWNER AUTHENTICATION REQUIRED
+
+Enter administrator password:
+`
+
+]);
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+/* API ENGINE */
+
+
 setLoading(true);
-
-
 
 
 
 try{
 
 
+const response=await fetch(
 
-const res = await fetch("/api/terminal",{
+"/api/terminal",
 
+{
 
 method:"POST",
-
 
 headers:{
 
@@ -118,21 +310,19 @@ headers:{
 
 },
 
-
 body:JSON.stringify({
 
 command:cmd
 
 })
 
+}
 
-});
-
-
-
+);
 
 
-const data = await res.json();
+
+const data=await response.json();
 
 
 
@@ -152,43 +342,17 @@ data.output
 
 
 
-
-
-
 if(data.unlock){
-
 
 
 unlock(data.unlock);
 
 
-
-if(data.unlock==="ROOT"){
-
-
-setRoot(true);
-
-
-setHistory(prev=>[
-
-...prev,
-
-"[+] Root shell activated"
-
-]);
-
-
 }
-
-
-
-}
-
 
 
 
 setLoading(false);
-
 
 
 
@@ -197,16 +361,16 @@ setLoading(false);
 
 
 
+}
 
-}catch(error){
-
+catch{
 
 
 setHistory(prev=>[
 
 ...prev,
 
-"Connection error."
+"Connection failure."
 
 ]);
 
@@ -214,28 +378,8 @@ setHistory(prev=>[
 setLoading(false);
 
 
-
 }
 
-
-
-}
-
-
-
-
-
-
-
-
-function clearTerminal(){
-
-
-setHistory([
-
-"Nexus Secure Shell v1.0"
-
-]);
 
 
 }
@@ -250,30 +394,26 @@ setHistory([
 
 return(
 
-
 <div
 
 onClick={()=>inputRef.current?.focus()}
 
 className="
 
-bg-black/90
-
 border
+border-green-400/30
 
-border-green-500/40
+rounded-2xl
 
-rounded-xl
-
-h-[420px]
-
-overflow-y-auto
+bg-black/70
 
 p-5
 
-font-mono
+h-130
 
-text-sm
+overflow-y-auto
+
+font-mono
 
 shadow-lg
 
@@ -287,23 +427,38 @@ shadow-green-500/10
 
 
 
-{/* HEADER */}
 
 
 <div className="
 
-text-green-500
+border-b
 
-text-xs
+border-green-500/20
 
-mb-5
+pb-3
 
-tracking-widest
+mb-4
 
 ">
 
 
-● NEXUS TERMINAL
+
+<p className="text-green-300 text-xs tracking-widest">
+
+⚔ NEXUS RED TEAM CONSOLE
+
+</p>
+
+
+
+<div className="text-xs text-gray-400 mt-2">
+
+SESSION: ENCRYPTED |
+
+USER: {owner ? "OWNER":"GUEST"}
+
+</div>
+
 
 
 </div>
@@ -313,34 +468,31 @@ tracking-widest
 
 
 
-
-
-{/* HISTORY */}
 
 
 <div className="
 
 space-y-3
 
-whitespace-pre-wrap
+text-sm
 
 text-green-400
+
+whitespace-pre-wrap
 
 ">
 
 
 
-{history.map((item,index)=>(
 
+
+{history.map((line,index)=>(
 
 <div key={index}>
 
-
-{item}
-
+{line}
 
 </div>
-
 
 ))}
 
@@ -348,15 +500,15 @@ text-green-400
 
 
 
-{loading && (
 
+
+{loading && (
 
 <div>
 
-processing...
+executing...
 
 </div>
-
 
 )}
 
@@ -365,20 +517,17 @@ processing...
 
 
 
-{/* INPUT LINE */}
 
 
 <div className="flex">
 
 
+
 <span>
 
-
-{root ? "root@nexus:~#" : "guest@nexus:~$"}
-
+{owner ? "owner@nexus:~#" : "guest@nexus:~$"}
 
 &nbsp;
-
 
 </span>
 
@@ -388,47 +537,25 @@ processing...
 
 <input
 
-
 ref={inputRef}
-
 
 value={input}
 
+type={awaitingPassword ? "password":"text"}
 
-onChange={(e)=>setInput(e.target.value)}
+onChange={e=>setInput(e.target.value)}
 
-
-onKeyDown={(e)=>{
+onKeyDown={e=>{
 
 
 if(e.key==="Enter"){
 
-
-if(input.trim()==="clear"){
-
-
-clearTerminal();
-
-
-setInput("");
-
-
-return;
-
-
-}
-
-
-
-run();
-
-
+execute();
 
 }
 
 
 }}
-
 
 className="
 
@@ -442,7 +569,6 @@ text-green-300
 
 "
 
-
 />
 
 
@@ -452,15 +578,11 @@ text-green-300
 
 
 
-
-
 <div ref={bottomRef}/>
 
 
 
-
 </div>
-
 
 
 

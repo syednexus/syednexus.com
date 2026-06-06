@@ -1,172 +1,213 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Shield, Terminal } from "lucide-react";
 
-type Props = {
-  setMode: (mode: "defender" | "lab") => void;
+type Props={
+
+setMode:(
+mode:
+"gateway" |
+"defender" |
+"medcore" |
+"lab" |
+"blogs"
+)=>void;
+
 };
 
-export default function NexusGateway({ setMode }: Props) {
-  return (
-    <main className="
-      min-h-screen 
-      bg-gradient-to-br 
-      from-[#07111f]
-      via-[#10264d]
-      to-[#27134d]
-      text-white
-      flex
-      items-center
-      justify-center
-      overflow-hidden
-    ">
-
-      <motion.div
-        initial={{ opacity:0, y:30 }}
-        animate={{ opacity:1, y:0 }}
-        transition={{ duration:0.8 }}
-        className="max-w-6xl w-full px-8"
-      >
-
-        <p className="text-cyan-300 tracking-[0.4em] text-sm">
-          SYED NEXUS
-        </p>
 
 
-        <h1 className="
-        text-6xl 
-        md:text-7xl
-        font-bold
-        mt-5
-        ">
-          Select Interface
-        </h1>
+
+export default function NexusGateway({
+setMode
+}:Props){
 
 
-        <p className="
-        text-slate-300 
-        mt-6
-        text-xl
-        max-w-xl
-        ">
-          Choose your access environment.
-        </p>
+const systems=[
 
 
-        <div className="
-        grid 
-        md:grid-cols-2 
-        gap-8 
-        mt-16
-        ">
+{
+icon:"🛡",
+name:"SENTINEL",
+desc:"Cybersecurity Intelligence Profile",
+mode:"defender" as const,
+color:"cyan"
+},
 
 
-          {/* DEFENDER */}
-
-          <button
-
-          onClick={() => setMode("defender")}
-
-          className="
-          group
-          text-left
-          rounded-3xl
-          border
-          border-cyan-400/30
-          bg-white/10
-          backdrop-blur-xl
-          p-10
-          hover:scale-[1.03]
-          transition
-          "
-
-          >
-
-          <Shield 
-          size={50}
-          className="
-          text-cyan-300
-          "
-          />
+{
+icon:"🧬",
+name:"MEDCORE",
+desc:"Healthcare & Pharmaceutical Intelligence",
+mode:"medcore" as const,
+color:"emerald"
+},
 
 
-          <h2 className="
-          text-3xl
-          mt-8
-          ">
-            Defender Interface
-          </h2>
+
+{
+icon:"⚔",
+name:"NEXUS LAB",
+desc:"Interactive Security Environment",
+mode:"lab" as const,
+color:"green"
+}
 
 
-          <p className="
-          text-slate-300
-          mt-4
-          ">
-            SOC-style professional dashboard containing background,
-            experience, skills and projects.
-          </p>
-
-
-          </button>
+];
 
 
 
 
-          {/* LAB */}
 
-          <button
+return(
 
-          onClick={() => setMode("lab")}
-
-          className="
-          text-left
-          rounded-3xl
-          border
-          border-purple-400/30
-          bg-white/10
-          backdrop-blur-xl
-          p-10
-          hover:scale-[1.03]
-          transition
-          "
-
-          >
-
-          <Terminal
-          size={50}
-          className="
-          text-purple-300
-          "
-          />
+<main className="
+min-h-screen
+bg-black
+text-white
+flex
+items-center
+justify-center
+font-mono
+overflow-hidden
+">
 
 
-          <h2 className="
-          text-3xl
-          mt-8
-          ">
-            Nexus Lab
-          </h2>
+<div className="
+max-w-6xl
+w-full
+px-6
+">
 
 
-          <p className="
-          text-slate-300
-          mt-4
-          ">
-            Interactive security environment with investigations,
-            challenges and technical exploration.
-          </p>
+
+<div className="
+text-center
+mb-16
+">
 
 
-          </button>
+<h1 className="
+text-5xl
+tracking-widest
+">
+
+SYED NEXUS
+
+</h1>
 
 
-        </div>
+
+<p className="
+text-gray-400
+mt-5
+">
+
+Digital Identity Operating System
+
+</p>
 
 
-      </motion.div>
+
+</div>
 
 
-    </main>
-  );
+
+
+
+<div className="
+grid
+grid-cols-1
+md:grid-cols-3
+gap-8
+">
+
+
+{systems.map(system=>(
+
+
+<button
+
+key={system.name}
+
+onClick={()=>setMode(system.mode)}
+
+className="
+group
+border
+border-white/20
+rounded-2xl
+p-8
+bg-white/5
+hover:bg-white/10
+transition
+text-left
+"
+
+>
+
+
+
+<div className="
+text-5xl
+">
+
+{system.icon}
+
+</div>
+
+
+
+<h2 className="
+text-2xl
+mt-6
+">
+
+{system.name}
+
+</h2>
+
+
+
+
+<p className="
+text-gray-400
+mt-4
+">
+
+{system.desc}
+
+</p>
+
+
+
+
+<div className="
+mt-8
+text-sm
+text-green-300
+">
+
+INITIALIZE →
+
+</div>
+
+
+
+</button>
+
+
+))}
+
+
+</div>
+
+
+</div>
+
+
+</main>
+
+)
+
 }

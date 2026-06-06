@@ -1,41 +1,101 @@
 "use client";
 
+
 import { useState } from "react";
 
+import { useNexusData } from "@/hooks/useNexusData";
 
-export default function RootPanel(){
+import { AccessLevel } from "@/types/access";
+
+
+import Filesystem from "./Filesystem";
+
+import AdminConsole from "@/components/admin/AdminConsole";
+
+
+
+
+
+
+type Props={
+
+access:AccessLevel;
+
+};
+
+
+
+
+
+
+export default function RootPanel({
+
+access
+
+}:Props){
+
+
+
+const profile = useNexusData();
 
 
 const [view,setView]=useState("profile");
 
 
-const skills=[
 
-["Linux",80],
-["Networking",70],
-["Security Fundamentals",75],
-["Python",50],
-["Web Security",45]
+
+
+const tabs=[
+
+"profile",
+
+"projects",
+
+"certs",
+
+"filesystem",
+
+...(access==="owner" ? ["admin"] : [])
 
 ];
+
+
+
+
+
 
 
 
 return(
 
 <div className="
+
 w-full
-max-w-4xl
+max-w-5xl
+
 border
 border-green-400/40
+
 bg-black/50
+
 rounded-2xl
+
 p-6
+
 font-mono
+
 text-green-300
+
 shadow-lg
 shadow-green-500/10
+
 ">
+
+
+
+
+
+
 
 
 
@@ -43,30 +103,73 @@ shadow-green-500/10
 
 
 <div className="
+
 flex
 justify-between
+
 border-b
 border-green-500/30
+
 pb-4
+
 ">
+
 
 
 <div>
 
+
+
 <h2 className="text-xl">
 
-root@nexus
+
+{
+
+access==="owner"
+
+?
+
+"owner@nexus"
+
+:
+
+"root@nexus"
+
+}
+
 
 </h2>
 
 
+
+
 <p className="text-xs">
 
-ACCESS LEVEL: ADMINISTRATOR
+
+{
+
+access==="owner"
+
+?
+
+"ACCESS LEVEL: SYSTEM OWNER"
+
+:
+
+"ACCESS LEVEL: READ ONLY"
+
+}
+
 
 </p>
 
+
+
 </div>
+
+
+
+
 
 
 <div>
@@ -76,7 +179,15 @@ VAULT: DECRYPTED ✓
 </div>
 
 
+
+
+
 </div>
+
+
+
+
+
 
 
 
@@ -86,37 +197,81 @@ VAULT: DECRYPTED ✓
 {/* NAV */}
 
 
+
 <div className="
+
 flex
-gap-4
+gap-5
+
 mt-5
+
 border-b
 border-green-500/20
+
 pb-4
+
 ">
 
 
-<button onClick={()=>setView("profile")}>
 
-PROFILE
+
+
+
+{tabs.map(tab=>(
+
+
+
+<button
+
+key={tab}
+
+onClick={()=>setView(tab)}
+
+className={
+
+`
+
+px-3
+
+py-1
+
+rounded
+
+nexus-hover
+
+${
+
+view===tab
+
+?
+
+"text-white border border-green-400/40"
+
+:
+
+"text-green-600"
+
+}
+
+`
+
+}
+
+>
+
+
+{tab.toUpperCase()}
+
 
 </button>
 
 
 
-<button onClick={()=>setView("projects")}>
 
-PROJECTS
-
-</button>
+))}
 
 
 
-<button onClick={()=>setView("certs")}>
-
-CERTIFICATIONS
-
-</button>
 
 
 
@@ -138,122 +293,172 @@ CERTIFICATIONS
 <section className="mt-6">
 
 
-<p className="text-xs text-green-500">
-
-IDENTITY MODULE
-
-</p>
-
-
-<h1 className="
-text-3xl
-mt-2
-">
-
-Syed Mohiuddin
-
-</h1>
-
-
-
-<p className="mt-3 text-green-200">
-
-Bachelor of Pharmacy → Master of Cyber Security
-
-</p>
-
-
-
-<p className="mt-3 text-gray-300">
-
-Exploring Security Operations, Networking,
-Infrastructure and Security Engineering.
-
-</p>
 
 
 
 
+<img
 
+src={profile.identity.avatar || "/profile.jpg"}
 
-
-<div className="
-space-y-4
-mt-8
-">
-
-
-<p className="text-xs text-green-500">
-
-SKILL MATRIX
-
-</p>
-
-
-
-{skills.map(skill=>(
-
-
-<div key={skill[0]}>
-
-
-<div className="flex justify-between">
-
-
-<span>
-
-{skill[0]}
-
-</span>
-
-
-<span>
-
-{skill[1]}%
-
-</span>
-
-
-</div>
-
-
-
-
-<div className="
-h-2
-bg-green-950
-rounded
-">
-
-
-<div
-
-style={{
-
-width:`${skill[1]}%`
-
-}}
+alt={profile.identity.name}
 
 className="
-h-full
-bg-green-400
-rounded
+
+w-24
+h-24
+
+rounded-full
+
+border
+border-green-400
+
+object-cover
+
+nexus-hover
+
 "
 
 />
 
 
-</div>
+
+
+
+
+
+<h1 className="text-3xl mt-3">
+
+
+{profile.identity.name}
+
+
+</h1>
+
+
+
+
+
+
+
+<p className="mt-3 text-green-200">
+
+
+{profile.identity.headline}
+
+
+</p>
+
+
+
+
+
+
+
+<p className="
+
+mt-5
+
+text-gray-300
+
+whitespace-pre-line
+
+">
+
+
+{profile.identity.summary}
+
+
+</p>
+
+
+
+
+
+
+
+
+<div className="mt-8">
+
+
+
+<p className="text-xs">
+
+EDUCATION
+
+</p>
+
+
+
+
+
+
+<div className="space-y-3 mt-3">
+
+
+{profile.education.map(item=>(
+
+
+
+<div
+
+key={item.degree}
+
+className="
+
+border
+border-green-500/20
+
+rounded-xl
+
+p-4
+
+bg-green-400/5
+
+nexus-hover
+
+"
+
+>
+
+
+
+<h3>
+
+🎓 {item.degree}
+
+</h3>
+
+
+
+
+<p className="text-gray-400 text-sm">
+
+{item.institution}
+
+</p>
 
 
 
 </div>
+
+
 
 
 ))}
 
 
 </div>
+
+
+
+
+
+
+</div>
+
+
+
 
 
 </section>
@@ -271,91 +476,94 @@ rounded
 {/* PROJECTS */}
 
 
+
 {view==="projects" && (
 
-<section className="mt-6">
 
+<section className="
 
-<h2 className="text-xl">
-
-PROJECT DATABASE
-
-</h2>
-
-
-
-<div className="
 grid
+
 grid-cols-2
+
 gap-4
-mt-5
+
+mt-6
+
 ">
 
 
 
-<div className="
+
+
+
+{profile.projects.map(project=>(
+
+
+
+<div
+
+key={project.name}
+
+className="
+
 border
 border-green-500/30
-rounded
+
+rounded-xl
+
 p-4
+
+bg-green-400/5
+
+nexus-hover
+
+"
+
+>
+
+
+
+<h3>
+
+⚔ {project.name}
+
+</h3>
+
+
+
+
+
+<p className="
+
+text-gray-400
+
+text-sm
+
+mt-2
+
 ">
 
-<h3>Syed Nexus Platform</h3>
 
-<p className="text-sm mt-2">
+{project.description}
 
-Next.js cybersecurity portfolio with interactive terminal lab.
 
 </p>
 
-</div>
-
-
-
-
-
-<div className="
-border
-border-green-500/30
-rounded
-p-4
-">
-
-<h3>Cybersecurity Labs</h3>
-
-<p className="text-sm mt-2">
-
-Linux, networking, web security and security tools practice.
-
-</p>
-
-</div>
-
-
-
-
-
-<div className="
-border
-border-green-500/30
-rounded
-p-4
-">
-
-<h3>Infrastructure Learning</h3>
-
-<p className="text-sm mt-2">
-
-Virtualization, servers and monitoring concepts.
-
-</p>
-
-</div>
 
 
 
 
 </div>
+
+
+
+
+))}
+
+
+
+
 
 
 </section>
@@ -369,44 +577,89 @@ Virtualization, servers and monitoring concepts.
 
 
 
-{/* CERTS */}
+
+{/* CERTIFICATIONS */}
+
 
 
 {view==="certs" && (
 
-<section className="mt-6">
 
 
-<h2 className="text-xl">
+<section className="
 
-CERTIFICATION VAULT
+mt-6
 
-</h2>
-
-
-
-<ul className="
-mt-5
 space-y-3
+
 ">
 
 
-<li>
-
-✓ Cisco Foundations of Cybersecurity
-
-</li>
-
-
-<li>
-
-✓ TryHackMe Cyber Security 101
-
-</li>
 
 
 
-</ul>
+
+{profile.certifications.map(cert=>(
+
+
+
+
+<div
+
+key={cert.name}
+
+className="
+
+border
+border-green-500/20
+
+rounded-xl
+
+p-4
+
+bg-green-400/5
+
+nexus-hover
+
+"
+
+>
+
+
+
+🛡 {cert.name}
+
+
+
+
+<p className="
+
+text-gray-500
+
+text-xs
+
+">
+
+
+{cert.status}
+
+
+</p>
+
+
+
+
+</div>
+
+
+
+
+
+))}
+
+
+
+
 
 
 </section>
@@ -422,93 +675,44 @@ space-y-3
 
 
 
-{/* LINKS */}
+
+{/* FILESYSTEM */}
 
 
-<div className="
-flex
-gap-4
-mt-8
-">
+{view==="filesystem" && (
 
+<div className="mt-6">
 
-
-<a
-
-href="/resume.pdf"
-
-download="Syed_Mohiuddin_Resume.pdf"
-
-className="
-border
-border-green-400
-px-4
-py-2
-rounded
-hover:bg-green-400/10
-"
-
->
-
-Download Resume
-
-</a>
-
-
-
-
-
-
-<a
-
-href="https://github.com/syednexus"
-
-target="_blank"
-
-className="
-border
-border-green-400
-px-4
-py-2
-rounded
-hover:bg-green-400/10
-"
-
->
-
-Github
-
-</a>
-
-
-
-
-
-
-<a
-
-href="https://linkedin.com/in/syedmohiuddin7"
-
-target="_blank"
-
-className="
-border
-border-green-400
-px-4
-py-2
-rounded
-hover:bg-green-400/10
-"
-
->
-
-LinkedIn
-
-</a>
-
-
+<Filesystem/>
 
 </div>
+
+)}
+
+
+
+
+
+
+
+
+
+{/* ADMIN */}
+
+
+
+{view==="admin" && access==="owner" && (
+
+<div className="mt-6">
+
+<AdminConsole/>
+
+</div>
+
+)}
+
+
+
 
 
 

@@ -1,47 +1,430 @@
-
 @import "tailwindcss";
+
+
+
+/* ==========================
+   NEXUS THEME VARIABLES
+   ========================== */
 
 
 :root {
 
-  --background: #08111f;
-  --foreground: #f8fafc;
+--background:#08111f;
+
+--foreground:#f8fafc;
 
 }
+
+
+
+
+
+
+
+/* ==========================
+   BASE SYSTEM
+   ========================== */
 
 
 html {
 
-  scroll-behavior: smooth;
+scroll-behavior:smooth;
 
 }
+
 
 
 body {
 
-  background:
-    radial-gradient(
-      circle at top left,
-      rgba(37,99,235,0.18),
-      transparent 35%
-    ),
-    #08111f;
+background:
 
-  color: var(--foreground);
+radial-gradient(
+
+circle at top left,
+
+rgba(37,99,235,0.18),
+
+transparent 35%
+
+),
+
+#08111f;
+
+
+color:var(--foreground);
+
+
+overflow-x:hidden;
 
 }
+
+
+
+
 
 
 section {
 
-  scroll-margin-top: 90px;
+scroll-margin-top:90px;
 
 }
 
 
 
-a:focus {
 
-  outline: none;
+
+
+/* Remove default browser outlines */
+
+a:focus,
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+
+outline:none;
+
+}
+
+
+
+
+
+
+
+
+
+
+/* ==========================
+   NEXUS GLOBAL INTERACTIONS
+   ========================== */
+
+
+
+button,
+a,
+[role="button"] {
+
+cursor:pointer;
+
+
+transition:
+
+transform 200ms ease,
+
+background-color 200ms ease,
+
+border-color 200ms ease,
+
+color 200ms ease,
+
+opacity 200ms ease,
+
+box-shadow 200ms ease;
+
+
+will-change:transform;
+
+}
+
+
+
+
+
+
+button:hover,
+a:hover,
+[role="button"]:hover {
+
+
+transform:
+
+translateY(-1px)
+
+scale(1.02);
+
+
+}
+
+
+
+
+
+
+
+
+
+
+/* ==========================
+   FORM CONTROLS
+   ========================== */
+
+
+
+input,
+textarea {
+
+
+cursor:text;
+
+
+}
+
+
+
+select {
+
+
+cursor:pointer;
+
+
+}
+
+
+
+
+
+
+
+button:disabled,
+a[aria-disabled="true"] {
+
+
+cursor:not-allowed;
+
+
+opacity:0.5;
+
+
+transform:none;
+
+
+}
+
+
+
+
+
+/* ============================
+   NEXUS SOC TILE ENGINE
+   ============================ */
+
+
+.nexus-card {
+
+transition:
+transform 180ms ease,
+border-color 180ms ease,
+background-color 180ms ease,
+box-shadow 180ms ease;
+
+}
+
+
+
+.nexus-card:hover {
+
+transform:
+translateY(-3px);
+
+
+border-color:
+rgba(34,211,238,0.55);
+
+
+background:
+rgba(34,211,238,0.06);
+
+
+box-shadow:
+0 0 25px rgba(34,211,238,0.15);
+
+
+}
+
+
+/* ==========================
+   SOC CARD INTERACTION
+   ========================== */
+
+
+.nexus-hover {
+
+cursor:pointer;
+
+transition:
+transform 180ms ease,
+border-color 180ms ease,
+background-color 180ms ease,
+box-shadow 180ms ease;
+
+}
+
+
+
+.nexus-hover:hover {
+
+transform:
+
+translateY(-3px);
+
+
+
+border-color:
+
+rgba(52,211,153,0.6);
+
+
+
+background:
+
+rgba(52,211,153,0.06);
+
+
+
+box-shadow:
+
+0 0 20px rgba(52,211,153,0.12);
+
+
+}
+
+
+
+
+/* ==========================
+   NEXUS INPUT STYLE
+   ========================== */
+
+
+.admin-input {
+
+
+margin-top:1rem;
+
+
+width:100%;
+
+
+background:black;
+
+
+border:
+
+1px solid rgba(248,113,113,0.3);
+
+
+border-radius:0.5rem;
+
+
+padding:0.75rem;
+
+
+color:white;
+
+
+}
+
+
+
+
+
+
+
+.admin-input:focus {
+
+
+border-color:
+
+rgba(248,113,113,0.8);
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================
+   SCROLLBAR
+   ========================== */
+
+
+
+::-webkit-scrollbar {
+
+
+width:8px;
+
+
+}
+
+
+
+
+
+::-webkit-scrollbar-track {
+
+
+background:#020617;
+
+
+}
+
+
+
+
+::-webkit-scrollbar-thumb {
+
+
+background:#334155;
+
+
+border-radius:20px;
+
+
+}
+
+
+
+
+
+::-webkit-scrollbar-thumb:hover {
+
+
+background:#64748b;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* ==========================
+   TEXT SELECTION
+   ========================== */
+
+
+::selection {
+
+
+background:
+
+rgba(34,211,238,0.35);
+
+
+color:white;
+
 
 }
