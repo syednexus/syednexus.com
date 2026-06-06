@@ -3,14 +3,21 @@
 
 import { Mode } from "@/types/mode";
 
+import { useNexus } from "@/context/NexusContext";
+
+import { cn } from "@/lib/utils";
 
 
 
-type Props={
 
-current:Mode;
 
-setMode:(mode:Mode)=>void;
+type System={
+
+name:string;
+
+mode:Mode;
+
+icon:string;
 
 };
 
@@ -20,30 +27,7 @@ setMode:(mode:Mode)=>void;
 
 
 
-export default function SystemSwitcher({
-
-current,
-
-setMode
-
-}:Props){
-
-
-
-
-
-
-const systems:{
-
-
-name:string;
-
-mode:Mode;
-
-icon:string;
-
-
-}[]=[
+const systems:System[]=[
 
 
 
@@ -60,6 +44,7 @@ icon:"🌌"
 
 
 
+
 {
 
 name:"SENTINEL",
@@ -69,6 +54,7 @@ mode:"defender",
 icon:"🛡"
 
 },
+
 
 
 
@@ -100,6 +86,7 @@ icon:"🧬"
 
 
 
+
 {
 
 name:"BLOGS",
@@ -123,25 +110,161 @@ icon:"📝"
 
 
 
+const avatarMap:Record<Mode,
+
+"gateway" |
+
+"sentinel" |
+
+"lab" |
+
+"medcore" |
+
+"owner"
+
+>={
+
+
+
+gateway:"gateway",
+
+
+
+defender:"sentinel",
+
+
+
+lab:"lab",
+
+
+
+medcore:"medcore",
+
+
+
+blogs:"gateway"
+
+
+
+};
+
+
+
+
+
+
+
+
+
+type Props={
+
+current:Mode;
+
+setMode:(mode:Mode)=>void;
+
+};
+
+
+
+
+
+
+
+
+
+
+export default function SystemSwitcher({
+
+current,
+
+setMode
+
+}:Props){
+
+
+
+
+
+
+
+const {
+
+setAvatar,
+
+setCurrentSystem
+
+}=useNexus();
+
+
+
+
+
+
+
+
+
+function switchSystem(
+
+mode:Mode
+
+){
+
+
+
+setMode(mode);
+
+
+
+setCurrentSystem(mode);
+
+
+
+setAvatar(
+
+avatarMap[mode]
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
 return(
 
-<div className="
+<nav
 
-fixed
+aria-label="Nexus system navigation"
 
-top-5
 
-right-5
+className={cn(
 
-z-50
+"fixed",
 
-flex
+"top-20",
 
-gap-3
+"right-5",
 
-font-mono
+"z-50",
 
-">
+"flex",
+
+"gap-3",
+
+"font-mono"
+
+)}
+
+>
+
 
 
 
@@ -158,49 +281,83 @@ font-mono
 
 
 
+
+
+
 <button
 
 
 key={system.mode}
 
 
-onClick={()=>setMode(system.mode)}
+
+aria-label={`Switch to ${system.name}`}
 
 
-className="
 
-border
+onClick={()=>switchSystem(system.mode)}
 
-border-white/20
 
-rounded-xl
 
-bg-black/60
+className={cn(
 
-backdrop-blur
+"border",
 
-px-4
+"border-white/20",
 
-py-2
+"rounded-xl",
 
-text-sm
+"bg-black/70",
 
-hover:bg-white/10
+"backdrop-blur-xl",
 
-transition
+"px-4",
 
-"
+"py-2",
+
+"text-sm",
+
+"hover:bg-white/10",
+
+"hover:scale-105",
+
+"transition"
+
+)}
 
 >
 
 
 
-{system.icon} {system.name}
+
+
+
+
+<span
+
+aria-hidden="true"
+
+>
+
+{system.icon}
+
+</span>
+
+{" "}
+
+{system.name}
+
+
+
 
 
 
 
 </button>
+
+
+
+
 
 
 
@@ -212,10 +369,13 @@ transition
 
 
 
-</div>
+
+
+</nav>
 
 
 );
+
 
 
 }

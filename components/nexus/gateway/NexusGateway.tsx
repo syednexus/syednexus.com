@@ -13,13 +13,120 @@ import { useNexus } from "@/context/NexusContext";
 
 
 
-
-
 type Props={
 
 setMode:(mode:Mode)=>void;
 
 };
+
+
+
+
+
+type AvatarMode =
+
+"gateway" |
+
+"sentinel" |
+
+"lab" |
+
+"medcore" |
+
+"owner";
+
+
+
+
+
+
+const avatarMap:Record<Mode,AvatarMode>={
+
+gateway:"gateway",
+
+defender:"sentinel",
+
+lab:"lab",
+
+medcore:"medcore",
+
+blogs:"gateway"
+
+};
+
+
+
+
+
+
+
+
+const systems:{
+
+icon:string;
+
+name:string;
+
+desc:string;
+
+mode:Mode;
+
+}[]=[
+
+
+
+
+{
+
+icon:"🛡",
+
+name:"SENTINEL",
+
+desc:"Cybersecurity Intelligence Profile",
+
+mode:"defender"
+
+},
+
+
+
+
+
+
+{
+
+icon:"🧬",
+
+name:"MEDCORE",
+
+desc:"Healthcare & Pharmaceutical Intelligence",
+
+mode:"medcore"
+
+},
+
+
+
+
+
+
+{
+
+icon:"⚔",
+
+name:"NEXUS LAB",
+
+desc:"Interactive Security Environment",
+
+mode:"lab"
+
+}
+
+
+
+
+];
+
 
 
 
@@ -33,6 +140,9 @@ export default function NexusGateway({
 setMode
 
 }:Props){
+
+
+
 
 
 
@@ -54,61 +164,6 @@ setAvatar
 
 
 
-const systems=[
-
-
-{
-
-icon:"🛡",
-
-name:"SENTINEL",
-
-desc:"Cybersecurity Intelligence Profile",
-
-mode:"defender" as Mode
-
-},
-
-
-
-
-{
-
-icon:"🧬",
-
-name:"MEDCORE",
-
-desc:"Healthcare & Pharmaceutical Intelligence",
-
-mode:"medcore" as Mode
-
-},
-
-
-
-
-{
-
-icon:"⚔",
-
-name:"NEXUS LAB",
-
-desc:"Interactive Security Environment",
-
-mode:"lab" as Mode
-
-}
-
-
-
-];
-
-
-
-
-
-
-
 
 
 function launchSystem(
@@ -123,30 +178,11 @@ setCurrentSystem(mode);
 
 
 
+setAvatar(
 
-if(mode==="defender"){
+avatarMap[mode]
 
-setAvatar("sentinel");
-
-}
-
-
-
-if(mode==="lab"){
-
-setAvatar("lab");
-
-}
-
-
-
-if(mode==="medcore"){
-
-setAvatar("medcore");
-
-}
-
-
+);
 
 
 
@@ -192,7 +228,6 @@ overflow-hidden
 
 
 
-
 <div className="
 
 max-w-7xl
@@ -211,7 +246,10 @@ py-12
 
 
 
+
+
 <motion.div
+
 
 initial={{
 
@@ -221,6 +259,7 @@ y:-20
 
 }}
 
+
 animate={{
 
 opacity:1,
@@ -228,6 +267,8 @@ opacity:1,
 y:0
 
 }}
+
+
 
 className="
 
@@ -284,6 +325,8 @@ DIGITAL IDENTITY OPERATING SYSTEM
 
 
 
+
+
 <p className="
 
 text-gray-400
@@ -311,11 +354,11 @@ AI powered professional intelligence environment
 
 
 
-{/* ROLE SELECTION */}
-
+{/* ROLE SELECTOR */}
 
 
 <div>
+
 
 
 <p className="
@@ -336,11 +379,15 @@ SELECT VISITOR PROFILE
 
 
 
+
+
+
 <RoleSelector
 
 setMode={setMode}
 
 />
+
 
 
 
@@ -354,16 +401,17 @@ setMode={setMode}
 
 
 
-
-{/* MANUAL SYSTEM SELECTION */}
-
+{/* SYSTEM SELECTOR */}
 
 
-<div className="
+
+<section className="
 
 mt-16
 
 ">
+
+
 
 
 
@@ -395,6 +443,7 @@ OR INITIALIZE SYSTEM MANUALLY
 
 
 
+
 <div className="
 
 grid
@@ -414,7 +463,13 @@ gap-8
 
 
 
+
 {systems.map(system=>(
+
+
+
+
+
 
 
 
@@ -424,11 +479,17 @@ gap-8
 key={system.name}
 
 
+
+aria-label={`Initialize ${system.name}`}
+
+
+
 whileHover={{
 
 scale:1.05
 
 }}
+
 
 
 whileTap={{
@@ -439,7 +500,9 @@ scale:.95
 
 
 
+
 onClick={()=>launchSystem(system.mode)}
+
 
 
 
@@ -471,15 +534,23 @@ text-left
 
 
 
-<div className="
+
+<div
+
+aria-hidden="true"
+
+className="
 
 text-5xl
 
-">
+"
+
+>
 
 {system.icon}
 
 </div>
+
 
 
 
@@ -525,6 +596,7 @@ mt-4
 
 
 
+
 <div className="
 
 mt-8
@@ -544,7 +616,12 @@ INITIALIZE →
 
 
 
+
 </motion.button>
+
+
+
+
 
 
 
@@ -558,8 +635,6 @@ INITIALIZE →
 
 
 
-</div>
-
 
 </div>
 
@@ -569,15 +644,24 @@ INITIALIZE →
 
 
 
+</section>
+
+
+
+
+
+
 
 
 </div>
+
 
 
 
 
 
 </main>
+
 
 );
 
