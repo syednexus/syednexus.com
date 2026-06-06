@@ -15,8 +15,6 @@ import LabIdentity from "./LabIdentity";
 import SecurityArsenal from "./SecurityArsenal";
 
 
-import SystemSwitcher from "@/components/core/SystemSwitcher";
-
 
 import { Mode } from "@/types/mode";
 import { AccessLevel } from "@/types/access";
@@ -328,7 +326,6 @@ text-white
 
 unlocked={unlocked}
 
-setMode={setMode}
 
 />
 
@@ -505,57 +502,15 @@ setAccess={setAccess}
 
 />
 
-
-
-
-
-
 </div>
 
-
-
-
-
-
-
-
-
 </div>
-
-
-
-
-
 
 </section>
 
 
-
-
-
-
-
-
-
-<SystemSwitcher
-
-current="lab"
-
-setMode={setMode}
-
-/>
-
-
-
-
-
-
-
 </main>
 
-
 );
-
-
 
 }

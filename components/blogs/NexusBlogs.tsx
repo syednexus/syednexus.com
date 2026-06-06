@@ -7,7 +7,6 @@ import { useState } from "react";
 import { useNexusData } from "@/hooks/useNexusData";
 
 
-import SystemSwitcher from "@/components/core/SystemSwitcher";
 
 
 import { Mode } from "@/types/mode";
@@ -828,13 +827,6 @@ whitespace-pre-line
 
 
 
-<SystemSwitcher
-
-current="blogs"
-
-setMode={setMode}
-
-/>
 
 
 

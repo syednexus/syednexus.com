@@ -9,7 +9,6 @@ import ResearchArchive from "./ResearchArchive";
 import HealthCyberBridge from "./HealthCyberBridge";
 
 import { Mode } from "@/types/mode";
-import SystemSwitcher from "@/components/core/SystemSwitcher";
 
 type Props={
 
@@ -142,13 +141,6 @@ xl:col-span-6
 
 
 
-<SystemSwitcher
-
-current="medcore"
-
-setMode={setMode}
-
-/>
 
 
 

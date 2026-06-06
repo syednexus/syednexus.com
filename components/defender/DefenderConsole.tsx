@@ -4,10 +4,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-
 import SentinelBoot from "./sentinel/SentinelBoot";
 import SentinelHeader from "./sentinel/SentinelHeader";
-
 
 import IdentityDossier from "./sentinel/IdentityDossier";
 import CareerTrace from "./sentinel/CareerTrace";
@@ -16,15 +14,11 @@ import CaseFiles from "./sentinel/CaseFiles";
 import VerificationVault from "./sentinel/VerificationVault";
 import MissionQueue from "./sentinel/MissionQueue";
 
-
 import ActivityFeed from "./ActivityFeed";
 import SkillMatrix from "./SkillMatrix";
 
-
 import { useNexusData } from "@/hooks/useNexusData";
 
-
-import SystemSwitcher from "@/components/core/SystemSwitcher";
 import { Mode } from "@/types/mode";
 
 
@@ -104,11 +98,7 @@ overflow-x-hidden
 
 
 
-<SentinelHeader
-
-setMode={setMode}
-
-/>
+<SentinelHeader/>
 
 
 
@@ -480,25 +470,6 @@ space-y-6
 
 
 </section>
-
-
-
-
-
-
-
-
-
-<SystemSwitcher
-
-current="defender"
-
-setMode={setMode}
-
-/>
-
-
-
 
 
 

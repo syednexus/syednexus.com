@@ -5,13 +5,16 @@ import { Mode } from "@/types/mode";
 
 
 
-type Props = {
 
-current: Mode;
+type Props={
+
+current:Mode;
 
 setMode:(mode:Mode)=>void;
 
 };
+
+
 
 
 
@@ -29,46 +32,84 @@ setMode
 
 
 
-const systems:{mode:Mode;label:string}[]=[
+
+const systems:{
+
+
+name:string;
+
+mode:Mode;
+
+icon:string;
+
+
+}[]=[
+
 
 
 {
+
+name:"GATEWAY",
+
+mode:"gateway",
+
+icon:"🌌"
+
+},
+
+
+
+
+{
+
+name:"SENTINEL",
 
 mode:"defender",
 
-label:"🛡 Sentinel"
+icon:"🛡"
 
 },
 
 
 
-{
-
-mode:"medcore",
-
-label:"🧬 MedCore"
-
-},
-
-
 
 {
+
+name:"LAB",
 
 mode:"lab",
 
-label:"⚔ Lab"
+icon:"⚔"
 
 },
 
 
 
+
+
 {
+
+name:"MEDCORE",
+
+mode:"medcore",
+
+icon:"🧬"
+
+},
+
+
+
+
+{
+
+name:"BLOGS",
 
 mode:"blogs",
 
-label:"📝 Blogs"
+icon:"📝"
 
 }
+
 
 
 ];
@@ -88,9 +129,9 @@ return(
 
 fixed
 
-bottom-6
+top-5
 
-right-6
+right-5
 
 z-50
 
@@ -100,8 +141,6 @@ gap-3
 
 font-mono
 
-flex-wrap
-
 ">
 
 
@@ -110,8 +149,12 @@ flex-wrap
 
 
 
-{systems.map(system=>(
 
+{systems
+
+.filter(system=>system.mode!==current)
+
+.map(system=>(
 
 
 
@@ -121,72 +164,43 @@ flex-wrap
 key={system.mode}
 
 
-type="button"
-
-
 onClick={()=>setMode(system.mode)}
 
 
-className={`
+className="
 
+border
+
+border-white/20
+
+rounded-xl
+
+bg-black/60
+
+backdrop-blur
 
 px-4
 
 py-2
 
-rounded-lg
+text-sm
 
-border
-
-bg-black/80
-
-backdrop-blur
+hover:bg-white/10
 
 transition
 
-cursor-pointer
-
-
-
-${
-
-
-current===system.mode
-
-
-?
-
-
-"border-green-400 text-green-300 shadow-lg shadow-green-500/20"
-
-
-:
-
-
-"border-gray-600 text-gray-400 hover:text-white hover:border-white"
-
-
-
-}
-
-
-`}
-
+"
 
 >
 
 
 
-
-{system.label}
-
+{system.icon} {system.name}
 
 
 
 
 </button>
-
-
 
 
 

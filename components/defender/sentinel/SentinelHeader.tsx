@@ -1,33 +1,45 @@
-type Props={
-
-setMode:(mode:"gateway"|"defender"|"lab")=>void;
-
-};
+"use client";
 
 
-
-export default function SentinelHeader({
-setMode
-}:Props){
+export default function SentinelHeader(){
 
 
 
 return(
 
 <header className="
+
 h-16
+
 px-8
+
 flex
+
 items-center
+
 justify-between
+
 border-b
+
 border-cyan-400/20
+
 bg-black/30
+
 font-mono
+
 ">
 
 
-<div className="text-cyan-300">
+
+
+
+<div className="
+
+text-cyan-300
+
+tracking-widest
+
+">
 
 🛡 NEXUS SENTINEL
 
@@ -35,54 +47,30 @@ font-mono
 
 
 
-<div className="flex gap-4">
-
-
-<button
-
-onClick={()=>setMode("lab")}
-
-className="
-border
-border-green-400
-text-green-300
-px-4
-py-2
-rounded
-"
-
->
-
-⚔ Lab
-
-</button>
 
 
 
+<div className="
 
-<button
+text-xs
 
-onClick={()=>setMode("gateway")}
+text-cyan-400/70
 
-className="
-border
-border-gray-500
-px-4
-py-2
-rounded
-"
+tracking-widest
 
->
+">
 
-Gateway
-
-</button>
-
+SECURITY INTELLIGENCE MODE ACTIVE
 
 </div>
 
 
+
+
+
+
 </header>
+
 
 );
 
