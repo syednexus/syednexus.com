@@ -1,97 +1,273 @@
 "use client";
 
-import { medcore } from "@/data/medcore";
+
 import { motion } from "framer-motion";
+
+import { medcore } from "@/data/medcore";
+
+
+
+
 
 
 export default function PharmaMatrix(){
+
+
+
+
+
+
+
+const domains = medcore.domains || [];
+
+
+
+
+
+
+
 
 
 return(
 
 <motion.div
 
-initial={{opacity:0,y:30}}
-animate={{opacity:1,y:0}}
+
+initial={{
+
+opacity:0,
+
+y:30
+
+}}
+
+
+animate={{
+
+opacity:1,
+
+y:0
+
+}}
+
 
 className="
+
 h-full
+
 border
+
 border-green-400/30
+
 rounded-2xl
+
 bg-black/40
+
 p-6
+
+font-mono
+
+shadow-lg
+
+shadow-green-500/10
+
+nexus-hover
+
 "
 
 >
 
 
+
+
+
+
+
+
+
+
+{/* HEADER */}
+
+
+
 <p className="
+
 text-green-300
+
 tracking-widest
+
 text-sm
+
 ">
 
-PHARMACEUTICAL KNOWLEDGE MATRIX
+💊 PHARMA INTELLIGENCE MATRIX
 
 </p>
 
 
-<div className="
-grid
-md:grid-cols-2
-gap-5
-mt-6
+
+
+
+
+
+
+
+<p className="
+
+text-xs
+
+text-gray-400
+
+mt-3
+
 ">
 
+Clinical knowledge archive and healthcare domain mapping
 
-{medcore.domains.map(area=>(
+</p>
 
 
-<div
 
-key={area.name}
 
-className="
-border
-border-green-400/20
-rounded-xl
-p-4
-bg-green-400/5
 
-nexus-hover
+
+
+
+
+
+
+<div className="
+
+grid
+
+md:grid-cols-2
+
+gap-5
+
+mt-8
+
 "
 
 >
 
 
-<h3 className="
-text-green-200
-">
 
-{area.name}
+
+
+
+
+
+
+
+{domains.map((area,index)=>(
+
+
+
+
+
+
+
+
+
+<motion.div
+
+
+key={`${area.name}-${index}`}
+
+
+whileHover={{
+
+scale:1.03
+
+}}
+
+
+
+className="
+
+border
+
+border-green-400/20
+
+rounded-xl
+
+p-4
+
+bg-green-400/5
+
+"
+
+>
+
+
+
+
+
+
+
+
+
+<h3 className="
+
+text-green-200
+
+"
+
+>
+
+🧬 {area.name}
 
 </h3>
 
 
 
 
+
+
+
+
+
 <div className="
-mt-3
+
+mt-4
+
 space-y-2
-">
+
+"
+
+>
 
 
-{area.concepts.map(item=>(
+
+
+
+
+
+
+
+
+{area.concepts.map((item,i)=>(
+
+
+
+
+
+
+
 
 
 <p
 
-key={item}
+
+key={`${item}-${i}`}
+
 
 className="
+
 text-sm
+
 text-gray-300
+
 "
 
 >
@@ -101,23 +277,72 @@ text-gray-300
 </p>
 
 
-))}
 
 
-</div>
 
 
-</div>
+
 
 
 ))}
 
 
+
+
+
+
+
+
+
+
 </div>
+
+
+
+
+
+
+
+
 
 
 </motion.div>
 
-)
+
+
+
+
+
+
+
+
+))}
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+</motion.div>
+
+);
+
+
 
 }

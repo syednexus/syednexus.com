@@ -3,13 +3,13 @@
 
 import { useEffect,useState } from "react";
 
-import { profile } from "@/data/profile";
-
 import NexusToast from "@/components/core/NexusToast";
 
 
 
 type Blog={
+
+id?:number;
 
 title:string;
 
@@ -17,9 +17,39 @@ category:string;
 
 content:string;
 
-date:string;
+tags?:string;
 
 };
+
+
+
+
+
+
+const defaultCategories=[
+
+"Cybersecurity",
+
+"Lab Research",
+
+"Learning Notes",
+
+"Healthcare Security",
+
+"Projects",
+
+"Certifications",
+
+"Career",
+
+"Personal Logs",
+
+"Other"
+
+];
+
+
+
 
 
 
@@ -31,7 +61,7 @@ export default function BlogEditor(){
 
 const [blogs,setBlogs]=useState<Blog[]>([]);
 
-const [editing,setEditing]=useState<string|null>(null);
+const [customCategory,setCustomCategory]=useState("");
 
 const [toast,setToast]=useState("");
 
@@ -39,13 +69,15 @@ const [toast,setToast]=useState("");
 
 
 
-const [form,setForm]=useState({
+const [form,setForm]=useState<Blog>({
 
 title:"",
 
-category:"Cybersecurity",
+category:"Learning Notes",
 
-content:""
+content:"",
+
+tags:""
 
 });
 
@@ -58,55 +90,7 @@ content:""
 
 useEffect(()=>{
 
-
-
-const saved=
-
-localStorage.getItem("nexus_blogs");
-
-
-
-if(saved){
-
-
-const parsed=JSON.parse(saved);
-
-
-// supports old + new storage
-
-if(Array.isArray(parsed)){
-
-
-setBlogs(parsed);
-
-
-}
-
-
-else{
-
-
-setBlogs(parsed.posts || []);
-
-
-}
-
-
-
-}
-
-
-
-else{
-
-
-setBlogs(profile.blogs.posts);
-
-
-}
-
-
-
+load();
 
 },[]);
 
@@ -117,18 +101,36 @@ setBlogs(profile.blogs.posts);
 
 
 
-
-function notify(message:string){
-
-
-setToast(message);
+async function load(){
 
 
-setTimeout(()=>{
+const res =
+await fetch("/api/blogs");
 
-setToast("");
 
-},2500);
+setBlogs(
+
+await res.json()
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+function notify(msg:string){
+
+
+setToast(msg);
+
+
+setTimeout(()=>setToast(""),2500);
 
 
 }
@@ -141,30 +143,26 @@ setToast("");
 
 
 
-function save(){
+
+async function save(){
 
 
 
-if(!form.title || !form.content){
+const finalData={
 
-return;
+...form,
 
-}
+category:
 
+form.category==="Other"
 
+?
 
+customCategory
 
+:
 
-
-const post:Blog={
-
-title:form.title,
-
-category:form.category,
-
-content:form.content,
-
-date:new Date().toLocaleDateString()
+form.category
 
 };
 
@@ -173,99 +171,63 @@ date:new Date().toLocaleDateString()
 
 
 
-let updated:Blog[];
+
+const res =
+await fetch("/api/blogs",{
+
+method:"POST",
+
+credentials:"include",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify(finalData)
+
+});
 
 
 
 
 
-if(editing){
 
 
 
-updated=
+if(!res.ok){
 
-blogs.map(blog=>
 
-blog.title===editing
+notify("Unauthorized - login again");
 
-?
 
-post
+return;
+
+
+}
+
+
+
+
+
+
+
+
+notify(
+
+form.id ?
+
+"Blog updated"
 
 :
 
-blog
+"Blog published"
 
 );
 
 
 
-notify("Article updated successfully");
-
-
-
-}
-
-
-
-else{
-
-
-
-updated=[
-
-post,
-
-...blogs
-
-];
-
-
-
-notify("Article published successfully");
-
-
-
-}
-
-
-
-
-
-
-
-
-setBlogs(updated);
-
-
-
-
-
-
-
-localStorage.setItem(
-
-"nexus_blogs",
-
-JSON.stringify({
-
-...profile.blogs,
-
-posts:updated
-
-})
-
-);
-
-
-
-
-
-
-
-
-setEditing(null);
 
 
 
@@ -275,17 +237,24 @@ setForm({
 
 title:"",
 
-category:"Cybersecurity",
+category:"Learning Notes",
 
-content:""
+content:"",
+
+tags:""
 
 });
 
 
 
+setCustomCategory("");
+
+
+
+load();
+
 
 }
-
 
 
 
@@ -299,21 +268,7 @@ content:""
 function edit(blog:Blog){
 
 
-
-setEditing(blog.title);
-
-
-
-setForm({
-
-title:blog.title,
-
-category:blog.category,
-
-content:blog.content
-
-});
-
+setForm(blog);
 
 
 }
@@ -327,53 +282,72 @@ content:blog.content
 
 
 
-function remove(title:string){
+
+async function remove(id:number|undefined){
 
 
 
+if(!id){
 
+return;
 
-const updated=
-
-blogs.filter(
-
-blog=>blog.title!==title
-
-);
-
-
-
-
-
-
-setBlogs(updated);
+}
 
 
 
 
 
 
-localStorage.setItem(
+const res =
+await fetch("/api/blogs",{
 
-"nexus_blogs",
+method:"DELETE",
 
-JSON.stringify({
+credentials:"include",
 
-...profile.blogs,
+headers:{
 
-posts:updated
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+id
 
 })
 
-);
+});
 
 
 
 
 
 
-notify("Article removed");
 
+
+if(!res.ok){
+
+
+notify("Unauthorized - login again");
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+notify("Blog deleted");
+
+
+
+load();
 
 
 }
@@ -388,22 +362,7 @@ notify("Article removed");
 
 return(
 
-<div className="
-
-border
-border-purple-400/30
-
-rounded-xl
-
-p-5
-
-bg-black/40
-
-">
-
-
-
-
+<div className="space-y-5">
 
 
 
@@ -414,21 +373,31 @@ bg-black/40
 
 
 
+<p className="text-purple-300 tracking-widest">
 
-
-<p className="
-
-text-purple-300
-
-tracking-widest
-
-text-sm
-
-">
-
-BLOG CONTROL SYSTEM
+📝 BLOG DATABASE
 
 </p>
+
+
+
+
+
+
+
+
+{
+
+form.id &&
+
+<p className="text-yellow-300 text-sm">
+
+Editing: {form.title}
+
+</p>
+
+}
+
 
 
 
@@ -440,7 +409,9 @@ BLOG CONTROL SYSTEM
 
 <input
 
-placeholder="Article title"
+className="admin-input"
+
+placeholder="Title"
 
 value={form.title}
 
@@ -456,8 +427,6 @@ title:e.target.value
 
 }
 
-className="admin-input"
-
 />
 
 
@@ -470,6 +439,8 @@ className="admin-input"
 
 
 <select
+
+className="admin-input"
 
 value={form.category}
 
@@ -485,24 +456,31 @@ category:e.target.value
 
 }
 
-className="admin-input"
-
 >
 
 
+{
 
-<option>Cybersecurity</option>
 
-<option>Healthcare</option>
+defaultCategories.map(cat=>(
 
-<option>Healthcare Security</option>
 
-<option>Technology</option>
+<option
 
-<option>Career Journey</option>
+key={cat}
 
-<option>Projects</option>
+value={cat}
 
+>
+
+{cat}
+
+</option>
+
+
+))
+
+}
 
 
 </select>
@@ -516,10 +494,69 @@ className="admin-input"
 
 
 
+{
+
+form.category==="Other"
+
+&&
+
+<input
+
+className="admin-input"
+
+placeholder="Custom category"
+
+value={customCategory}
+
+onChange={e=>setCustomCategory(e.target.value)}
+
+/>
+
+}
+
+
+
+
+
+
+
+
+
+<input
+
+className="admin-input"
+
+placeholder="Tags"
+
+value={form.tags}
+
+onChange={e=>
+
+setForm({
+
+...form,
+
+tags:e.target.value
+
+})
+
+}
+
+/>
+
+
+
+
+
+
+
+
 
 <textarea
 
-placeholder="Write blog content"
+className="admin-input min-h-40"
+
+placeholder="Content"
 
 value={form.content}
 
@@ -535,10 +572,7 @@ content:e.target.value
 
 }
 
-className="admin-input min-h-40"
-
 />
-
 
 
 
@@ -554,37 +588,35 @@ onClick={save}
 
 className="
 
-mt-5
-
 border
 
-border-purple-400
+border-green-400
 
 px-5
 
 py-2
 
-rounded
+rounded-lg
+
+text-green-300
+
+hover:bg-green-400/10
 
 "
 
 >
 
-
 {
 
-editing
+form.id ?
 
-?
-
-"SAVE CHANGES"
+"UPDATE BLOG"
 
 :
 
-"PUBLISH ARTICLE"
+"PUBLISH BLOG"
 
 }
-
 
 </button>
 
@@ -596,22 +628,21 @@ editing
 
 
 
-<div className="mt-8 space-y-4">
 
 
+<div className="space-y-3 pt-5">
 
 
+{
 
 
-{blogs.map(blog=>(
-
-
+blogs.map(blog=>(
 
 
 
 <div
 
-key={blog.title}
+key={blog.id}
 
 className="
 
@@ -625,6 +656,12 @@ p-4
 
 bg-purple-400/5
 
+flex
+
+justify-between
+
+items-center
+
 "
 
 >
@@ -634,33 +671,35 @@ bg-purple-400/5
 
 
 
-<h3>
+<div>
+
+
+<p className="text-purple-200">
 
 📝 {blog.title}
-
-</h3>
-
-
-
-
-
-
-<p className="text-xs text-gray-400">
-
-{blog.category} • {blog.date}
 
 </p>
 
 
 
+<p className="text-xs text-gray-400">
+
+{blog.category}
+
+</p>
+
+
+</div>
 
 
 
 
 
-<div className="flex gap-4 mt-4">
 
 
+
+
+<div className="flex gap-3">
 
 
 
@@ -669,7 +708,23 @@ bg-purple-400/5
 
 onClick={()=>edit(blog)}
 
-className="text-blue-300"
+className="
+
+border
+
+border-yellow-400
+
+px-3
+
+py-1
+
+rounded
+
+text-yellow-300
+
+hover:bg-yellow-400/10
+
+"
 
 >
 
@@ -685,9 +740,25 @@ EDIT
 
 <button
 
-onClick={()=>remove(blog.title)}
+onClick={()=>remove(blog.id)}
 
-className="text-red-400"
+className="
+
+border
+
+border-red-400
+
+px-3
+
+py-1
+
+rounded
+
+text-red-300
+
+hover:bg-red-400/10
+
+"
 
 >
 
@@ -698,20 +769,7 @@ DELETE
 
 
 
-
-
 </div>
-
-
-
-
-
-</div>
-
-
-
-))}
-
 
 
 
@@ -720,6 +778,14 @@ DELETE
 
 </div>
 
+
+))
+
+}
+
+
+
+</div>
 
 
 
@@ -728,6 +794,7 @@ DELETE
 </div>
 
 );
+
 
 
 }

@@ -1,26 +1,31 @@
 "use client";
 
 
-import { useState } from "react";
+import {
+
+useEffect,
+useState
+
+} from "react";
 
 
 // TYPES
 
-import { Mode } from "@/types/mode";
-
 import { AccessLevel } from "@/types/access";
-
-
 
 
 // CONTEXT
 
-import { NexusProvider } from "@/context/NexusContext";
+import {
+
+NexusProvider,
+
+useNexus
+
+} from "@/context/NexusContext";
 
 
-
-
-// SYSTEMS
+// SYSTEM MODULES
 
 import NexusGateway from "@/components/nexus/gateway/NexusGateway";
 
@@ -33,17 +38,21 @@ import MedCore from "@/components/medcore/MedCore";
 import NexusBlogs from "@/components/blogs/NexusBlogs";
 
 
-
-
-// GLOBAL NEXUS COMPONENTS
-
-import NexusAI from "@/components/nexus/ai/NexusAI";
+// GLOBAL COMPONENTS
 
 import NexusAvatar from "@/components/nexus/avatar/NexusAvatar";
 
 import NexusCore from "@/components/nexus/core/NexusCore";
 
 import SystemSwitcher from "@/components/core/SystemSwitcher";
+
+import NexusCommand from "@/components/NexusCommand";
+
+
+// ENGINES
+
+import MissionEngine from "@/components/nexus/mission/MissionEngine";
+
 
 
 
@@ -59,17 +68,111 @@ function NexusRouter(){
 
 
 
-const [mode,setMode]=
 
-useState<Mode>("gateway");
+const {
+
+currentSystem,
+
+changeSystem
+
+}=useNexus();
 
 
 
 
 
-const [access,setAccess]=
+
+
+const [access,setAccess] =
 
 useState<AccessLevel>("visitor");
+
+
+
+
+
+
+
+
+
+
+// RESTORE OWNER SESSION FROM COOKIE
+
+
+useEffect(()=>{
+
+
+
+async function restoreSession(){
+
+
+
+try{
+
+
+
+const response =
+
+await fetch(
+
+"/api/auth/session"
+
+);
+
+
+
+
+const data =
+
+await response.json();
+
+
+
+
+
+if(data.authenticated){
+
+
+
+setAccess("owner");
+
+
+
+}
+
+
+
+
+}
+
+
+
+catch{
+
+
+
+setAccess("visitor");
+
+
+
+}
+
+
+
+}
+
+
+
+
+restoreSession();
+
+
+
+},[]);
+
+
+
+
 
 
 
@@ -87,45 +190,36 @@ let screen;
 
 
 
-if(mode==="gateway"){
 
 
 
-screen =
+switch(currentSystem){
+
+
+
+
+
+
+
+
+
+case "gateway":
+
+
+
+screen=(
 
 <NexusGateway
 
-setMode={setMode}
+setMode={changeSystem}
 
-/>;
+/>
 
-
-
-}
+);
 
 
 
-
-
-
-
-
-
-else if(mode==="defender"){
-
-
-
-screen =
-
-<DefenderConsole
-
-setMode={setMode}
-
-/>;
-
-
-
-}
+break;
 
 
 
@@ -135,46 +229,50 @@ setMode={setMode}
 
 
 
-else if(mode==="medcore"){
+
+
+case "defender":
 
 
 
-screen =
+screen=(
+
+<DefenderConsole/>
+
+);
+
+
+
+break;
+
+
+
+
+
+
+
+
+
+
+
+
+case "medcore":
+
+
+
+screen=(
 
 <MedCore
 
-setMode={setMode}
+setMode={changeSystem}
 
-/>;
+/>
 
-
-
-}
+);
 
 
 
-
-
-
-
-
-
-
-else if(mode==="blogs"){
-
-
-
-screen =
-
-<NexusBlogs
-
-setMode={setMode}
-
-/>;
-
-
-
-}
+break;
 
 
 
@@ -185,16 +283,40 @@ setMode={setMode}
 
 
 
-else{
+
+
+case "blogs":
 
 
 
-screen =
+screen=(
+
+<NexusBlogs/>
+
+);
+
+
+
+break;
+
+
+
+
+
+
+
+
+
+
+
+
+case "lab":
+
+
+
+screen=(
 
 <NexusLab
-
-
-setMode={setMode}
 
 
 access={access}
@@ -202,12 +324,46 @@ access={access}
 
 setAccess={setAccess}
 
+/>
 
-/>;
+);
+
+
+
+break;
+
+
+
+
+
+
+
+
+
+
+
+default:
+
+
+
+screen=(
+
+<NexusGateway
+
+setMode={changeSystem}
+
+/>
+
+);
 
 
 
 }
+
+
+
+
+
 
 
 
@@ -223,35 +379,58 @@ return(
 
 
 
+
+
+
+
+
+{/* ACTIVE SYSTEM */}
+
+<div className="relative min-h-screen">
+
 {screen}
 
+</div>
 
 
 
 
 
-{/* GLOBAL NAVIGATION */}
+
+
+
+
+{/* SYSTEM SWITCHER */}
+
 
 {
 
-mode!=="gateway" && (
+currentSystem !== "gateway"
 
+&&
+
+(
 
 <SystemSwitcher
 
 
-current={mode}
+current={currentSystem}
 
 
-setMode={setMode}
-
+setMode={changeSystem}
 
 />
-
 
 )
 
 }
+
+
+
+
+
+
+
 
 
 
@@ -275,7 +454,11 @@ setMode={setMode}
 
 
 
+
+
+
 export default function Home(){
+
 
 
 
@@ -290,21 +473,38 @@ return(
 
 
 
+
+
+
+
+
+{/* MAIN NEXUS OS ROUTER */}
+
 <NexusRouter/>
 
 
 
 
 
-{/* GLOBAL EXPERIENCE LAYER */}
-
-
-
-<NexusAI/>
 
 
 
 
+
+{/* GLOBAL COMMAND PALETTE CTRL + K */}
+
+<NexusCommand/>
+
+
+
+
+
+
+
+
+
+
+{/* GLOBAL AI EXPERIENCE */}
 
 <NexusAvatar/>
 
@@ -313,6 +513,24 @@ return(
 
 
 <NexusCore/>
+
+
+
+
+
+
+
+
+
+
+{/* BACKGROUND SERVICES */}
+
+<MissionEngine/>
+
+
+
+
+
 
 
 

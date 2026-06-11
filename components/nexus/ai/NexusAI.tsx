@@ -32,13 +32,12 @@ text:string;
 
 
 
+
 export default function NexusAI(){
 
 
 
 
-
-const [open,setOpen]=useState(false);
 
 
 
@@ -47,6 +46,8 @@ const [input,setInput]=useState("");
 
 
 const [thinking,setThinking]=useState(false);
+
+
 
 
 
@@ -72,11 +73,22 @@ text:
 
 
 
+
+
+
 const {
 
 avatar,
 
-visitor
+visitor,
+
+aiOpen,
+
+setAiOpen,
+
+aiPrompt,
+
+setAiPrompt
 
 }=useNexus();
 
@@ -86,8 +98,12 @@ visitor
 
 
 
+
+
 const bottomRef =
 useRef<HTMLDivElement|null>(null);
+
+
 
 
 
@@ -115,7 +131,43 @@ behavior:"smooth"
 
 
 
-function generateResponse(question:string){
+useEffect(()=>{
+
+
+
+if(aiPrompt){
+
+
+
+sendMessage(aiPrompt);
+
+
+
+setAiPrompt("");
+
+
+
+}
+
+
+
+},[aiPrompt]);
+
+
+
+
+
+
+
+
+
+function generateResponse(
+
+question:string
+
+){
+
+
 
 
 
@@ -124,6 +176,98 @@ question.toLowerCase();
 
 
 
+
+if(
+
+q.includes("report") ||
+
+q.includes("analysis")
+
+){
+
+return (
+
+`Nexus Intelligence Report Generated.
+
+Visitor profile: ${visitor.toUpperCase()}
+Active system: ${avatar.toUpperCase()}
+
+Summary:
+Syed has a multidisciplinary profile combining cybersecurity, healthcare knowledge, operational leadership and technical projects.
+
+Recommended sections:
+• Sentinel → Experience, certifications and cyber skills
+• Nexus Lab → Hands-on projects and security learning
+• MedCore → Pharmacy background and healthcare security focus`
+
+);
+
+}
+
+
+
+
+
+
+
+
+
+if(
+
+q.includes("contact") ||
+
+q.includes("connection")
+
+){
+
+return (
+
+`Contact module initialized.
+
+You can connect with Syed regarding:
+• Cybersecurity opportunities
+• SOC Analyst pathways
+• Healthcare cybersecurity
+• Technical collaborations
+
+Resume download is available through Nexus Core.`
+
+);
+
+}
+
+
+
+
+
+
+
+
+
+if(
+
+q.includes("career analysis")
+
+){
+
+return (
+
+`Career analysis complete.
+
+Syed's profile aligns with entry-level cybersecurity roles requiring:
+
+• Security fundamentals
+• Networking knowledge
+• Vulnerability assessment exposure
+• Documentation skills
+• Operational experience
+
+Recommended pathway:
+SOC Analyst → Security Analyst → Security Engineer`
+
+);
+
+}
 
 
 
@@ -138,6 +282,7 @@ q.includes("cyber")
 ){
 
 
+
 return (
 
 "Security analysis complete: Syed combines cybersecurity studies, networking fundamentals, vulnerability assessment practice, security labs and operational leadership experience. Recommended areas include SOC operations, security analysis and governance."
@@ -145,7 +290,10 @@ return (
 );
 
 
+
 }
+
+
 
 
 
@@ -165,6 +313,7 @@ q.includes("medical")
 ){
 
 
+
 return (
 
 "MedCore analysis complete: Syed's pharmacy foundation provides healthcare domain knowledge that connects strongly with healthcare cybersecurity, privacy, compliance and risk management."
@@ -172,7 +321,10 @@ return (
 );
 
 
+
 }
+
+
 
 
 
@@ -193,11 +345,13 @@ q.includes("lab")
 ){
 
 
+
 return (
 
 "Nexus Lab contains Syed's cybersecurity projects, technical experiments, vulnerability research, security documentation and continuous learning progression."
 
 );
+
 
 
 }
@@ -216,20 +370,23 @@ q.includes("hire") ||
 
 q.includes("recruit") ||
 
-q.includes("job")
+q.includes("job") ||
+
+q.includes("career")
 
 ){
 
 
+
 return (
 
-"Recruiter analysis: Review Sentinel mode for Syed's professional timeline, certifications, projects, technical capability matrix and leadership experience."
+"Recruiter analysis: Sentinel mode contains Syed's career timeline, certifications, projects, cybersecurity capability matrix and professional growth pathway."
 
 );
 
 
-}
 
+}
 
 
 
@@ -268,8 +425,9 @@ text?:string
 
 
 
-const question =
 
+
+const question =
 text || input;
 
 
@@ -283,6 +441,8 @@ return;
 
 
 }
+
+
 
 
 
@@ -307,6 +467,9 @@ text:question
 
 
 
+
+
+
 setInput("");
 
 
@@ -319,7 +482,11 @@ setThinking(true);
 
 
 
+
+
 setTimeout(()=>{
+
+
 
 
 
@@ -340,7 +507,11 @@ text:generateResponse(question)
 
 
 
+
+
+
 setThinking(false);
+
 
 
 
@@ -351,6 +522,9 @@ setThinking(false);
 
 
 }
+
+
+
 
 
 
@@ -373,6 +547,7 @@ const suggestions=[
 
 
 ];
+
 
 
 
@@ -409,7 +584,9 @@ font-mono
 
 
 
-{open && (
+
+
+{aiOpen && (
 
 <div className="
 
@@ -453,7 +630,6 @@ flex-col
 <div>
 
 
-
 <p className="
 
 text-blue-300
@@ -489,12 +665,7 @@ System: {avatar.toUpperCase()}
 </p>
 
 
-
-
 </div>
-
-
-
 
 
 
@@ -524,6 +695,7 @@ pr-2
 
 
 
+
 {messages.map((msg,index)=>(
 
 
@@ -539,16 +711,15 @@ msg.role==="ai"
 
 ?
 
-"border border-blue-400/20 bg-blue-400/10 rounded-xl p-3 text-sm text-blue-100 leading-relaxed"
+"border border-blue-400/20 bg-blue-400/10 rounded-xl p-3 text-sm text-blue-100"
 
 :
 
-"border border-green-400/20 bg-green-400/10 rounded-xl p-3 text-sm text-green-100 leading-relaxed"
+"border border-green-400/20 bg-green-400/10 rounded-xl p-3 text-sm text-green-100"
 
 }
 
 >
-
 
 
 {msg.text}
@@ -568,26 +739,16 @@ msg.role==="ai"
 
 
 
+
 {thinking && (
 
-
 <div className="
-
-border
-
-border-blue-400/20
-
-bg-blue-400/10
-
-rounded-xl
-
-p-3
-
-text-sm
 
 text-blue-300
 
 animate-pulse
+
+text-sm
 
 ">
 
@@ -595,8 +756,8 @@ Analyzing Nexus data...
 
 </div>
 
-
 )}
+
 
 
 
@@ -609,8 +770,6 @@ Analyzing Nexus data...
 
 
 </div>
-
-
 
 
 
@@ -643,9 +802,12 @@ mt-3
 
 <button
 
+
 key={item}
 
+
 onClick={()=>sendMessage(item)}
+
 
 className="
 
@@ -663,10 +825,6 @@ py-1
 
 text-blue-300
 
-hover:bg-blue-400/10
-
-transition
-
 "
 
 >
@@ -679,6 +837,7 @@ transition
 
 
 
+
 ))}
 
 
@@ -687,9 +846,8 @@ transition
 
 
 
+
 </div>
-
-
 
 
 
@@ -718,15 +876,10 @@ mt-4
 
 <input
 
-
 value={input}
 
 
-onChange={e=>
-
-setInput(e.target.value)
-
-}
+onChange={e=>setInput(e.target.value)}
 
 
 
@@ -745,9 +898,7 @@ sendMessage();
 }}
 
 
-
 placeholder="Ask Nexus AI..."
-
 
 
 className="
@@ -766,11 +917,9 @@ px-3
 
 py-2
 
-text-sm
-
-outline-none
-
 text-white
+
+text-sm
 
 "
 
@@ -782,11 +931,11 @@ text-white
 
 
 
-
-
 <button
 
+
 onClick={()=>sendMessage()}
+
 
 className="
 
@@ -799,8 +948,6 @@ rounded-xl
 px-4
 
 text-blue-300
-
-hover:bg-blue-400/10
 
 "
 
@@ -815,10 +962,7 @@ hover:bg-blue-400/10
 
 
 
-
 </div>
-
-
 
 
 
@@ -841,7 +985,7 @@ hover:bg-blue-400/10
 <button
 
 
-onClick={()=>setOpen(!open)}
+onClick={()=>setAiOpen(!aiOpen)}
 
 
 className="
@@ -872,12 +1016,10 @@ transition
 
 >
 
-
 🤖
 
 
 </button>
-
 
 
 

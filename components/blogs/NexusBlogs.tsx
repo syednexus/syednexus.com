@@ -3,22 +3,52 @@
 
 import { useState } from "react";
 
-
 import { useNexusData } from "@/hooks/useNexusData";
 
 
 
 
-import { Mode } from "@/types/mode";
+type BlogPost = {
+
+id:number;
+
+title:string;
+
+category:string;
+
+content:string;
+
+tags?:string;
+
+date:string | Date;
+
+};
 
 
+const defaultCategories = [
+
+"Cybersecurity",
+
+"Lab Research",
+
+"Learning Notes",
+
+"Healthcare Security",
+
+"Projects",
+
+"Certifications",
+
+"Career",
+
+"Personal Logs"
+
+];
 
 
+type BlogData = {
 
-
-type Props={
-
-setMode:(mode:Mode)=>void;
+posts:BlogPost[];
 
 };
 
@@ -28,34 +58,88 @@ setMode:(mode:Mode)=>void;
 
 
 
-export default function NexusBlogs({
-
-setMode
-
-}:Props){
 
 
-
-
-
-const profile = useNexusData();
-
-
-
-
-
-const [category,setCategory]=useState("All");
+export default function NexusBlogs(){
 
 
 
 
 
 
-const categories=[
+const profile =
+useNexusData();
+
+
+
+
+
+
+const [category,setCategory] =
+useState("All");
+
+
+
+const [search,setSearch] =
+useState("");
+
+
+
+const [selectedPost,setSelectedPost] =
+useState<BlogPost|null>(null);
+
+
+
+
+
+
+
+
+
+
+
+// FIX PRISMA DATA TYPE
+
+
+const blogs =
+
+profile.blogs as BlogData | undefined;
+
+
+
+
+
+const posts:BlogPost[] =
+
+blogs?.posts ?? [];
+
+
+
+
+
+
+
+
+
+
+// CREATE CATEGORIES
+
+
+const categories = [
 
 "All",
 
-...profile.blogs.categories
+...Array.from(
+
+new Set([
+
+...defaultCategories,
+
+...posts.map(post=>post.category)
+
+])
+
+)
 
 ];
 
@@ -67,26 +151,55 @@ const categories=[
 
 
 
-const posts:import("@/hooks/useNexusData").BlogPost[] = profile.blogs.posts;
-
-
-
-
+// FILTER ENGINE
 
 
 const filtered =
 
+posts.filter(post=>{
+
+
+
+
+
+
+const matchCategory =
+
 category==="All"
 
-?
+||
 
-posts
+post.category===category;
 
-:
 
-posts.filter(
 
-blog=>blog.category===category
+const searchable = [
+
+post.title,
+
+post.category,
+
+post.content,
+
+post.tags || ""
+
+]
+
+.join(" ")
+
+.toLowerCase();
+
+
+
+
+
+
+
+const matchSearch =
+
+searchable.includes(
+
+search.toLowerCase()
 
 );
 
@@ -96,29 +209,58 @@ blog=>blog.category===category
 
 
 
+return (
+
+matchCategory && matchSearch
+
+);
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+function formatDate(date:string | Date){
+
+
+
+return new Date(date)
+
+.toLocaleDateString();
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// ARTICLE MODE
+
+
+if(selectedPost){
+
 
 
 return(
 
-<main className="
-
-min-h-screen
-
-bg-linear-to-br
-
-from-[#08040f]
-
-via-[#10172a]
-
-to-black
-
-text-white
-
-font-mono
-
-p-8
-
-">
+<main className="min-h-screen bg-linear-to-br from-[#08040f] via-[#10172a] to-black text-white font-mono p-8">
 
 
 
@@ -126,41 +268,37 @@ p-8
 
 
 
+<button
 
+onClick={()=>setSelectedPost(null)}
 
-{/* HEADER */}
+className="border border-purple-400/30 rounded-xl px-5 py-2 text-purple-300 hover:bg-purple-400/10 transition"
 
+>
 
+← BACK TO ARCHIVE
 
-<header className="
-
-border
-border-purple-400/30
-
-rounded-2xl
-
-p-8
-
-bg-purple-400/5
-
-">
+</button>
 
 
 
 
 
 
-<p className="
 
-text-purple-300
 
-tracking-widest
 
-text-sm
+<article className="max-w-5xl mx-auto mt-10 border border-purple-400/20 rounded-2xl p-10 bg-purple-400/5">
 
-">
 
-NEXUS KNOWLEDGE ARCHIVE
+
+
+
+
+
+<p className="text-purple-300 text-sm">
+
+{selectedPost.category}
 
 </p>
 
@@ -169,9 +307,104 @@ NEXUS KNOWLEDGE ARCHIVE
 
 
 
-<h1 className="text-4xl mt-4">
 
-Research & Intelligence Logs
+<h1 className="text-5xl mt-5">
+
+{selectedPost.title}
+
+</h1>
+
+
+
+
+
+
+
+
+<p className="text-gray-500 mt-4">
+
+{formatDate(selectedPost.date)}
+
+</p>
+
+
+
+
+
+
+
+
+<div className="mt-10 text-gray-300 leading-8 whitespace-pre-line">
+
+{selectedPost.content}
+
+</div>
+
+
+
+
+
+
+
+</article>
+
+
+
+</main>
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ARCHIVE MODE
+
+
+return(
+
+<main className="min-h-screen bg-linear-to-br from-[#08040f] via-[#10172a] to-black text-white font-mono p-8">
+
+
+
+
+
+
+
+
+
+<header className="border border-purple-400/30 rounded-2xl p-8 bg-purple-400/5">
+
+
+
+
+
+<p className="text-purple-300 tracking-widest text-sm">
+
+📚 NEXUS KNOWLEDGE ARCHIVE
+
+</p>
+
+
+
+
+
+
+<h1 className="text-5xl mt-5">
+
+Research Logs
 
 </h1>
 
@@ -182,7 +415,7 @@ Research & Intelligence Logs
 
 <p className="text-gray-400 mt-4">
 
-Cybersecurity • Healthcare Security • Technology Research
+Cybersecurity • Healthcare Security • Research • Learning Notes
 
 </p>
 
@@ -201,98 +434,22 @@ Cybersecurity • Healthcare Security • Technology Research
 
 
 
-
-
-
-<div className="
-
-grid
-
-grid-cols-12
-
-gap-6
-
-mt-8
-
-">
+<section className="mt-8 border border-purple-400/20 rounded-xl p-5 bg-black/30">
 
 
 
 
 
 
+<input
 
+value={search}
 
+onChange={(e)=>setSearch(e.target.value)}
 
+placeholder="Search intelligence archive..."
 
-{/* SIDEBAR */}
-
-
-
-<section className="
-
-col-span-12
-
-xl:col-span-4
-
-space-y-6
-
-">
-
-
-
-
-
-
-
-
-{/* AUTHOR */}
-
-
-
-<div className="
-
-border
-
-border-purple-400/20
-
-rounded-2xl
-
-p-6
-
-bg-purple-400/5
-
-nexus-hover
-
-">
-
-
-
-
-
-
-
-<img
-
-src={profile.identity.avatar || "/profile.jpg"}
-
-alt={profile.identity.name}
-
-className="
-
-w-24
-
-h-24
-
-rounded-full
-
-border
-
-border-purple-400
-
-object-cover
-
-"
+className="w-full bg-black border border-purple-400/30 rounded-xl px-4 py-3 outline-none text-purple-200"
 
 />
 
@@ -303,205 +460,53 @@ object-cover
 
 
 
-<h2 className="text-2xl mt-5">
+<div className="flex gap-3 flex-wrap mt-5">
 
-{profile.identity.name}
 
-</h2>
 
+{
 
 
+categories.map(item=>(
 
 
 
+<button
 
-<p className="
+key={item}
 
-text-gray-400
+onClick={()=>setCategory(item)}
 
-text-sm
+className={`border rounded-full px-5 py-2 transition ${
 
-mt-3
+category===item
 
-">
+?
 
+"border-purple-300 bg-purple-400/20 text-white"
 
-{profile.identity.headline}
+:
 
+"border-purple-400/30 text-purple-300"
 
-</p>
-
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-{/* PROJECTS */}
-
-
-
-<div className="
-
-border
-
-border-purple-400/20
-
-rounded-xl
-
-p-5
-
-">
-
-
-
-
-
-
-<p className="text-purple-300 text-xs">
-
-FEATURED PROJECTS
-
-</p>
-
-
-
-
-
-
-
-
-{profile.projects.slice(0,3).map(project=>(
-
-
-
-<p
-
-key={project.name}
-
-className="
-
-text-sm
-
-mt-3
-
-text-gray-300
-
-"
+}`}
 
 >
 
+{item}
 
-⚔ {project.name}
-
-
-</p>
+</button>
 
 
 
-
-))}
-
+))
 
 
+}
 
 
 
 </div>
-
-
-
-
-
-
-
-
-
-
-
-{/* EDUCATION */}
-
-
-
-<div className="
-
-border
-
-border-purple-400/20
-
-rounded-xl
-
-p-5
-
-">
-
-
-
-
-
-
-<p className="text-purple-300 text-xs">
-
-ACADEMIC TRACE
-
-</p>
-
-
-
-
-
-
-
-
-
-{profile.education.map(edu=>(
-
-
-
-
-<p
-
-key={edu.degree}
-
-className="text-sm mt-3"
-
->
-
-
-🎓 {edu.degree}
-
-
-</p>
-
-
-
-
-
-))}
-
-
-
-
-
-
-
-
-</div>
-
-
 
 
 
@@ -518,117 +523,29 @@ className="text-sm mt-3"
 
 
 
+<section className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
 
 
-{/* BLOG AREA */}
 
 
 
 
-<section className="
 
-col-span-12
 
-xl:col-span-8
 
-">
+{
 
+filtered.length===0 &&
 
 
+<div className="border border-gray-700 rounded-xl p-8 text-gray-400">
 
-
-
-
-<div className="
-
-flex
-
-gap-3
-
-flex-wrap
-
-">
-
-
-
-
-
-
-
-
-{categories.map(item=>(
-
-
-
-
-<button
-
-
-key={item}
-
-
-onClick={()=>setCategory(item)}
-
-
-
-className={
-
-`
-
-border
-
-rounded-full
-
-px-4
-
-py-2
-
-${
-
-category===item
-
-?
-
-"border-purple-300 text-white"
-
-:
-
-"border-purple-400/30 text-purple-300"
-
-}
-
-`
-
-}
-
-
->
-
-
-
-{item}
-
-
-
-</button>
-
-
-
-
-
-))}
-
-
-
-
-
-
-
-
+No matching intelligence logs found.
 
 </div>
 
 
+}
 
 
 
@@ -639,85 +556,20 @@ category===item
 
 
 
-<div className="
 
-grid
+{
 
-gap-6
 
-mt-8
-
-">
+filtered.map((post,index)=>(
 
 
 
 
+<article
 
+key={post.id ?? `${post.title}-${post.date}-${index}`}
 
-
-
-
-{filtered.length===0 && (
-
-
-
-<div className="
-
-border
-
-border-gray-700
-
-rounded-xl
-
-p-8
-
-text-gray-400
-
-">
-
-
-No intelligence logs published yet.
-
-
-</div>
-
-
-
-
-)}
-
-
-
-
-
-
-
-
-
-{filtered.map(post=>(
-
-
-
-
-<div
-
-key={post.title}
-
-className="
-
-border
-
-border-purple-400/20
-
-rounded-xl
-
-p-6
-
-bg-purple-400/5
-
-nexus-hover
-
-"
+className="border border-purple-400/20 rounded-2xl p-6 bg-purple-400/5 hover:bg-purple-400/10 transition"
 
 >
 
@@ -727,18 +579,45 @@ nexus-hover
 
 
 
-<p className="text-xs text-purple-300">
+
+<div className="flex justify-between items-center">
+
+
+
+
+
+<span className="text-xs text-purple-300">
 
 {post.category}
 
-</p>
+</span>
 
 
 
 
 
 
-<h2 className="text-2xl mt-3">
+<span className="text-xs text-gray-500">
+
+{formatDate(post.date)}
+
+</span>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<h2 className="text-2xl mt-5">
 
 {post.title}
 
@@ -750,9 +629,14 @@ nexus-hover
 
 
 
-<p className="text-xs text-gray-500 mt-2">
 
-{post.date}
+<p className="text-gray-400 mt-5 line-clamp-3">
+
+
+{post.content.slice(0,180)}
+
+...
+
 
 </p>
 
@@ -763,33 +647,19 @@ nexus-hover
 
 
 
-<p className="
+<button
 
-text-gray-300
+onClick={()=>setSelectedPost(post)}
 
-mt-5
+className="mt-6 text-purple-300 text-sm hover:underline"
 
-whitespace-pre-line
-
-">
-
-{post.content}
-
-</p>
+>
 
 
+READ INTELLIGENCE →
 
 
-
-
-</div>
-
-
-
-
-
-
-))}
+</button>
 
 
 
@@ -798,36 +668,18 @@ whitespace-pre-line
 
 
 
-
-
-</div>
+</article>
 
 
 
+))
+
+
+}
 
 
 
 </section>
-
-
-
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-
 
 
 

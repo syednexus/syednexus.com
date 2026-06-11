@@ -1,17 +1,12 @@
 "use client";
 
-
-import { useEffect, useState } from "react";
-
-import { profile } from "@/data/profile";
-
+import { useEffect,useState } from "react";
 import NexusToast from "@/components/core/NexusToast";
 
 
-
-
-
 type Education={
+
+id?:number;
 
 degree:string;
 
@@ -19,13 +14,11 @@ institution:string;
 
 period:string;
 
-field:string;
+field:string | null;
 
-focus:string[];
+focus:string;
 
 };
-
-
 
 
 
@@ -36,18 +29,11 @@ export default function EducationEditor(){
 
 
 
-
-
 const [education,setEducation]=useState<Education[]>([]);
 
-
-const [editing,setEditing]=useState<string|null>(null);
-
+const [editing,setEditing]=useState<Education|null>(null);
 
 const [toast,setToast]=useState("");
-
-
-
 
 
 
@@ -73,38 +59,9 @@ focus:""
 
 
 
-
-
-
-
 useEffect(()=>{
 
-
-
-const saved =
-
-localStorage.getItem("nexus_education");
-
-
-
-if(saved){
-
-
-setEducation(JSON.parse(saved));
-
-
-}
-
-
-else{
-
-
-setEducation(profile.education);
-
-
-}
-
-
+load();
 
 },[]);
 
@@ -114,19 +71,35 @@ setEducation(profile.education);
 
 
 
+async function load(){
 
 
-function notify(message:string){
+const res =
+await fetch("/api/education");
 
 
-setToast(message);
+setEducation(
+
+await res.json()
+
+);
 
 
-setTimeout(()=>{
+}
 
-setToast("");
 
-},2500);
+
+
+
+
+
+function notify(msg:string){
+
+
+setToast(msg);
+
+
+setTimeout(()=>setToast(""),2500);
 
 
 }
@@ -139,7 +112,7 @@ setToast("");
 
 
 
-function save(){
+async function save(){
 
 
 
@@ -153,116 +126,64 @@ return;
 
 
 
+const res =
+await fetch("/api/education",{
 
+method:"POST",
 
-const record:Education={
+credentials:"include",
 
-degree:form.degree,
+headers:{
 
-institution:form.institution,
+"Content-Type":"application/json"
 
-period:form.period,
+},
 
-field:form.field,
+body:JSON.stringify({
 
-focus:
+id:editing?.id,
 
-form.focus
+...form
 
-.split(",")
+})
 
-.map(x=>x.trim())
-
-};
-
-
-
-
+});
 
 
 
 
 
-let updated:Education[];
+
+
+if(!res.ok){
+
+
+notify("Unauthorized - login again");
+
+
+return;
+
+
+}
 
 
 
 
 
-if(editing){
 
 
 
-updated=
+notify(
 
-education.map(item=>
+editing ?
 
-item.degree===editing
-
-?
-
-record
+"Education updated"
 
 :
 
-item
+"Education added"
 
 );
-
-
-
-notify("Education updated successfully");
-
-
-
-}
-
-
-
-else{
-
-
-
-updated=[
-
-record,
-
-...education
-
-];
-
-
-
-notify("Education added successfully");
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-setEducation(updated);
-
-
-
-
-
-localStorage.setItem(
-
-"nexus_education",
-
-JSON.stringify(updated)
-
-);
-
-
 
 
 
@@ -270,7 +191,6 @@ JSON.stringify(updated)
 
 
 setEditing(null);
-
 
 
 
@@ -292,9 +212,10 @@ focus:""
 
 
 
+load();
+
+
 }
-
-
 
 
 
@@ -308,8 +229,7 @@ function edit(item:Education){
 
 
 
-setEditing(item.degree);
-
+setEditing(item);
 
 
 
@@ -321,12 +241,11 @@ institution:item.institution,
 
 period:item.period,
 
-field:item.field,
+field:item.field || "",
 
-focus:item.focus.join(", ")
+focus:item.focus
 
 });
-
 
 
 }
@@ -340,40 +259,47 @@ focus:item.focus.join(", ")
 
 
 
-
-function remove(degree:string){
-
+async function remove(id:number){
 
 
 
+const res =
+await fetch("/api/education",{
 
-const updated=
+method:"DELETE",
 
-education.filter(
+credentials:"include",
 
-item=>item.degree!==degree
+headers:{
 
-);
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+id
+
+})
+
+});
 
 
 
 
 
 
-setEducation(updated);
+if(!res.ok){
 
 
+notify("Unauthorized - login again");
 
 
+return;
 
 
-localStorage.setItem(
+}
 
-"nexus_education",
-
-JSON.stringify(updated)
-
-);
 
 
 
@@ -383,10 +309,10 @@ notify("Education removed");
 
 
 
+load();
+
+
 }
-
-
-
 
 
 
@@ -398,17 +324,7 @@ notify("Education removed");
 
 return(
 
-<div className="
-
-border
-border-blue-400/30
-rounded-xl
-p-5
-bg-black/40
-
-">
-
-
+<div className="space-y-5">
 
 
 
@@ -421,18 +337,9 @@ bg-black/40
 
 
 
+<p className="text-blue-300 tracking-widest text-sm">
 
-
-
-<p className="
-
-text-blue-300
-tracking-widest
-text-sm
-
-">
-
-EDUCATION MANAGER
+🎓 EDUCATION DATABASE MANAGER
 
 </p>
 
@@ -442,158 +349,60 @@ EDUCATION MANAGER
 
 
 
+{
 
+editing &&
+
+(
+
+<p className="text-yellow-300 text-sm">
+
+Editing: {editing.degree}
+
+</p>
+
+)
+
+}
+
+
+
+
+
+
+
+
+{Object.keys(form).map(key=>(
 
 
 <input
 
-placeholder="Degree"
+key={key}
 
-value={form.degree}
+placeholder={key}
 
-onChange={(e)=>
+value={form[key as keyof typeof form]}
+
+
+onChange={e=>
 
 setForm({
 
 ...form,
 
-degree:e.target.value
+[key]:e.target.value
 
 })
 
 }
+
 
 className="admin-input"
 
 />
 
 
-
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Institution"
-
-value={form.institution}
-
-onChange={(e)=>
-
-setForm({
-
-...form,
-
-institution:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Period"
-
-value={form.period}
-
-onChange={(e)=>
-
-setForm({
-
-...form,
-
-period:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Field"
-
-value={form.field}
-
-onChange={(e)=>
-
-setForm({
-
-...form,
-
-field:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Focus areas comma separated"
-
-value={form.focus}
-
-onChange={(e)=>
-
-setForm({
-
-...form,
-
-focus:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
+))}
 
 
 
@@ -607,19 +416,22 @@ className="admin-input"
 
 onClick={save}
 
+
 className="
 
-mt-5
-
 border
-border-blue-400
+
+border-green-400
 
 px-5
+
 py-2
 
-rounded
+rounded-lg
 
-nexus-hover
+text-green-300
+
+hover:bg-green-400/10
 
 "
 
@@ -628,9 +440,7 @@ nexus-hover
 
 {
 
-editing
-
-?
+editing ?
 
 "SAVE CHANGES"
 
@@ -639,7 +449,6 @@ editing
 "ADD EDUCATION"
 
 }
-
 
 
 </button>
@@ -652,19 +461,13 @@ editing
 
 
 
+<div className="space-y-3 mt-8">
 
 
 
-<div className="mt-8 space-y-4">
+{
 
-
-
-
-
-
-
-{education.map(item=>(
-
+education.map(item=>(
 
 
 
@@ -672,11 +475,14 @@ editing
 
 <div
 
-key={item.degree}
+
+key={item.id}
+
 
 className="
 
 border
+
 border-blue-400/20
 
 rounded-xl
@@ -685,7 +491,13 @@ p-4
 
 bg-blue-400/5
 
-nexus-hover
+
+flex
+
+justify-between
+
+items-center
+
 
 "
 
@@ -695,8 +507,10 @@ nexus-hover
 
 
 
+<div>
 
-<h3>
+
+<h3 className="text-blue-200">
 
 🎓 {item.degree}
 
@@ -705,10 +519,7 @@ nexus-hover
 
 
 
-
-
-
-<p className="text-gray-400">
+<p className="text-sm text-gray-400">
 
 {item.institution}
 
@@ -717,15 +528,26 @@ nexus-hover
 
 
 
+<p className="text-xs text-gray-500">
+
+{item.period}
+
+</p>
+
+
+
+</div>
 
 
 
 
 
-<div className="flex gap-4 mt-4">
 
 
 
+
+
+<div className="flex gap-3">
 
 
 
@@ -735,7 +557,23 @@ nexus-hover
 
 onClick={()=>edit(item)}
 
-className="text-blue-300"
+className="
+
+border
+
+border-yellow-400
+
+px-3
+
+py-1
+
+rounded
+
+text-yellow-300
+
+hover:bg-yellow-400/10
+
+"
 
 >
 
@@ -752,9 +590,25 @@ EDIT
 
 <button
 
-onClick={()=>remove(item.degree)}
+onClick={()=>remove(item.id!)}
 
-className="text-red-400"
+className="
+
+border
+
+border-red-400
+
+px-3
+
+py-1
+
+rounded
+
+text-red-300
+
+hover:bg-red-400/10
+
+"
 
 >
 
@@ -766,6 +620,19 @@ DELETE
 
 
 
+</div>
+
+
+
+
+
+
+</div>
+
+
+))
+
+}
 
 
 
@@ -777,34 +644,8 @@ DELETE
 
 
 </div>
-
-
-
-
-
-))}
-
-
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-</div>
-
 
 );
-
 
 
 }

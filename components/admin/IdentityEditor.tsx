@@ -11,6 +11,31 @@ import NexusToast from "@/components/core/NexusToast";
 
 
 
+type Identity={
+
+id?:number;
+
+name:string;
+
+headline:string;
+
+summary:string;
+
+location?:string|null;
+
+avatar?:string|null;
+
+email?:string|null;
+
+};
+
+
+
+
+
+
+
+
 
 export default function IdentityEditor(){
 
@@ -18,12 +43,33 @@ export default function IdentityEditor(){
 
 
 
-const [identity,setIdentity]=useState(
+const [identity,setIdentity]=useState<Identity>({
 
-profile.identity
+name:profile.identity.name,
 
-);
+headline:profile.identity.headline,
 
+summary:profile.identity.summary,
+
+avatar:profile.identity.avatar,
+
+location:profile.identity.location,
+
+email:Array.isArray(profile.identity.email)
+
+?
+
+profile.identity.email[0]
+
+:
+
+profile.identity.email
+
+});
+
+
+
+const [loading,setLoading]=useState(true);
 
 
 const [toast,setToast]=useState("");
@@ -35,32 +81,12 @@ const [toast,setToast]=useState("");
 
 
 
+
+
 useEffect(()=>{
 
 
-
-const saved=
-
-localStorage.getItem("nexus_identity");
-
-
-
-if(saved){
-
-
-
-setIdentity({
-
-...profile.identity,
-
-...JSON.parse(saved)
-
-});
-
-
-
-}
-
+loadIdentity();
 
 
 },[]);
@@ -73,26 +99,77 @@ setIdentity({
 
 
 
-function save(){
+
+
+async function loadIdentity(){
 
 
 
-localStorage.setItem(
-
-"nexus_identity",
-
-JSON.stringify(identity)
-
-);
+try{
 
 
+const res=
 
-setToast(
+await fetch("/api/identity");
 
-"Identity updated successfully"
 
-);
 
+const data=
+
+await res.json();
+
+
+
+
+
+if(data){
+
+
+setIdentity(data);
+
+
+}
+
+
+
+
+}
+
+
+catch(error){
+
+
+console.error(error);
+
+
+}
+
+
+
+
+
+setLoading(false);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+function notify(msg:string){
+
+
+
+setToast(msg);
 
 
 
@@ -114,6 +191,94 @@ setToast("");
 
 
 
+async function save(){
+
+
+
+try{
+
+
+
+await fetch(
+
+"/api/identity",
+
+{
+
+method:"POST",
+
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+
+body:JSON.stringify({
+
+name:identity.name,
+
+headline:identity.headline,
+
+summary:identity.summary,
+
+location:identity.location,
+
+avatar:identity.avatar,
+
+email:identity.email
+
+})
+
+}
+
+);
+
+
+
+
+
+notify(
+
+"Identity saved to Nexus Database"
+
+);
+
+
+
+}
+
+
+
+catch(error){
+
+
+console.error(error);
+
+
+
+notify(
+
+"Database save failed"
+
+);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
 function uploadImage(
 
 e:React.ChangeEvent<HTMLInputElement>
@@ -122,7 +287,9 @@ e:React.ChangeEvent<HTMLInputElement>
 
 
 
-const file=e.target.files?.[0];
+const file=
+
+e.target.files?.[0];
 
 
 
@@ -132,11 +299,43 @@ return;
 
 }
 
+const isJpeg =
+
+file.type==="image/jpeg"
+
+&&
+
+/\.(jpe?g)$/i.test(file.name);
+
+
+if(!isJpeg){
+
+notify("Profile picture must be a JPG or JPEG file");
+
+e.target.value="";
+
+return;
+
+}
+
+
+if(file.size > 1000000){
+
+notify("Image must be below 1MB");
+
+e.target.value="";
+
+return;
+
+}
 
 
 
 
-const reader=new FileReader();
+
+const reader=
+
+new FileReader();
 
 
 
@@ -148,12 +347,9 @@ reader.onload=()=>{
 
 setIdentity({
 
-
 ...identity,
 
-
 avatar:reader.result as string
-
 
 });
 
@@ -179,6 +375,30 @@ reader.readAsDataURL(file);
 
 
 
+if(loading){
+
+
+return(
+
+<p className="text-green-400">
+
+Loading Identity...
+
+</p>
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
 return(
 
 <div className="space-y-5">
@@ -187,11 +407,12 @@ return(
 
 
 
-<NexusToast
 
-message={toast}
 
-/>
+
+
+<NexusToast message={toast}/>
+
 
 
 
@@ -210,7 +431,7 @@ text-sm
 
 ">
 
-IDENTITY MANAGER
+IDENTITY DATABASE MANAGER
 
 </p>
 
@@ -222,11 +443,16 @@ IDENTITY MANAGER
 
 
 
-
-
 <img
 
-src={identity.avatar || "/profile.jpg"}
+src={
+
+identity.avatar ||
+
+"/profile.jpg"
+
+}
+
 
 className="
 
@@ -258,7 +484,7 @@ object-cover
 
 type="file"
 
-accept="image/*"
+accept=".jpg,.jpeg,image/jpeg"
 
 onChange={uploadImage}
 
@@ -275,11 +501,12 @@ className="text-sm"
 
 
 
+
 <input
+
 
 value={identity.name}
 
-placeholder="Name"
 
 onChange={e=>
 
@@ -293,21 +520,121 @@ name:e.target.value
 
 }
 
-className="
 
-w-full
+placeholder="Name"
 
-bg-black/40
 
-border
+className="admin-input"
 
-border-red-400/20
 
-rounded
+/>
 
-p-3
 
-"
+
+
+
+
+
+
+
+
+<input
+
+
+value={identity.headline}
+
+
+onChange={e=>
+
+setIdentity({
+
+...identity,
+
+headline:e.target.value
+
+})
+
+}
+
+
+placeholder="Headline"
+
+
+className="admin-input"
+
+
+/>
+
+
+
+
+
+
+
+
+
+
+
+<textarea
+
+
+value={identity.summary}
+
+
+onChange={e=>
+
+setIdentity({
+
+...identity,
+
+summary:e.target.value
+
+})
+
+}
+
+
+placeholder="Summary"
+
+
+className="admin-input min-h-40"
+
+
+/>
+
+
+
+
+
+
+
+
+
+
+<input
+
+
+value={identity.email || ""}
+
+
+onChange={e=>
+
+setIdentity({
+
+...identity,
+
+email:e.target.value
+
+})
+
+}
+
+
+placeholder="Email"
+
+
+className="admin-input"
+
 
 />
 
@@ -323,9 +650,9 @@ p-3
 
 <input
 
-value={identity.headline}
 
-placeholder="Headline"
+value={identity.location || ""}
+
 
 onChange={e=>
 
@@ -333,74 +660,18 @@ setIdentity({
 
 ...identity,
 
-headline:e.target.value
+location:e.target.value
 
 })
 
 }
 
-className="
 
-w-full
-
-bg-black/40
-
-border
-
-border-red-400/20
-
-rounded
-
-p-3
-
-"
-
-/>
+placeholder="Location"
 
 
+className="admin-input"
 
-
-
-
-
-
-
-
-<textarea
-
-value={identity.summary}
-
-placeholder="Summary"
-
-onChange={e=>
-
-setIdentity({
-
-...identity,
-
-summary:e.target.value
-
-})
-
-}
-
-className="
-
-w-full
-
-min-h-40
-
-bg-black/40
-
-border
-
-border-red-400/20
-
-rounded
-
-p-3
-
-"
 
 />
 
@@ -414,7 +685,9 @@ p-3
 
 <button
 
+
 onClick={save}
+
 
 className="
 
@@ -436,7 +709,9 @@ hover:bg-green-400/10
 
 >
 
-SAVE CHANGES
+
+SAVE TO DATABASE
+
 
 </button>
 
@@ -447,8 +722,9 @@ SAVE CHANGES
 
 
 
-</div>
 
+
+</div>
 
 );
 

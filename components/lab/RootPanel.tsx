@@ -3,6 +3,8 @@
 
 import { useState } from "react";
 
+import { motion } from "framer-motion";
+
 import { useNexusData } from "@/hooks/useNexusData";
 
 import { AccessLevel } from "@/types/access";
@@ -11,6 +13,7 @@ import { AccessLevel } from "@/types/access";
 import Filesystem from "./Filesystem";
 
 import AdminConsole from "@/components/admin/AdminConsole";
+
 
 
 
@@ -28,6 +31,9 @@ access:AccessLevel;
 
 
 
+
+
+
 export default function RootPanel({
 
 access
@@ -36,10 +42,23 @@ access
 
 
 
-const profile = useNexusData();
 
 
-const [view,setView]=useState("profile");
+
+
+
+const profile =
+useNexusData();
+
+
+
+
+const [view,setView]=
+useState("profile");
+
+
+
+
 
 
 
@@ -48,6 +67,8 @@ const [view,setView]=useState("profile");
 const tabs=[
 
 "profile",
+
+"experience",
 
 "projects",
 
@@ -66,14 +87,40 @@ const tabs=[
 
 
 
+
+
 return(
 
-<div className="
+<motion.div
+
+
+initial={{
+
+opacity:0,
+
+scale:.97
+
+}}
+
+
+animate={{
+
+opacity:1,
+
+scale:1
+
+}}
+
+
+
+className="
 
 w-full
+
 max-w-5xl
 
 border
+
 border-green-400/40
 
 bg-black/50
@@ -87,9 +134,14 @@ font-mono
 text-green-300
 
 shadow-lg
+
 shadow-green-500/10
 
-">
+"
+
+>
+
+
 
 
 
@@ -105,9 +157,13 @@ shadow-green-500/10
 <div className="
 
 flex
+
 justify-between
 
+items-center
+
 border-b
+
 border-green-500/30
 
 pb-4
@@ -116,12 +172,26 @@ pb-4
 
 
 
+
+
+
+
+
 <div>
 
 
 
-<h2 className="text-xl">
 
+
+
+
+<h2 className="
+
+text-xl
+
+tracking-widest
+
+">
 
 {
 
@@ -129,22 +199,32 @@ access==="owner"
 
 ?
 
-"owner@nexus"
+"👑 owner@nexus"
 
 :
 
-"root@nexus"
+"⚡ root@nexus"
 
 }
-
 
 </h2>
 
 
 
 
-<p className="text-xs">
 
+
+
+
+<p className="
+
+text-xs
+
+text-gray-400
+
+mt-2
+
+">
 
 {
 
@@ -152,31 +232,18 @@ access==="owner"
 
 ?
 
-"ACCESS LEVEL: SYSTEM OWNER"
+"ACCESS LEVEL: SYSTEM ADMINISTRATOR"
 
 :
 
-"ACCESS LEVEL: READ ONLY"
+"ACCESS LEVEL: READ ONLY ROOT"
 
 }
-
 
 </p>
 
 
 
-</div>
-
-
-
-
-
-
-<div>
-
-VAULT: DECRYPTED ✓
-
-</div>
 
 
 
@@ -192,20 +259,70 @@ VAULT: DECRYPTED ✓
 
 
 
+<div className="
+
+text-xs
+
+text-green-400
+
+border
+
+border-green-400/30
+
+rounded-full
+
+px-3
+
+py-2
+
+"
+
+>
+
+VAULT DECRYPTED ✓
+
+</div>
 
 
-{/* NAV */}
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/* NAVIGATION */}
 
 
 
 <div className="
 
 flex
-gap-5
+
+gap-3
+
+flex-wrap
 
 mt-5
 
 border-b
+
 border-green-500/20
 
 pb-4
@@ -217,15 +334,26 @@ pb-4
 
 
 
+
+
+
 {tabs.map(tab=>(
+
+
+
+
 
 
 
 <button
 
+
 key={tab}
 
+
 onClick={()=>setView(tab)}
+
+
 
 className={
 
@@ -237,7 +365,7 @@ py-1
 
 rounded
 
-nexus-hover
+transition
 
 ${
 
@@ -245,7 +373,7 @@ view===tab
 
 ?
 
-"text-white border border-green-400/40"
+"text-white border border-green-400/40 bg-green-400/10"
 
 :
 
@@ -259,16 +387,21 @@ view===tab
 
 >
 
-
 {tab.toUpperCase()}
-
 
 </button>
 
 
 
 
+
+
+
+
 ))}
+
+
+
 
 
 
@@ -285,10 +418,15 @@ view===tab
 
 
 
+
+
+
 {/* PROFILE */}
 
 
+
 {view==="profile" && (
+
 
 <section className="mt-6">
 
@@ -297,25 +435,30 @@ view===tab
 
 
 
+
+
 <img
+
 
 src={profile.identity.avatar || "/profile.jpg"}
 
+
 alt={profile.identity.name}
+
 
 className="
 
 w-24
+
 h-24
 
 rounded-full
 
 border
+
 border-green-400
 
 object-cover
-
-nexus-hover
 
 "
 
@@ -327,11 +470,17 @@ nexus-hover
 
 
 
-<h1 className="text-3xl mt-3">
 
+
+<h1 className="
+
+text-3xl
+
+mt-4
+
+">
 
 {profile.identity.name}
-
 
 </h1>
 
@@ -341,13 +490,24 @@ nexus-hover
 
 
 
-<p className="mt-3 text-green-200">
 
+
+
+<p className="
+
+mt-3
+
+text-green-200
+
+">
 
 {profile.identity.headline}
 
-
 </p>
+
+
+
+
 
 
 
@@ -365,10 +525,8 @@ whitespace-pre-line
 
 ">
 
-
 {profile.identity.summary}
 
-
 </p>
 
 
@@ -378,35 +536,66 @@ whitespace-pre-line
 
 
 
-<div className="mt-8">
+</section>
 
 
-
-<p className="text-xs">
-
-EDUCATION
-
-</p>
+)}
 
 
 
 
 
 
-<div className="space-y-3 mt-3">
 
 
-{profile.education.map(item=>(
+
+
+
+
+
+
+{/* EXPERIENCE */}
+
+
+
+{view==="experience" && (
+
+
+
+<section className="
+
+mt-6
+
+space-y-4
+
+">
+
+
+
+
+
+
+
+
+{profile.experience.map((job,index)=>(
+
+
+
+
+
 
 
 
 <div
 
-key={item.degree}
+
+key={`${job.company}-${index}`}
+
 
 className="
 
 border
+
 border-green-500/20
 
 rounded-xl
@@ -415,32 +604,72 @@ p-4
 
 bg-green-400/5
 
-nexus-hover
-
 "
 
 >
 
 
 
+
+
+
+
 <h3>
 
-🎓 {item.degree}
+🛰 {job.role}
 
 </h3>
 
 
 
 
-<p className="text-gray-400 text-sm">
 
-{item.institution}
+
+
+
+<p className="
+
+text-green-300
+
+text-sm
+
+">
+
+{job.company}
 
 </p>
 
 
 
+
+
+
+
+
+<p className="
+
+text-gray-500
+
+text-xs
+
+">
+
+{job.period}
+
+</p>
+
+
+
+
+
+
+
+
 </div>
+
+
+
+
 
 
 
@@ -448,14 +677,8 @@ nexus-hover
 ))}
 
 
-</div>
 
 
-
-
-
-
-</div>
 
 
 
@@ -463,7 +686,13 @@ nexus-hover
 
 </section>
 
+
+
 )}
+
+
+
+
 
 
 
@@ -480,11 +709,12 @@ nexus-hover
 {view==="projects" && (
 
 
+
 <section className="
 
 grid
 
-grid-cols-2
+md:grid-cols-2
 
 gap-4
 
@@ -497,17 +727,27 @@ mt-6
 
 
 
-{profile.projects.map(project=>(
+
+
+{profile.projects.map((project,index)=>(
+
+
+
+
+
 
 
 
 <div
 
-key={project.name}
+
+key={`${project.name}-${index}`}
+
 
 className="
 
 border
+
 border-green-500/30
 
 rounded-xl
@@ -516,11 +756,14 @@ p-4
 
 bg-green-400/5
 
-nexus-hover
-
 "
 
 >
+
+
+
+
+
 
 
 
@@ -529,6 +772,10 @@ nexus-hover
 ⚔ {project.name}
 
 </h3>
+
+
+
+
 
 
 
@@ -544,9 +791,7 @@ mt-2
 
 ">
 
-
 {project.description}
-
 
 </p>
 
@@ -554,7 +799,13 @@ mt-2
 
 
 
+
+
+
 </div>
+
+
+
 
 
 
@@ -566,9 +817,18 @@ mt-2
 
 
 
+
+
 </section>
 
+
+
 )}
+
+
+
+
+
 
 
 
@@ -599,18 +859,27 @@ space-y-3
 
 
 
-{profile.certifications.map(cert=>(
+
+
+{profile.certifications.map((cert,index)=>(
+
+
+
+
 
 
 
 
 <div
 
-key={cert.name}
+
+key={`${cert.name}-${index}`}
+
 
 className="
 
 border
+
 border-green-500/20
 
 rounded-xl
@@ -619,15 +888,22 @@ p-4
 
 bg-green-400/5
 
-nexus-hover
-
 "
 
 >
 
 
 
+
+
+
+
+
 🛡 {cert.name}
+
+
+
+
 
 
 
@@ -638,18 +914,26 @@ text-gray-500
 
 text-xs
 
+mt-1
+
 ">
 
-
 {cert.status}
-
 
 </p>
 
 
 
 
+
+
+
+
+
 </div>
+
+
+
 
 
 
@@ -662,7 +946,10 @@ text-xs
 
 
 
+
+
 </section>
+
 
 
 )}
@@ -676,16 +963,25 @@ text-xs
 
 
 
-{/* FILESYSTEM */}
+
+
+
+
+{/* FILE SYSTEM */}
+
 
 
 {view==="filesystem" && (
 
+
 <div className="mt-6">
+
 
 <Filesystem/>
 
+
 </div>
+
 
 )}
 
@@ -697,17 +993,24 @@ text-xs
 
 
 
-{/* ADMIN */}
+
+
+
+{/* OWNER ADMIN */}
 
 
 
 {view==="admin" && access==="owner" && (
 
+
 <div className="mt-6">
+
 
 <AdminConsole/>
 
+
 </div>
+
 
 )}
 
@@ -718,10 +1021,13 @@ text-xs
 
 
 
-</div>
 
+
+
+</motion.div>
 
 );
+
 
 
 }

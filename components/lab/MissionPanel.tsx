@@ -1,11 +1,21 @@
 "use client";
 
 
+import { motion } from "framer-motion";
+
+
+
+
+
+
 type Props={
 
 unlocked:string[];
 
 };
+
+
+
 
 
 
@@ -21,53 +31,58 @@ unlocked
 
 
 
-const skills=[
-
-
-{
-name:"Linux Operations",
-level:80
-},
-
-
-{
-name:"Network Security",
-level:70
-},
-
-
-{
-name:"Web Security",
-level:50
-},
-
-
-{
-name:"Security Operations",
-level:45
-}
-
-
-];
-
-
-
-
-
-
 
 
 const archives=[
 
-"IDENTITY",
 
-"SKILLS",
 
-"PROJECTS",
+{
+id:"IDENTITY",
+title:"Identity Archive",
+command:"unlock identity"
+},
 
-"CERTS"
+
+
+{
+id:"SKILLS",
+title:"Capability Matrix",
+command:"unlock skills"
+},
+
+
+
+{
+id:"PROJECTS",
+title:"Project Vault",
+command:"unlock projects"
+},
+
+
+
+{
+id:"CERTS",
+title:"Credential Store",
+command:"unlock certs"
+}
+
+
 
 ];
+
+
+
+
+
+
+
+
+const progress = Math.round(
+
+(unlocked.length / archives.length) * 100
+
+);
 
 
 
@@ -79,9 +94,32 @@ const archives=[
 
 return(
 
-<div className="
+<motion.div
+
+
+initial={{
+
+opacity:0,
+
+x:-20
+
+}}
+
+
+animate={{
+
+opacity:1,
+
+x:0
+
+}}
+
+
+
+className="
 
 border
+
 border-cyan-400/30
 
 rounded-2xl
@@ -96,13 +134,21 @@ shadow-lg
 
 shadow-cyan-500/10
 
-">
+nexus-hover
+
+"
+
+>
 
 
 
 
 
 
+
+
+
+{/* HEADER */}
 
 
 
@@ -116,7 +162,30 @@ text-sm
 
 ">
 
-MISSION CONTROL
+🎯 MISSION CONTROL
+
+</p>
+
+
+
+
+
+
+
+
+
+
+<p className="
+
+text-xs
+
+text-gray-500
+
+mt-2
+
+">
+
+Restore Nexus archives through terminal operations
 
 </p>
 
@@ -130,43 +199,21 @@ MISSION CONTROL
 
 
 
-{/* SKILL LEVELS */}
+
+
+{/* COMPLETION */}
+
 
 
 <div className="
 
 mt-6
 
-space-y-5
-
-">
-
-
-
-
-
-
-
-{skills.map(skill=>(
-
-
-
-
-<div
-
-key={skill.name}
-
-className="
-
-rounded-xl
-
-p-2
-
-nexus-hover
-
 "
 
 >
+
+
 
 
 
@@ -179,17 +226,27 @@ flex
 
 justify-between
 
-text-sm
+text-xs
 
-">
+"
+
+>
+
+
+
+
+
 
 
 
 <span>
 
-{skill.name}
+VAULT RESTORATION
 
 </span>
+
+
+
 
 
 
@@ -197,7 +254,7 @@ text-sm
 
 <span className="text-cyan-300">
 
-{skill.level}%
+{progress}%
 
 </span>
 
@@ -206,7 +263,11 @@ text-sm
 
 
 
+
+
+
 </div>
+
 
 
 
@@ -223,11 +284,16 @@ bg-gray-800
 
 rounded
 
-mt-2
-
 overflow-hidden
 
-">
+mt-3
+
+"
+
+>
+
+
+
 
 
 
@@ -236,11 +302,13 @@ overflow-hidden
 
 <div
 
+
 style={{
 
-width:`${skill.level}%`
+width:`${progress}%`
 
 }}
+
 
 
 className="
@@ -249,7 +317,7 @@ h-full
 
 bg-cyan-400
 
-rounded
+transition-all
 
 "
 
@@ -260,19 +328,11 @@ rounded
 
 
 
-</div>
-
-
 
 
 
 </div>
 
-
-
-
-
-))}
 
 
 
@@ -295,53 +355,24 @@ rounded
 
 
 
-{/* ARCHIVES */}
+
+{/* OBJECTIVES */}
+
 
 
 <div className="
 
 mt-8
 
-border-t
-
-border-cyan-400/20
-
-pt-5
-
-">
-
-
-
-
-
-
-<p className="
-
-text-xs
-
-text-gray-400
-
-">
-
-ARCHIVE STATUS
-
-</p>
-
-
-
-
-
-
-
-
-
-<div className="
-
-mt-4
-
 space-y-3
 
-">
+"
+
+>
+
+
+
+
 
 
 
@@ -355,27 +386,33 @@ space-y-3
 
 
 
-<div
 
-key={item}
+
+<motion.div
+
+
+key={item.id}
+
+
+whileHover={{
+
+scale:1.03
+
+}}
+
+
 
 className="
 
-flex
-
-justify-between
-
 border
 
-border-cyan-400/10
+border-cyan-400/20
 
 rounded-xl
 
-p-3
+p-4
 
 bg-cyan-400/5
-
-nexus-hover
 
 "
 
@@ -386,36 +423,74 @@ nexus-hover
 
 
 
-<span>
-
-{item}
-
-</span>
 
 
 
 
 
+<div className="
 
-<span>
+flex
 
+justify-between
 
-{
+items-center
 
-unlocked.includes(item)
+"
 
-?
-
-"🟢 ONLINE"
-
-:
-
-"🔒 LOCKED"
-
-}
+>
 
 
-</span>
+
+
+
+
+
+
+<div>
+
+
+
+
+
+
+
+
+<p className="
+
+text-sm
+
+text-gray-300
+
+">
+
+{item.title}
+
+</p>
+
+
+
+
+
+
+
+
+
+
+<p className="
+
+text-xs
+
+text-gray-500
+
+mt-1
+
+">
+
+&gt; {item.command}
+
+</p>
+
 
 
 
@@ -424,6 +499,71 @@ unlocked.includes(item)
 
 
 </div>
+
+
+
+
+
+
+
+
+
+
+
+<span className={
+
+unlocked.includes(item.id)
+
+?
+
+"text-green-400 text-xs"
+
+:
+
+"text-red-400 text-xs"
+
+}
+
+>
+
+{
+
+unlocked.includes(item.id)
+
+?
+
+"ONLINE"
+
+:
+
+"LOCKED"
+
+}
+
+</span>
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+</motion.div>
+
+
 
 
 
@@ -440,10 +580,6 @@ unlocked.includes(item)
 
 
 
-</div>
-
-
-
 
 
 </div>
@@ -455,10 +591,54 @@ unlocked.includes(item)
 
 
 
+
+
+
+
+{/* FOOTER */}
+
+
+
+<div className="
+
+mt-6
+
+border
+
+border-cyan-400/20
+
+rounded-xl
+
+p-3
+
+text-xs
+
+text-gray-400
+
+bg-black/30
+
+"
+
+>
+
+Use the Nexus terminal to complete objectives.
+
 </div>
 
+
+
+
+
+
+
+
+
+
+
+</motion.div>
 
 );
+
 
 
 }

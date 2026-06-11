@@ -3,6 +3,8 @@
 
 import { useEffect,useState } from "react";
 
+import { AccessLevel } from "@/types/access";
+
 
 
 
@@ -10,6 +12,8 @@ import { useEffect,useState } from "react";
 type Props={
 
 unlocked:string[];
+
+access?:AccessLevel;
 
 };
 
@@ -22,7 +26,9 @@ unlocked:string[];
 
 export default function StatusBar({
 
-unlocked
+unlocked,
+
+access="visitor"
 
 }:Props){
 
@@ -46,9 +52,7 @@ useEffect(()=>{
 const timer=setInterval(()=>{
 
 
-
-setTime(t=>t+1);
-
+setTime(prev=>prev+1);
 
 
 },1000);
@@ -71,13 +75,11 @@ return()=>clearInterval(timer);
 
 
 
-
-const percent = Math.round(
+const percent=Math.round(
 
 (unlocked.length/4)*100
 
 );
-
 
 
 
@@ -98,6 +100,8 @@ border-cyan-400/20
 
 bg-black/40
 
+backdrop-blur
+
 flex
 
 items-center
@@ -111,7 +115,6 @@ font-mono
 text-sm
 
 ">
-
 
 
 
@@ -139,10 +142,11 @@ tracking-widest
 
 
 
-
 <div className="
 
-flex
+hidden
+
+md:flex
 
 gap-6
 
@@ -156,9 +160,10 @@ text-gray-300
 
 
 
+
 <span>
 
-ACCESS: GUEST
+ACCESS: {access.toUpperCase()}
 
 </span>
 
@@ -210,8 +215,6 @@ SESSION: {time}s
 
 
 </div>
-
-
 
 
 

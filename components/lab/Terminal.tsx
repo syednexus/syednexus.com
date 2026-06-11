@@ -1,9 +1,14 @@
 "use client";
 
 
-import { useState,useRef,useEffect } from "react";
+import {
 
-import { admin } from "@/data/admin";
+useState,
+useRef,
+useEffect
+
+} from "react";
+
 
 import { AccessLevel } from "@/types/access";
 
@@ -16,7 +21,13 @@ unlock:(x:string)=>void;
 
 setAccess:(x:AccessLevel)=>void;
 
+access:AccessLevel;
+
 };
+
+
+
+
 
 
 
@@ -27,9 +38,17 @@ export default function Terminal({
 
 unlock,
 
-setAccess
+setAccess,
+
+access
 
 }:Props){
+
+
+
+
+
+
 
 
 
@@ -37,27 +56,43 @@ const [input,setInput]=useState("");
 
 const [loading,setLoading]=useState(false);
 
-const [owner,setOwner]=useState(false);
 
-const [awaitingPassword,setAwaitingPassword]=useState(false);
+
+
+
+
 
 
 
 const [history,setHistory]=useState<string[]>([
 
-"Nexus Red Team Console v3.0",
+"Nexus Security Console v4.0",
 
-"Encrypted session established.",
+"Encrypted operator session established.",
 
-"Type 'help' for available commands."
+"Type 'help' to list commands."
 
 ]);
 
 
 
-const bottomRef=useRef<HTMLDivElement>(null);
 
-const inputRef=useRef<HTMLInputElement>(null);
+
+
+
+
+
+
+const bottomRef =
+useRef<HTMLDivElement>(null);
+
+
+
+const inputRef =
+useRef<HTMLInputElement>(null);
+
+
+
 
 
 
@@ -74,11 +109,33 @@ behavior:"smooth"
 });
 
 
+
 inputRef.current?.focus();
 
 
 },[history,loading]);
 
+
+
+
+
+
+
+
+
+function addHistory(text:string){
+
+
+setHistory(prev=>[
+
+...prev,
+
+text
+
+]);
+
+
+}
 
 
 
@@ -100,7 +157,16 @@ return;
 
 
 
-const cmd=input.trim();
+
+const cmd =
+input.trim().toLowerCase();
+
+
+
+const rawInput =
+input.trim();
+
+
 
 
 setInput("");
@@ -108,120 +174,38 @@ setInput("");
 
 
 
-setHistory(prev=>[
 
-...prev,
 
-`${owner ? "owner@nexus:~#" : "guest@nexus:~$"} ${
-awaitingPassword ? "********" : cmd
-}`
 
-]);
+addHistory(
 
+`${
 
+access==="owner"
 
+?
 
+"owner@nexus:~#"
 
+:
 
+"guest@nexus:~$"
 
+} ${rawInput}`
 
+);
 
 
-/* PASSWORD CHECK */
 
 
-if(awaitingPassword){
 
 
 
-const savedPassword=
 
-localStorage.getItem("nexus_password")
 
-||
 
-admin.security.password;
 
-
-
-
-if(cmd===savedPassword){
-
-
-
-setOwner(true);
-
-
-setAwaitingPassword(false);
-
-
-/* IMPORTANT */
-setAccess("owner");
-
-
-
-
-
-setHistory(prev=>[
-
-...prev,
-
-`
-[OWNER ACCESS GRANTED]
-
-Administrator identity confirmed.
-
-SYSTEM STATUS:
-✓ Sentinel online
-✓ MedCore online
-✓ Nexus Lab unlocked
-
-OWNER SESSION ACTIVE
-`
-
-]);
-
-
-
-}
-
-
-else{
-
-
-setAwaitingPassword(false);
-
-
-setHistory(prev=>[
-
-...prev,
-
-"[ACCESS DENIED] Invalid owner credential"
-
-]);
-
-
-}
-
-
-
-
-return;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-/* COMMANDS */
-
+// CLEAR
 
 
 if(cmd==="clear"){
@@ -229,7 +213,7 @@ if(cmd==="clear"){
 
 setHistory([
 
-"Nexus Red Team Console v3.0"
+"Nexus Security Console v4.0"
 
 ]);
 
@@ -244,9 +228,238 @@ return;
 
 
 
+
+
+
+
+// HELP
+
+
+if(cmd==="help"){
+
+
+
+addHistory(`
+
+AVAILABLE COMMANDS
+
+
+help
+clear
+whoami
+status
+tools
+
+unlock identity
+unlock skills
+unlock projects
+unlock certs
+
+sudo unlock
+
+`);
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// WHOAMI
+
+
+if(cmd==="whoami"){
+
+
+
+addHistory(
+
+access==="owner"
+
+?
+
+"OWNER // Nexus Administrator"
+
+:
+
+"GUEST // Security Explorer"
+
+);
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// STATUS
+
+
+if(cmd==="status"){
+
+
+
+addHistory(`
+
+SYSTEM STATUS
+
+Sentinel : ONLINE
+MedCore  : ONLINE
+Lab Core : ACTIVE
+
+`);
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// TOOLS
+
+
+if(cmd==="tools"){
+
+
+
+addHistory(`
+
+SECURITY TOOLKIT
+
+> Nessus
+> Burp Suite
+> Wireshark
+> Nmap
+> Linux CLI
+
+`);
+
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+
+// UNLOCK COMMANDS
+
+
+if(cmd==="unlock identity"){
+
+
+unlock("IDENTITY");
+
+addHistory("[+] Identity archive opened");
+
+return;
+
+
+}
+
+
+
+
+
+if(cmd==="unlock skills"){
+
+
+unlock("SKILLS");
+
+addHistory("[+] Capability archive opened");
+
+return;
+
+
+}
+
+
+
+
+
+if(cmd==="unlock projects"){
+
+
+unlock("PROJECTS");
+
+addHistory("[+] Case files opened");
+
+return;
+
+
+}
+
+
+
+
+
+
+if(cmd==="unlock certs"){
+
+
+unlock("CERTS");
+
+addHistory("[+] Verification vault opened");
+
+return;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+// OWNER AUTH REQUEST
+
+
 if(
 
-cmd==="sudo unlock" ||
+cmd==="sudo unlock"
+
+||
 
 cmd==="nexus --root"
 
@@ -254,21 +467,41 @@ cmd==="nexus --root"
 
 
 
-setAwaitingPassword(true);
+if(access==="owner"){
 
 
 
-setHistory(prev=>[
+addHistory(
 
-...prev,
+"[OWNER] Root privileges already active"
 
-`
-OWNER AUTHENTICATION REQUIRED
+);
 
-Enter administrator password:
-`
 
-]);
+
+return;
+
+
+}
+
+
+
+
+
+
+
+addHistory(`
+
+[PRIVILEGE ESCALATION REQUESTED]
+
+Opening secure authentication gateway...
+
+`);
+
+
+
+
+setAccess("auth");
 
 
 
@@ -286,17 +519,23 @@ return;
 
 
 
-/* API ENGINE */
+
+// API COMMAND FALLBACK
 
 
 setLoading(true);
 
 
 
+
+
 try{
 
 
-const response=await fetch(
+
+const response =
+
+await fetch(
 
 "/api/terminal",
 
@@ -322,7 +561,15 @@ command:cmd
 
 
 
-const data=await response.json();
+
+
+
+
+const data =
+
+await response.json();
+
+
 
 
 
@@ -332,13 +579,14 @@ setTimeout(()=>{
 
 
 
-setHistory(prev=>[
+addHistory(
 
-...prev,
+data.output ||
 
-data.output
+"Command executed."
 
-]);
+);
+
 
 
 
@@ -352,6 +600,8 @@ unlock(data.unlock);
 
 
 
+
+
 setLoading(false);
 
 
@@ -361,21 +611,25 @@ setLoading(false);
 
 
 
+
 }
+
+
 
 catch{
 
 
-setHistory(prev=>[
 
-...prev,
+addHistory(
 
-"Connection failure."
+"Unknown command. Type 'help'."
 
-]);
+);
+
 
 
 setLoading(false);
+
 
 
 }
@@ -398,25 +652,18 @@ return(
 
 onClick={()=>inputRef.current?.focus()}
 
+
 className="
 
 border
 border-green-400/30
-
 rounded-2xl
-
 bg-black/70
-
 p-5
-
 h-130
-
 overflow-y-auto
-
 font-mono
-
 shadow-lg
-
 shadow-green-500/10
 
 "
@@ -429,39 +676,64 @@ shadow-green-500/10
 
 
 
+
+
 <div className="
 
 border-b
-
 border-green-500/20
-
 pb-3
-
 mb-4
 
 ">
 
 
+<p className="
 
-<p className="text-green-300 text-xs tracking-widest">
+text-green-300
+text-xs
+tracking-widest
 
-⚔ NEXUS RED TEAM CONSOLE
+">
+
+⚔ NEXUS TERMINAL
 
 </p>
 
 
 
-<div className="text-xs text-gray-400 mt-2">
+
+
+<p className="
+
+text-xs
+text-gray-400
+mt-2
+
+">
 
 SESSION: ENCRYPTED |
 
-USER: {owner ? "OWNER":"GUEST"}
+USER: {
+
+access==="owner"
+
+?
+
+" OWNER"
+
+:
+
+" GUEST"
+
+}
+
+</p>
+
 
 </div>
 
 
-
-</div>
 
 
 
@@ -473,11 +745,8 @@ USER: {owner ? "OWNER":"GUEST"}
 <div className="
 
 space-y-3
-
 text-sm
-
 text-green-400
-
 whitespace-pre-wrap
 
 ">
@@ -486,7 +755,13 @@ whitespace-pre-wrap
 
 
 
-{history.map((line,index)=>(
+
+
+
+{
+
+history.map((line,index)=>(
+
 
 <div key={index}>
 
@@ -494,7 +769,10 @@ whitespace-pre-wrap
 
 </div>
 
-))}
+
+))
+
+}
 
 
 
@@ -502,7 +780,10 @@ whitespace-pre-wrap
 
 
 
-{loading && (
+
+{
+
+loading &&
 
 <div>
 
@@ -510,7 +791,8 @@ executing...
 
 </div>
 
-)}
+}
+
 
 
 
@@ -525,11 +807,29 @@ executing...
 
 <span>
 
-{owner ? "owner@nexus:~#" : "guest@nexus:~$"}
+
+{
+
+access==="owner"
+
+?
+
+"owner@nexus:~#"
+
+:
+
+"guest@nexus:~$"
+
+}
+
 
 &nbsp;
 
+
 </span>
+
+
+
 
 
 
@@ -540,8 +840,6 @@ executing...
 ref={inputRef}
 
 value={input}
-
-type={awaitingPassword ? "password":"text"}
 
 onChange={e=>setInput(e.target.value)}
 
@@ -557,14 +855,12 @@ execute();
 
 }}
 
+
 className="
 
 bg-transparent
-
 outline-none
-
 flex-1
-
 text-green-300
 
 "
@@ -573,7 +869,12 @@ text-green-300
 
 
 
+
+
+
+
 </div>
+
 
 
 
@@ -582,14 +883,17 @@ text-green-300
 
 
 
+
+
 </div>
 
 
 
-</div>
 
+</div>
 
 );
+
 
 
 }

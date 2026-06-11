@@ -1,37 +1,66 @@
 "use client";
 
 
-import { motion } from "framer-motion";
-
 import { useNexusData } from "@/hooks/useNexusData";
 
 
 
 
+type BlogPost = {
 
-type Activity={
-
-icon:string;
+id:number;
 
 title:string;
 
-type:string;
+category:string;
 
-date:string;
+content:string;
+
+date:string | Date;
 
 };
-
-
-
-
-
-
 
 export default function ActivityFeed(){
 
 
 
-const profile = useNexusData();
+const profile =
+useNexusData();
+
+
+
+
+
+// normalize blogs
+
+
+const rawPosts =
+profile.blogs?.posts || [];
+
+
+
+
+const posts:BlogPost[] = (
+
+Array.isArray(rawPosts)
+
+?
+
+rawPosts
+
+:
+
+Object.values(rawPosts).flat()
+
+)
+
+.filter((post:any)=>
+
+post &&
+
+post.title
+
+) as BlogPost[];
 
 
 
@@ -39,29 +68,21 @@ const profile = useNexusData();
 
 
 
-const activities:Activity[]=[
 
 
-
-
+const activity = [
 
 
 
 ...profile.certifications.map(cert=>({
 
-icon:"🛡",
+icon:"🏆",
 
 title:cert.name,
 
-type:"Certification",
-
-date:cert.status
+type:"Certification"
 
 })),
-
-
-
-
 
 
 
@@ -73,9 +94,7 @@ icon:"⚔",
 
 title:project.name,
 
-type:"Project",
-
-date:project.status
+type:"Project"
 
 })),
 
@@ -84,45 +103,15 @@ date:project.status
 
 
 
+...posts.map(post=>({
 
+icon:"📚",
 
+title:post.title,
 
-...profile.education.map(edu=>({
-
-icon:"🎓",
-
-title:edu.degree,
-
-type:"Education",
-
-date:edu.period
-
-})),
-
-
-
-
-
-
-
-
-
-
-...profile.blogs.posts.map(blog=>({
-
-icon:"📝",
-
-title:blog.title,
-
-type:"Research Log",
-
-date:blog.date
+type:post.category || "Blog"
 
 }))
-
-
-
-
 
 
 
@@ -136,50 +125,22 @@ date:blog.date
 
 
 
+
 return(
 
-<motion.div
-
-
-initial={{
-
-opacity:0,
-
-x:20
-
-}}
-
-
-animate={{
-
-opacity:1,
-
-x:0
-
-}}
-
-
-
-className="
+<div className="
 
 border
-border-blue-400/30
+
+border-cyan-400/20
 
 rounded-2xl
 
 p-6
 
-bg-blue-400/5
+bg-cyan-400/5
 
-font-mono
-
-nexus-hover
-
-"
-
->
-
-
+">
 
 
 
@@ -189,7 +150,7 @@ nexus-hover
 
 <p className="
 
-text-blue-300
+text-cyan-300
 
 tracking-widest
 
@@ -209,10 +170,9 @@ LIVE ACTIVITY FEED
 
 
 
-
 <div className="
 
-mt-6
+mt-5
 
 space-y-4
 
@@ -224,9 +184,7 @@ space-y-4
 
 
 
-
-
-{activities.map((item,index)=>(
+{activity.map((item,index)=>(
 
 
 
@@ -235,15 +193,21 @@ space-y-4
 
 <div
 
-key={index}
+
+key={`${item.title}-${index}`}
+
 
 className="
 
-border-l-2
+border
 
-border-blue-400/40
+border-white/10
 
-pl-4
+rounded-xl
+
+p-4
+
+bg-black/30
 
 "
 
@@ -256,7 +220,11 @@ pl-4
 
 
 
-<p>
+<p className="
+
+text-white
+
+">
 
 {item.icon} {item.title}
 
@@ -267,9 +235,7 @@ pl-4
 
 
 
-
-
-<div className="
+<p className="
 
 text-xs
 
@@ -279,14 +245,9 @@ mt-1
 
 ">
 
+{item.type}
 
-
-{item.type} • {item.date}
-
-
-
-</div>
-
+</p>
 
 
 
@@ -309,8 +270,6 @@ mt-1
 
 
 
-
-
 </div>
 
 
@@ -320,8 +279,7 @@ mt-1
 
 
 
-</motion.div>
-
+</div>
 
 );
 

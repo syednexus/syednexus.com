@@ -1,17 +1,12 @@
 "use client";
 
-
-import { useEffect, useState } from "react";
-
-import { profile } from "@/data/profile";
-
+import {useEffect,useState} from "react";
 import NexusToast from "@/components/core/NexusToast";
 
 
-
-
-
 type Project={
+
+id?:number;
 
 name:string;
 
@@ -21,12 +16,9 @@ status:string;
 
 description:string;
 
-technologies:string[];
+technologies:string;
 
 };
-
-
-
 
 
 
@@ -36,17 +28,11 @@ export default function ProjectEditor(){
 
 
 
-
-
 const [projects,setProjects]=useState<Project[]>([]);
 
-
-const [editing,setEditing]=useState<string|null>(null);
-
+const [editing,setEditing]=useState<Project|null>(null);
 
 const [toast,setToast]=useState("");
-
-
 
 
 
@@ -55,7 +41,7 @@ const [form,setForm]=useState({
 
 name:"",
 
-category:"Cybersecurity",
+category:"",
 
 status:"Active",
 
@@ -70,39 +56,9 @@ technologies:""
 
 
 
-
-
-
-
-
 useEffect(()=>{
 
-
-
-const saved=
-
-localStorage.getItem("nexus_projects");
-
-
-
-if(saved){
-
-
-setProjects(JSON.parse(saved));
-
-
-}
-
-
-else{
-
-
-setProjects(profile.projects);
-
-
-}
-
-
+load();
 
 },[]);
 
@@ -113,22 +69,18 @@ setProjects(profile.projects);
 
 
 
+async function load(){
 
 
-function notify(message:string){
+const res =
+await fetch("/api/projects");
 
 
+setProjects(
 
-setToast(message);
+await res.json()
 
-
-
-setTimeout(()=>{
-
-setToast("");
-
-},2500);
-
+);
 
 
 }
@@ -141,18 +93,67 @@ setToast("");
 
 
 
+function notify(msg:string){
 
 
-function save(){
+setToast(msg);
+
+
+setTimeout(()=>setToast(""),2500);
+
+
+}
 
 
 
 
 
-if(!form.name){
+
+
+
+
+async function save(){
+
+
+
+const res =
+await fetch("/api/projects",{
+
+method:"POST",
+
+credentials:"include",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+id:editing?.id,
+
+...form
+
+})
+
+});
+
+
+
+
+
+
+
+if(!res.ok){
+
+
+notify("Unauthorized - login again");
+
 
 return;
 
+
 }
 
 
@@ -161,119 +162,17 @@ return;
 
 
 
-const project:Project={
+notify(
 
-name:form.name,
+editing ?
 
-category:form.category,
-
-status:form.status,
-
-description:form.description,
-
-technologies:
-
-form.technologies
-
-.split(",")
-
-.map(x=>x.trim())
-
-};
-
-
-
-
-
-
-
-
-let updated:Project[];
-
-
-
-
-
-
-
-if(editing){
-
-
-
-updated=
-
-projects.map(p=>
-
-p.name===editing
-
-?
-
-project
+"Project updated"
 
 :
 
-p
+"Project saved"
 
 );
-
-
-
-
-notify("Project updated successfully");
-
-
-
-}
-
-
-
-
-
-
-else{
-
-
-
-updated=[
-
-project,
-
-...projects
-
-];
-
-
-
-notify("Project added successfully");
-
-
-
-}
-
-
-
-
-
-
-
-
-
-setProjects(updated);
-
-
-
-
-
-
-localStorage.setItem(
-
-"nexus_projects",
-
-JSON.stringify(updated)
-
-);
-
-
 
 
 
@@ -286,13 +185,11 @@ setEditing(null);
 
 
 
-
-
 setForm({
 
 name:"",
 
-category:"Cybersecurity",
+category:"",
 
 status:"Active",
 
@@ -305,10 +202,11 @@ technologies:""
 
 
 
+
+load();
+
+
 }
-
-
-
 
 
 
@@ -323,28 +221,57 @@ function edit(project:Project){
 
 
 
-
-
-
-setEditing(project.name);
-
-
+setEditing(project);
 
 
 
 setForm({
 
-name:project.name,
+name:project.name || "",
 
-category:project.category,
+category:project.category || "",
 
-status:project.status,
+status:project.status || "",
 
-description:project.description,
+description:project.description || "",
 
-technologies:
+technologies:project.technologies || ""
 
-project.technologies.join(", ")
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+async function remove(id:number){
+
+
+
+const res =
+await fetch("/api/projects",{
+
+method:"DELETE",
+
+credentials:"include",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+id
+
+})
 
 });
 
@@ -352,69 +279,30 @@ project.technologies.join(", ")
 
 
 
-}
+
+if(!res.ok){
 
 
+notify("Unauthorized - login again");
 
 
-
-
-
-
-
-
-
-
-function remove(name:string){
-
-
-
-
-
-
-const updated=
-
-projects.filter(
-
-p=>p.name!==name
-
-);
-
-
-
-
-
-
-
-setProjects(updated);
-
-
-
-
-
-
-
-localStorage.setItem(
-
-"nexus_projects",
-
-JSON.stringify(updated)
-
-);
-
-
-
-
-
-notify("Project removed");
-
-
-
+return;
 
 
 }
 
 
+
+
+
+notify("Project deleted");
+
+
+
+load();
+
+
+}
 
 
 
@@ -428,24 +316,7 @@ notify("Project removed");
 
 return(
 
-<div className="
-
-border
-border-orange-400/30
-
-rounded-xl
-
-p-5
-
-bg-black/40
-
-">
-
-
-
-
-
-
+<div className="space-y-5">
 
 
 
@@ -455,23 +326,9 @@ bg-black/40
 
 
 
+<p className="text-orange-300 tracking-widest">
 
-
-
-
-
-
-<p className="
-
-text-orange-300
-
-tracking-widest
-
-text-sm
-
-">
-
-PROJECT DATABASE MANAGER
+⚔ PROJECT DATABASE
 
 </p>
 
@@ -480,17 +337,38 @@ PROJECT DATABASE MANAGER
 
 
 
+{
+
+editing && (
+
+<p className="text-yellow-300 text-sm">
+
+Editing: {editing.name}
+
+</p>
+
+)
+
+}
 
 
 
 
+
+
+
+
+{Object.keys(form).map(key=>(
 
 
 <input
 
-placeholder="Project name"
+key={key}
 
-value={form.name}
+value={form[key as keyof typeof form]}
+
+placeholder={key}
+
 
 onChange={e=>
 
@@ -498,143 +376,19 @@ setForm({
 
 ...form,
 
-name:e.target.value
+[key]:e.target.value
 
 })
 
 }
+
 
 className="admin-input"
 
 />
 
 
-
-
-
-
-
-
-
-<input
-
-placeholder="Category"
-
-value={form.category}
-
-onChange={e=>
-
-setForm({
-
-...form,
-
-category:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Status"
-
-value={form.status}
-
-onChange={e=>
-
-setForm({
-
-...form,
-
-status:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-
-
-
-<textarea
-
-placeholder="Description"
-
-value={form.description}
-
-onChange={e=>
-
-setForm({
-
-...form,
-
-description:e.target.value
-
-})
-
-}
-
-className="admin-input min-h-32"
-
-/>
-
-
-
-
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Technologies comma separated"
-
-value={form.technologies}
-
-onChange={e=>
-
-setForm({
-
-...form,
-
-technologies:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
-
-
+))}
 
 
 
@@ -649,39 +403,36 @@ onClick={save}
 
 className="
 
-mt-5
-
 border
 
-border-orange-400
+border-green-400
 
 px-5
 
 py-2
 
-rounded
+rounded-lg
+
+text-green-300
+
+hover:bg-green-400/10
 
 "
 
 >
 
 
-
 {
 
-editing
+editing ?
 
-?
-
-"SAVE CHANGES"
+"UPDATE PROJECT"
 
 :
 
-"ADD PROJECT"
+"SAVE PROJECT"
 
 }
-
-
 
 
 </button>
@@ -694,37 +445,21 @@ editing
 
 
 
+<div className="space-y-3">
 
 
 
-
-<div className="
-
-mt-8
-
-space-y-4
-
-">
+{
 
 
-
-
-
-
-
-{projects.map(project=>(
-
-
-
-
+projects.map(project=>(
 
 
 
 
 <div
 
-
-key={project.name}
+key={project.id}
 
 
 className="
@@ -739,6 +474,14 @@ p-4
 
 bg-orange-400/5
 
+
+flex
+
+justify-between
+
+items-center
+
+
 "
 
 >
@@ -747,38 +490,35 @@ bg-orange-400/5
 
 
 
+<div>
 
 
-
-<h3>
+<p className="text-orange-200">
 
 ⚔ {project.name}
 
-</h3>
+</p>
 
 
 
+<p className="text-xs text-gray-400">
 
-
-
-
-
-
-<p className="
-
-text-gray-400
-
-text-sm
-
-">
-
-{project.description}
+{project.category} • {project.status}
 
 </p>
 
 
 
 
+<p className="text-xs text-gray-500 mt-1">
+
+{project.technologies}
+
+</p>
+
+
+
+</div>
 
 
 
@@ -786,13 +526,10 @@ text-sm
 
 
 
-<div className="flex gap-4 mt-4">
 
 
 
-
-
-
+<div className="flex gap-3">
 
 
 
@@ -800,7 +537,23 @@ text-sm
 
 onClick={()=>edit(project)}
 
-className="text-blue-300"
+className="
+
+border
+
+border-yellow-400
+
+px-3
+
+py-1
+
+rounded
+
+text-yellow-300
+
+hover:bg-yellow-400/10
+
+"
 
 >
 
@@ -815,13 +568,27 @@ EDIT
 
 
 
-
-
 <button
 
-onClick={()=>remove(project.name)}
+onClick={()=>remove(project.id!)}
 
-className="text-red-400"
+className="
+
+border
+
+border-red-400
+
+px-3
+
+py-1
+
+rounded
+
+text-red-300
+
+hover:bg-red-400/10
+
+"
 
 >
 
@@ -833,6 +600,7 @@ DELETE
 
 
 
+</div>
 
 
 
@@ -841,36 +609,13 @@ DELETE
 </div>
 
 
+))
 
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-))}
-
-
-
-
-
-
-
+}
 
 
 
 </div>
-
-
-
 
 
 
@@ -881,7 +626,6 @@ DELETE
 
 
 );
-
 
 
 }

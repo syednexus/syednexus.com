@@ -1,75 +1,118 @@
 "use client";
 
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 
 
 export default function PasswordManager(){
 
 
-const [password,setPassword]=useState("nexusroot");
+const [password,setPassword]=useState("");
 
-const [newPass,setNewPass]=useState("");
+const [confirm,setConfirm]=useState("");
 
 const [message,setMessage]=useState("");
 
-
-
-
-
-useEffect(()=>{
-
-
-const stored =
-window.localStorage.getItem("nexus_password");
-
-
-if(stored){
-
-setPassword(stored);
-
-}
-
-
-},[]);
+const [loading,setLoading]=useState(false);
 
 
 
 
 
 
-
-function updatePassword(){
-
+async function updatePassword(){
 
 
-if(!newPass.trim()){
+if(!password || !confirm){
+
+
+setMessage("Enter password fields");
 
 return;
 
+
 }
 
 
 
-window.localStorage.setItem(
+if(password!==confirm){
 
-"nexus_password",
 
-newPass
+setMessage("Passwords do not match");
+
+return;
+
+
+}
+
+
+
+
+setLoading(true);
+
+
+
+
+const res =
+await fetch(
+
+"/api/admin/password",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+password
+
+})
+
+}
 
 );
 
 
 
-setPassword(newPass);
 
-setNewPass("");
+
+
+if(res.ok){
+
 
 setMessage(
 "Password updated successfully"
 );
 
+
+setPassword("");
+
+setConfirm("");
+
+
+}
+
+
+else{
+
+
+setMessage(
+"Password update failed"
+);
+
+
+}
+
+
+
+setLoading(false);
 
 
 }
@@ -110,23 +153,28 @@ SECURITY CONFIGURATION
 
 
 
-<p className="
+<div className="
 mt-5
-text-gray-400
 text-sm
+space-y-2
+text-green-400
 ">
 
-Current Password
-
+<p>
+Authentication:DATABASE
 </p>
-
-
 
 <p>
-
-{"*".repeat(password.length)}
-
+Password Source:PRISMA HASH
 </p>
+
+<p>
+Encryption:BCRYPT
+</p>
+
+</div>
+
+
 
 
 
@@ -138,11 +186,11 @@ Current Password
 
 type="password"
 
-value={newPass}
+value={password}
 
-placeholder="New root password"
+placeholder="New password"
 
-onChange={(e)=>setNewPass(e.target.value)}
+onChange={e=>setPassword(e.target.value)}
 
 className="
 
@@ -164,9 +212,41 @@ p-3
 
 
 
+<input
+
+type="password"
+
+value={confirm}
+
+placeholder="Confirm password"
+
+onChange={e=>setConfirm(e.target.value)}
+
+className="
+
+mt-3
+w-full
+bg-black
+border
+border-red-400/30
+rounded
+p-3
+
+"
+
+/>
+
+
+
+
+
+
+
 <button
 
 onClick={updatePassword}
+
+disabled={loading}
 
 className="
 
@@ -181,7 +261,21 @@ rounded
 
 >
 
-UPDATE PASSWORD
+
+{
+
+loading
+
+?
+
+"UPDATING..."
+
+:
+
+"UPDATE PASSWORD"
+
+}
+
 
 </button>
 
@@ -202,10 +296,8 @@ text-sm
 
 
 
-
 </div>
 
-)
-
+);
 
 }

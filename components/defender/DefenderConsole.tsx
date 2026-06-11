@@ -2,35 +2,49 @@
 
 
 import { useState } from "react";
+
 import { motion } from "framer-motion";
 
+// Nexus Search 
+
+import NexusSearch from "@/components/NexusSearch";
+
+// BOOT + HEADER
+
 import SentinelBoot from "./sentinel/SentinelBoot";
+
 import SentinelHeader from "./sentinel/SentinelHeader";
 
+
+
+// SENTINEL MODULES
+
 import IdentityDossier from "./sentinel/IdentityDossier";
+
 import CareerTrace from "./sentinel/CareerTrace";
+
 import CapabilityMatrix from "./sentinel/CapabilityMatrix";
+
 import CaseFiles from "./sentinel/CaseFiles";
+
 import VerificationVault from "./sentinel/VerificationVault";
+
 import MissionQueue from "./sentinel/MissionQueue";
 
+
+
+// INTELLIGENCE WIDGETS
+
 import ActivityFeed from "./ActivityFeed";
+
 import SkillMatrix from "./SkillMatrix";
+
+import ActivityTimeline from "@/components/ActivityTimeline";
+
+// DATA ENGINE
 
 import { useNexusData } from "@/hooks/useNexusData";
 
-import { Mode } from "@/types/mode";
-
-
-
-
-
-
-type Props={
-
-setMode:(mode:Mode)=>void;
-
-};
 
 
 
@@ -38,18 +52,24 @@ setMode:(mode:Mode)=>void;
 
 
 
-export default function DefenderConsole({
 
-setMode
-
-}:Props){
+export default function DefenderConsole(){
 
 
 
-const [booted,setBooted]=useState(false);
 
 
-const profile = useNexusData();
+
+const [booted,setBooted] =
+useState(false);
+
+
+
+
+const profile =
+useNexusData();
+
+
 
 
 
@@ -79,9 +99,12 @@ complete={()=>setBooted(true)}
 
 
 
+
 return(
 
-<main className="
+<main
+
+className="
 
 min-h-screen
 
@@ -91,11 +114,20 @@ text-white
 
 overflow-x-hidden
 
-">
+"
+
+>
 
 
 
 
+
+
+
+
+
+
+{/* HEADER */}
 
 
 <SentinelHeader/>
@@ -108,7 +140,17 @@ overflow-x-hidden
 
 
 
-<section className="p-6">
+
+
+<section
+
+className="
+
+p-6
+
+"
+
+>
 
 
 
@@ -118,11 +160,13 @@ overflow-x-hidden
 
 
 
-{/* ACTIVE SESSION */}
 
+
+{/* ACTIVE SECURITY SESSION */}
 
 
 <motion.div
+
 
 
 initial={{
@@ -132,6 +176,7 @@ opacity:0,
 y:20
 
 }}
+
 
 
 animate={{
@@ -180,10 +225,17 @@ nexus-hover
 
 
 
+
+
 <div>
 
 
-<p className="
+
+
+
+<p
+
+className="
 
 text-cyan-300
 
@@ -191,7 +243,9 @@ tracking-widest
 
 text-sm
 
-">
+"
+
+>
 
 SENTINEL ACTIVE SESSION
 
@@ -204,7 +258,11 @@ SENTINEL ACTIVE SESSION
 
 
 
-<h1 className="
+
+
+<h1
+
+className="
 
 text-4xl
 
@@ -212,7 +270,9 @@ font-bold
 
 mt-3
 
-">
+"
+
+>
 
 Syed Nexus Security Intelligence Platform
 
@@ -225,17 +285,26 @@ Syed Nexus Security Intelligence Platform
 
 
 
-<p className="
+
+
+<p
+
+className="
 
 text-gray-400
 
 mt-3
 
-">
+"
+
+>
 
 Digital profile analysis • Capability mapping • Security journey intelligence
 
 </p>
+
+
+
 
 
 
@@ -249,11 +318,13 @@ Digital profile analysis • Capability mapping • Security journey intelligenc
 
 
 
-{/* USER SESSION */}
+{/* ANALYST CARD */}
 
 
 
-<div className="
+<div
+
+className="
 
 hidden
 
@@ -273,7 +344,11 @@ p-4
 
 bg-black/30
 
-">
+"
+
+>
+
+
 
 
 
@@ -282,7 +357,18 @@ bg-black/30
 
 <img
 
-src={profile.identity.avatar || "/profile.jpg"}
+
+src={
+
+profile.identity.avatar ||
+
+"/profile.jpg"
+
+}
+
+
+alt={profile.identity.name}
+
 
 className="
 
@@ -308,7 +394,12 @@ object-cover
 
 
 
+
+
 <div>
+
+
+
 
 
 
@@ -323,7 +414,11 @@ object-cover
 
 
 
-<p className="
+
+
+<p
+
+className="
 
 text-xs
 
@@ -331,7 +426,9 @@ text-green-400
 
 mt-1
 
-">
+"
+
+>
 
 ● ACTIVE ANALYST
 
@@ -341,13 +438,20 @@ mt-1
 
 
 
-<p className="
+
+
+
+<p
+
+className="
 
 text-xs
 
 text-gray-400
 
-">
+"
+
+>
 
 SESSION VERIFIED
 
@@ -357,14 +461,21 @@ SESSION VERIFIED
 
 
 
-</div>
-
-
-
 
 
 
 </div>
+
+
+
+
+
+
+
+</div>
+
+
+
 
 
 
@@ -374,55 +485,9 @@ SESSION VERIFIED
 
 </motion.div>
 
+<div className="mb-8">
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div
-className="
-
-grid
-grid-cols-12
-gap-6
-
-"
->
-
-
-{/* LEFT COLUMN */}
-
-
-<div className="
-
-col-span-12
-xl:col-span-8
-
-space-y-6
-
-">
-
-
-<IdentityDossier/>
-
-
-<CareerTrace/>
-
-
-<CapabilityMatrix/>
-
-
-<CaseFiles/>
-
+<NexusSearch/>
 
 </div>
 
@@ -430,19 +495,108 @@ space-y-6
 
 
 
+{/* MAIN DASHBOARD GRID */}
 
 
-{/* RIGHT COLUMN */}
+<div
+
+className="
+
+grid
+
+grid-cols-12
+
+gap-6
+
+"
+
+>
 
 
-<div className="
+
+
+
+
+
+
+
+{/* LEFT INTELLIGENCE PANEL */}
+
+
+<section
+
+className="
 
 col-span-12
+
+xl:col-span-8
+
+space-y-6
+
+"
+
+>
+
+
+
+
+
+
+
+<IdentityDossier/>
+
+
+
+
+<CareerTrace/>
+
+
+
+
+<CapabilityMatrix/>
+
+
+
+
+<CaseFiles/>
+
+
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+{/* RIGHT INTELLIGENCE PANEL */}
+
+
+<aside
+
+className="
+
+col-span-12
+
 xl:col-span-4
 
 space-y-6
 
-">
+"
+
+>
+
+
+<ActivityTimeline/>
 
 
 <ActivityFeed/>
@@ -457,11 +611,18 @@ space-y-6
 <MissionQueue/>
 
 
+</aside>
+
+
+
+
+
+
+
+
 </div>
 
 
-
-</div>
 
 
 
@@ -473,10 +634,17 @@ space-y-6
 
 
 
+
+
+
+
+
+
+
 </main>
 
-
 );
+
 
 
 }

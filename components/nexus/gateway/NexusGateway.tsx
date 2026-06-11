@@ -1,9 +1,13 @@
 "use client";
 
 
+import { useState } from "react";
+
 import { motion } from "framer-motion";
 
 import RoleSelector from "./RoleSelector";
+
+import NexusBoot from "./NexusBoot";
 
 import { Mode } from "@/types/mode";
 
@@ -24,17 +28,11 @@ setMode:(mode:Mode)=>void;
 
 
 type AvatarMode =
-
 "gateway" |
-
 "sentinel" |
-
 "lab" |
-
 "medcore" |
-
 "owner";
-
 
 
 
@@ -50,7 +48,7 @@ lab:"lab",
 
 medcore:"medcore",
 
-blogs:"gateway"
+blogs:"owner"
 
 };
 
@@ -63,6 +61,7 @@ blogs:"gateway"
 
 const systems:{
 
+
 icon:string;
 
 name:string;
@@ -71,8 +70,8 @@ desc:string;
 
 mode:Mode;
 
-}[]=[
 
+}[]=[
 
 
 
@@ -87,7 +86,6 @@ desc:"Cybersecurity Intelligence Profile",
 mode:"defender"
 
 },
-
 
 
 
@@ -120,12 +118,26 @@ desc:"Interactive Security Environment",
 
 mode:"lab"
 
+},
+
+{
+
+
+icon:"📚",
+
+name:"KNOWLEDGE ARCHIVE",
+
+desc:"Cybersecurity blogs, research notes and learning logs",
+
+mode:"blogs"
+
+
 }
 
 
 
-
 ];
+
 
 
 
@@ -148,6 +160,13 @@ setMode
 
 
 
+// ALL HOOKS FIRST
+
+const [booted,setBooted]=useState(false);
+
+
+
+
 
 const {
 
@@ -156,6 +175,33 @@ setCurrentSystem,
 setAvatar
 
 }=useNexus();
+
+
+
+
+
+
+
+
+
+// THEN CONDITIONS
+
+if(!booted){
+
+
+
+return(
+
+<NexusBoot
+
+complete={()=>setBooted(true)}
+
+/>
+
+);
+
+
+}
 
 
 
@@ -228,6 +274,8 @@ overflow-hidden
 
 
 
+
+
 <div className="
 
 max-w-7xl
@@ -239,8 +287,6 @@ px-6
 py-12
 
 ">
-
-
 
 
 
@@ -285,7 +331,6 @@ mb-14
 
 
 
-
 <h1 className="
 
 text-6xl
@@ -299,6 +344,7 @@ font-bold
 SYED NEXUS
 
 </h1>
+
 
 
 
@@ -354,9 +400,6 @@ AI powered professional intelligence environment
 
 
 
-{/* ROLE SELECTOR */}
-
-
 <div>
 
 
@@ -381,13 +424,11 @@ SELECT VISITOR PROFILE
 
 
 
-
 <RoleSelector
 
 setMode={setMode}
 
 />
-
 
 
 
@@ -401,15 +442,9 @@ setMode={setMode}
 
 
 
-{/* SYSTEM SELECTOR */}
 
 
-
-<section className="
-
-mt-16
-
-">
+<section className="mt-16">
 
 
 
@@ -444,13 +479,14 @@ OR INITIALIZE SYSTEM MANUALLY
 
 
 
+
 <div className="
 
 grid
 
 grid-cols-1
 
-md:grid-cols-3
+md:grid-cols-4
 
 gap-8
 
@@ -469,19 +505,13 @@ gap-8
 
 
 
-
-
-
-
 <motion.button
 
 
 key={system.name}
 
 
-
 aria-label={`Initialize ${system.name}`}
-
 
 
 whileHover={{
@@ -489,7 +519,6 @@ whileHover={{
 scale:1.05
 
 }}
-
 
 
 whileTap={{
@@ -500,9 +529,7 @@ scale:.95
 
 
 
-
 onClick={()=>launchSystem(system.mode)}
-
 
 
 
@@ -539,11 +566,7 @@ text-left
 
 aria-hidden="true"
 
-className="
-
-text-5xl
-
-"
+className="text-5xl"
 
 >
 
@@ -577,6 +600,7 @@ mt-6
 
 
 
+
 <p className="
 
 text-gray-400
@@ -588,7 +612,6 @@ mt-4
 {system.desc}
 
 </p>
-
 
 
 
@@ -621,13 +644,7 @@ INITIALIZE →
 
 
 
-
-
-
-
 ))}
-
-
 
 
 
@@ -645,7 +662,6 @@ INITIALIZE →
 
 
 </section>
-
 
 
 

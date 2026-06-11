@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 
 import { useNexus } from "@/context/NexusContext";
 
+import { avatarProfiles } from "@/data/avatar";
+
 
 
 
@@ -14,19 +16,24 @@ import { useNexus } from "@/context/NexusContext";
 export default function NexusAvatar(){
 
 
-
 const {
 
 avatar,
 
-visitor
+visitor,
+
+changeSystem,
+
+completeObjective
 
 }=useNexus();
 
 
 
 
-const [open,setOpen]=useState(true);
+
+const [open,setOpen] =
+useState(false);
 
 
 
@@ -34,25 +41,22 @@ const [open,setOpen]=useState(true);
 
 
 
-const modes={
+const avatarData={
 
 
 gateway:{
 
 icon:"🌌",
 
-name:"NEXUS GUIDE",
+title:"NEXUS GUIDE",
 
 role:"Digital Intelligence Assistant",
 
 outfit:"Core Interface",
 
-message:"Welcome. Select your pathway to begin."
+message:"Welcome. Select a Nexus pathway to begin."
 
 },
-
-
-
 
 
 
@@ -60,19 +64,15 @@ sentinel:{
 
 icon:"🛡",
 
-name:"SENTINEL ANALYST",
+title:"SENTINEL ANALYST",
 
-role:"Cybersecurity Profile Agent",
+role:"Cybersecurity Intelligence Agent",
 
-outfit:"Security Analyst Gear",
+outfit:"SOC Analyst Gear",
 
-message:"Professional intelligence systems active."
+message:"Monitoring cybersecurity intelligence."
 
 },
-
-
-
-
 
 
 
@@ -81,41 +81,32 @@ lab:{
 
 icon:"🥷",
 
-name:"CYBER OPERATOR",
+title:"CYBER OPERATOR",
 
-role:"Security Research Agent",
+role:"Security Research Assistant",
 
-outfit:"Operator Hoodie",
+outfit:"Operator Interface",
 
-message:"Lab environment initialized."
+message:"Security lab environment active."
 
 },
-
-
-
-
 
 
 
 
 medcore:{
 
-icon:"👨‍⚕️",
+icon:"🥼",
 
-name:"MEDCORE SPECIALIST",
+title:"MEDCORE SPECIALIST",
 
-role:"Healthcare Security Agent",
+role:"Healthcare Intelligence Agent",
 
-outfit:"Medical Lab Coat",
+outfit:"Medical Research Coat",
 
-message:"Healthcare intelligence online."
+message:"Healthcare intelligence systems online."
 
 },
-
-
-
-
-
 
 
 
@@ -124,13 +115,13 @@ owner:{
 
 icon:"👑",
 
-name:"SYSTEM ARCHITECT",
+title:"NEXUS ARCHITECT",
 
-role:"Nexus Administrator",
+role:"System Administrator",
 
-outfit:"Architect Interface",
+outfit:"Command Interface",
 
-message:"Owner privileges detected."
+message:"Administrator control active."
 
 }
 
@@ -144,8 +135,115 @@ message:"Owner privileges detected."
 
 
 
+const current =
+avatarData[avatar];
 
-const current = modes[avatar];
+
+const actions =
+avatarProfiles[avatar].actions;
+
+
+
+
+
+
+
+
+
+function executeAction(action:string){
+
+
+
+const command =
+action.toLowerCase();
+
+
+
+
+if(
+
+command.includes("project") ||
+
+command.includes("lab")
+
+){
+
+
+changeSystem("lab");
+
+return;
+
+}
+
+
+
+
+
+if(
+
+command.includes("cyber") ||
+
+command.includes("sentinel") ||
+
+command.includes("skill")
+
+){
+
+
+changeSystem("defender");
+
+return;
+
+}
+
+
+
+
+
+if(
+
+command.includes("health") ||
+
+command.includes("medical") ||
+
+command.includes("pharma")
+
+){
+
+
+changeSystem("medcore");
+
+return;
+
+}
+
+
+
+
+
+
+if(command.includes("resume")){
+
+
+
+completeObjective("resume");
+
+window.open(
+
+"/resume.pdf",
+
+"_blank"
+
+);
+
+
+return;
+
+
+}
+
+
+}
 
 
 
@@ -164,7 +262,7 @@ initial={{
 
 opacity:0,
 
-x:-50
+x:-40
 
 }}
 
@@ -178,18 +276,21 @@ x:0
 }}
 
 
-
 className="
 
 fixed
 
 left-6
 
-bottom-60
+bottom-6
 
 z-50
 
 font-mono
+
+max-h-[90vh]
+
+overflow-y-auto
 
 "
 
@@ -201,16 +302,19 @@ font-mono
 
 
 
+{
 
+open
 
+?
 
-{open ? (
+(
 
+<div
 
+className="
 
-<div className="
-
-w-64
+w-72
 
 border
 
@@ -218,9 +322,7 @@ border-purple-400/40
 
 rounded-2xl
 
-bg-[#020617]/90
-
-backdrop-blur-xl
+bg-[#020617]
 
 p-5
 
@@ -228,38 +330,19 @@ shadow-xl
 
 shadow-purple-500/20
 
-">
+"
+
+>
 
 
 
 
 
 
-
-<div className="
-
-flex
-
-justify-between
-
-items-center
-
-">
+<div className="flex justify-between items-center">
 
 
-
-
-
-
-<p className="
-
-text-purple-300
-
-tracking-widest
-
-text-sm
-
-">
+<p className="text-purple-300 text-xs tracking-widest">
 
 AVATAR ENGINE
 
@@ -267,18 +350,11 @@ AVATAR ENGINE
 
 
 
-
-
-
 <button
 
 onClick={()=>setOpen(false)}
 
-className="
-
-text-gray-400
-
-"
+className="text-gray-400"
 
 >
 
@@ -288,13 +364,7 @@ text-gray-400
 
 
 
-
-
-
-
 </div>
-
-
 
 
 
@@ -307,48 +377,26 @@ text-gray-400
 
 animate={{
 
-
 y:[0,-8,0]
-
 
 }}
 
 
 transition={{
 
-
 duration:3,
 
-
 repeat:Infinity
-
 
 }}
 
 
-
-className="
-
-text-center
-
-mt-6
-
-"
+className="text-center mt-5"
 
 >
 
 
-
-
-
-
-
-
-<div className="
-
-text-7xl
-
-">
+<div className="text-6xl">
 
 {current.icon}
 
@@ -356,49 +404,19 @@ text-7xl
 
 
 
+<h2 className="text-purple-300 mt-3">
 
-
-
-
-
-<h2 className="
-
-text-purple-300
-
-mt-4
-
-">
-
-{current.name}
+{current.title}
 
 </h2>
 
 
 
-
-
-
-
-
-<p className="
-
-text-xs
-
-text-gray-400
-
-mt-2
-
-">
+<p className="text-xs text-gray-400">
 
 {current.role}
 
 </p>
-
-
-
-
-
-
 
 
 
@@ -411,31 +429,17 @@ mt-2
 
 
 
-
-
-<div className="
-
-mt-6
-
-space-y-3
-
-text-xs
-
-">
-
-
-
-
-
+<div className="mt-5 text-xs space-y-3">
 
 
 <p>
 
-Visitor:
+VISITOR:
 
 <span className="text-purple-300">
 
- {" "}
+{" "}
+
 {visitor.toUpperCase()}
 
 </span>
@@ -446,20 +450,18 @@ Visitor:
 
 
 
-
-
-
-
 <p>
 
-Outfit:
+OUTFIT:
 
 <span className="text-purple-300">
 
- {" "}
+{" "}
+
 {current.outfit}
 
 </span>
+
 
 </p>
 
@@ -468,12 +470,9 @@ Outfit:
 
 
 
+<p
 
-
-
-<p className="
-
-text-gray-300
+className="
 
 border-t
 
@@ -481,7 +480,11 @@ border-purple-400/20
 
 pt-3
 
-">
+text-gray-300
+
+"
+
+>
 
 "{current.message}"
 
@@ -489,12 +492,6 @@ pt-3
 
 
 
-
-
-
-
-
-
 </div>
 
 
@@ -504,9 +501,66 @@ pt-3
 
 
 
+<div className="mt-5 space-y-2">
+
+
+{
+
+actions.map(action=>(
+
+
+<button
+
+
+key={action}
+
+
+onClick={()=>executeAction(action)}
+
+
+className="
+
+w-full
+
+border
+
+border-purple-400/20
+
+rounded-lg
+
+py-2
+
+text-xs
+
+text-purple-200
+
+hover:bg-purple-400/10
+
+transition
+
+"
+
+>
+
+
+{action}
+
+
+</button>
+
+
+))
+
+}
+
 
 </div>
 
+
+
+
+
+</div>
 
 
 )
@@ -517,7 +571,9 @@ pt-3
 
 <button
 
+
 onClick={()=>setOpen(true)}
+
 
 className="
 
@@ -539,6 +595,10 @@ shadow-lg
 
 shadow-purple-500/30
 
+hover:scale-110
+
+transition
+
 "
 
 >
@@ -549,7 +609,6 @@ shadow-purple-500/30
 
 </button>
 
-
 )
 
 }
@@ -558,12 +617,7 @@ shadow-purple-500/30
 
 
 
-
-
-
-
 </motion.div>
-
 
 );
 

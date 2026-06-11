@@ -1,123 +1,165 @@
 "use client";
 
-
 import { useEffect,useState } from "react";
-
-import { profile } from "@/data/profile";
 
 import NexusToast from "@/components/core/NexusToast";
 
 
+type Skill={
 
+id:number;
 
+category:string;
 
-type Skills={
-
-cybersecurity:string[];
-
-tools:string[];
-
-programming:string[];
-
-pharmacy:string[];
+name:string;
 
 };
-
-
-
-
-
 
 
 
 export default function SkillEditor(){
 
 
+const categories=[
+
+"cybersecurity",
+
+"tools",
+
+"programming",
+
+"pharmacy"
+
+];
 
 
 
-const [skills,setSkills]=useState<Skills>(
+const [skills,setSkills]=useState<Skill[]>([]);
 
-profile.skills
-
-);
-
-
+const [editing,setEditing]=useState<Skill|null>(null);
 
 const [toast,setToast]=useState("");
 
 
 
+const [form,setForm]=useState({
 
+category:"cybersecurity",
+
+name:""
+
+});
 
 
 
 
 useEffect(()=>{
 
-
-
-const saved=
-
-localStorage.getItem("nexus_skills");
-
-
-
-if(saved){
-
-
-setSkills(
-
-JSON.parse(saved)
-
-);
-
-
-}
-
-
+load();
 
 },[]);
 
 
 
 
+async function load(){
+
+const res =
+await fetch("/api/skills");
+
+
+setSkills(await res.json());
+
+}
+
+
+
+
+function notify(msg:string){
+
+setToast(msg);
+
+setTimeout(()=>setToast(""),2500);
+
+}
 
 
 
 
 
-
-function update(
-
-category:keyof Skills,
-
-value:string
-
-){
+async function save(){
 
 
 
+const res =
+await fetch("/api/skills",{
 
+method:"POST",
 
-setSkills({
+credentials:"include",
 
-...skills,
+headers:{
 
+"Content-Type":"application/json"
 
-[category]:
+},
 
-value
+body:JSON.stringify({
 
-.split("\n")
+id:editing?.id,
 
-.filter(Boolean)
+category:form.category,
 
+name:form.name
+
+})
 
 });
 
 
 
+
+if(!res.ok){
+
+notify("Unauthorized");
+
+return;
+
+}
+
+
+
+
+notify(
+
+editing ?
+
+"Skill updated"
+
+:
+
+"Skill added"
+
+);
+
+
+
+setEditing(null);
+
+
+setForm({
+
+category:"cybersecurity",
+
+name:""
+
+});
+
+
+
+load();
+
+
 }
 
 
@@ -126,48 +168,52 @@ value
 
 
 
+async function remove(id:number){
 
 
 
-function save(){
+const res =
+await fetch("/api/skills",{
 
+method:"DELETE",
 
+credentials:"include",
 
+headers:{
 
+"Content-Type":"application/json"
 
-localStorage.setItem(
+},
 
-"nexus_skills",
+body:JSON.stringify({
 
-JSON.stringify(skills)
+id
 
-);
+})
 
-
-
-
-
-setToast(
-
-"Capability matrix updated successfully"
-
-);
+});
 
 
 
 
+if(!res.ok){
 
-setTimeout(()=>{
+notify("Unauthorized");
 
-setToast("");
+return;
 
-},2500);
+}
 
+
+
+notify("Skill deleted");
+
+
+load();
 
 
 
 }
-
 
 
 
@@ -178,33 +224,16 @@ setToast("");
 
 return(
 
-<div className="space-y-6">
-
-
-
-
+<div className="space-y-5">
 
 
 <NexusToast message={toast}/>
 
 
 
+<p className="text-red-300 tracking-widest text-sm">
 
-
-
-
-
-<p className="
-
-text-red-300
-
-tracking-widest
-
-text-sm
-
-">
-
-CAPABILITY MATRIX MANAGER
+CAPABILITY DATABASE
 
 </p>
 
@@ -213,142 +242,66 @@ CAPABILITY MATRIX MANAGER
 
 
 
+<select
 
+value={form.category}
 
+onChange={e=>
 
-{Object.keys(skills).map(key=>(
+setForm({
 
+...form,
 
+category:e.target.value
 
+})
 
+}
 
-
-
-<div
-
-
-key={key}
-
-
-className="
-
-border
-
-border-red-400/20
-
-rounded-xl
-
-p-4
-
-bg-red-400/5
-
-"
+className="admin-input"
 
 >
 
 
+{categories.map(x=>(
 
+<option key={x}>
 
+{x}
 
-
-
-
-
-<p className="
-
-uppercase
-
-text-xs
-
-text-red-300
-
-mb-3
-
-">
-
-{key}
-
-</p>
-
-
-
-
-
-
-
-
-
-
-<textarea
-
-
-value={
-
-skills[key as keyof Skills]
-
-.join("\n")
-
-}
-
-
-onChange={e=>
-
-update(
-
-key as keyof Skills,
-
-e.target.value
-
-)
-
-}
-
-
-
-className="
-
-w-full
-
-min-h-32
-
-bg-black/40
-
-border
-
-border-red-400/20
-
-rounded-xl
-
-p-3
-
-outline-none
-
-text-white
-
-"
-
-
-/>
-
-
-
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
+</option>
 
 ))}
 
 
+</select>
+
+
+
+
+
+
+<input
+
+value={form.name}
+
+placeholder="Skill name"
+
+onChange={e=>
+
+setForm({
+
+...form,
+
+name:e.target.value
+
+})
+
+}
+
+className="admin-input"
+
+/>
 
 
 
@@ -360,27 +313,21 @@ text-white
 
 onClick={save}
 
-className="
-
-border
-
-border-green-400/40
-
-rounded-xl
-
-px-5
-
-py-3
-
-text-green-300
-
-hover:bg-green-400/10
-
-"
+className="border border-green-400 px-5 py-2 rounded"
 
 >
 
-SAVE MATRIX
+{
+
+editing ?
+
+"UPDATE SKILL"
+
+:
+
+"ADD SKILL"
+
+}
 
 </button>
 
@@ -392,12 +339,127 @@ SAVE MATRIX
 
 
 
+<div className="grid grid-cols-2 gap-4">
+
+
+{categories.map(cat=>(
+
+
+<div
+
+key={cat}
+
+className="border border-red-400/20 rounded-xl p-4"
+
+>
+
+
+<h3 className="text-red-300 mb-3">
+
+{cat}
+
+</h3>
+
+
+
+
+
+{skills
+
+.filter(x=>x.category===cat)
+
+.map(skill=>(
+
+
+<div
+
+key={skill.id}
+
+className="flex justify-between items-center mb-2"
+
+>
+
+
+<span>
+
+• {skill.name}
+
+</span>
+
+
+
+
+
+<div className="flex gap-3">
+
+
+<button
+
+onClick={()=>{
+
+
+setEditing(skill);
+
+
+setForm({
+
+category:skill.category,
+
+name:skill.name
+
+});
+
+
+}}
+
+>
+
+EDIT
+
+</button>
+
+
+
+
+
+
+<button
+
+onClick={()=>remove(skill.id)}
+
+>
+
+DELETE
+
+</button>
+
+
 
 </div>
 
 
-);
+</div>
 
+
+))
+
+}
+
+
+
+</div>
+
+
+))}
+
+
+</div>
+
+
+
+</div>
+
+);
 
 
 }

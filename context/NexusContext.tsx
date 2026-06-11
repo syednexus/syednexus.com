@@ -27,12 +27,27 @@ export type VisitorRole =
 
 
 
+
 export type AvatarMode =
 "gateway" |
 "sentinel" |
 "lab" |
 "medcore" |
 "owner";
+
+
+
+
+
+export type Objective={
+
+id:string;
+
+title:string;
+
+completed:boolean;
+
+};
 
 
 
@@ -54,6 +69,11 @@ icon:string;
 
 
 
+
+
+
+
+
 type NexusContextType={
 
 
@@ -70,6 +90,8 @@ currentSystem:Mode;
 
 setCurrentSystem:(mode:Mode)=>void;
 
+changeSystem:(mode:Mode)=>void;
+
 
 // avatar
 
@@ -78,7 +100,19 @@ avatar:AvatarMode;
 setAvatar:(mode:AvatarMode)=>void;
 
 
-// mission
+// AI
+
+aiOpen:boolean;
+
+setAiOpen:(open:boolean)=>void;
+
+
+aiPrompt:string;
+
+setAiPrompt:(prompt:string)=>void;
+
+
+// missions
 
 mission:string;
 
@@ -90,7 +124,12 @@ missionProgress:number;
 setMissionProgress:(value:number)=>void;
 
 
-// xp
+objectives:Objective[];
+
+completeObjective:(id:string)=>void;
+
+
+// XP
 
 xp:number;
 
@@ -126,7 +165,6 @@ createContext<NexusContextType|null>(null);
 
 
 
-
 export function NexusProvider({
 
 children
@@ -143,49 +181,221 @@ children:ReactNode
 
 
 
-const [visitor,setVisitor] =
+// VISITOR
+
+
+const [visitor,setVisitor]=
 useState<VisitorRole>("unknown");
 
 
 
 
-const [currentSystem,setCurrentSystem] =
+
+
+
+
+// SYSTEM
+
+
+const [currentSystem,setCurrentSystem]=
 useState<Mode>("gateway");
 
 
 
 
-const [avatar,setAvatar] =
+
+
+
+
+// AVATAR
+
+
+const [avatar,setAvatar]=
 useState<AvatarMode>("gateway");
 
 
 
 
 
-const [mission,setMission] =
+
+
+
+
+
+function changeSystem(
+
+mode:Mode
+
+){
+
+
+
+setCurrentSystem(mode);
+
+
+
+
+const avatarMap:Record<Mode,AvatarMode>={
+
+
+gateway:"gateway",
+
+defender:"sentinel",
+
+lab:"lab",
+
+medcore:"medcore",
+
+blogs:"gateway"
+
+
+};
+
+
+
+
+
+setAvatar(
+
+avatarMap[mode]
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// AI
+
+
+const [aiOpen,setAiOpen]=
+useState(false);
+
+
+
+
+const [aiPrompt,setAiPrompt]=
+useState("");
+
+
+
+
+
+
+
+
+
+
+// MISSION
+
+
+const [mission,setMission]=
 useState(
+
 "Explore Nexus Identity System"
+
 );
 
 
 
 
-
-const [missionProgress,setMissionProgress] =
+const [missionProgress,setMissionProgress]=
 useState(0);
 
 
 
 
 
-const [xp,setXP] =
+
+
+
+
+const [objectives,setObjectives]=
+useState<Objective[]>([
+
+
+{
+
+id:"sentinel",
+
+title:"Explore Sentinel Profile",
+
+completed:false
+
+},
+
+
+
+{
+
+id:"projects",
+
+title:"Review Nexus Projects",
+
+completed:false
+
+},
+
+
+
+{
+
+id:"resume",
+
+title:"Download Resume",
+
+completed:false
+
+},
+
+
+
+{
+
+id:"ai",
+
+title:"Use Nexus AI",
+
+completed:false
+
+}
+
+
+]);
+
+
+
+
+
+
+
+
+
+// XP
+
+
+const [xp,setXP]=
 useState(0);
 
 
 
 
 
-const [achievements,setAchievements] =
+
+
+
+// ACHIEVEMENTS
+
+
+const [achievements,setAchievements]=
 useState<Achievement[]>([]);
 
 
@@ -196,8 +406,11 @@ useState<Achievement[]>([]);
 
 
 
+function addXP(
 
-function addXP(amount:number){
+amount:number
+
+){
 
 
 setXP(prev=>prev+amount);
@@ -205,6 +418,93 @@ setXP(prev=>prev+amount);
 
 }
 
+
+
+
+
+
+
+
+
+
+
+function completeObjective(
+
+id:string
+
+){
+
+
+
+setObjectives(prev=>{
+
+
+
+const target =
+prev.find(
+
+item=>item.id===id
+
+);
+
+
+
+
+if(!target || target.completed){
+
+
+return prev;
+
+
+}
+
+
+
+
+
+
+setXP(x=>x+100);
+
+
+
+
+
+
+
+
+return prev.map(item=>
+
+
+item.id===id
+
+
+?
+
+
+{
+
+...item,
+
+completed:true
+
+}
+
+
+:
+
+
+item
+
+
+);
+
+
+
+});
+
+
+
+}
 
 
 
@@ -226,11 +526,16 @@ setAchievements(prev=>{
 
 
 
-const exists = prev.some(
+
+
+const exists =
+prev.some(
 
 item=>item.id===achievement.id
 
 );
+
+
 
 
 
@@ -239,6 +544,7 @@ if(exists){
 return prev;
 
 }
+
 
 
 
@@ -251,7 +557,9 @@ achievement
 ];
 
 
+
 });
+
 
 
 }
@@ -272,20 +580,46 @@ return(
 value={{
 
 
+// visitor
+
 visitor,
 
 setVisitor,
 
 
+
+// system
+
 currentSystem,
 
 setCurrentSystem,
 
+changeSystem,
+
+
+
+// avatar
 
 avatar,
 
 setAvatar,
 
+
+
+// AI
+
+aiOpen,
+
+setAiOpen,
+
+
+aiPrompt,
+
+setAiPrompt,
+
+
+
+// mission
 
 mission,
 
@@ -297,14 +631,26 @@ missionProgress,
 setMissionProgress,
 
 
+objectives,
+
+completeObjective,
+
+
+
+// XP
+
 xp,
 
 addXP,
 
 
+
+// achievements
+
 achievements,
 
 unlockAchievement
+
 
 
 }}
@@ -318,11 +664,13 @@ unlockAchievement
 
 </NexusContext.Provider>
 
+
 );
 
 
 
 }
+
 
 
 
@@ -359,6 +707,7 @@ throw new Error(
 
 
 return context;
+
 
 
 }

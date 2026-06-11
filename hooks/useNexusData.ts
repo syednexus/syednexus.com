@@ -1,43 +1,9 @@
 "use client";
 
 
-import { useEffect, useState } from "react";
+import { useEffect,useState } from "react";
 
 import { profile } from "@/data/profile";
-
-
-
-
-
-export type BlogPost={
-
-title:string;
-
-category:string;
-
-content:string;
-
-date:string;
-
-};
-
-
-
-
-
-type NexusData = Omit<typeof profile,"blogs"> & {
-
-blogs:{
-
-categories:string[];
-
-posts:BlogPost[];
-
-};
-
-};
-
-
 
 
 
@@ -47,24 +13,7 @@ export function useNexusData(){
 
 
 
-const [data,setData]=useState<NexusData>({
-
-
-...(profile as any),
-
-
-blogs:{
-
-categories:profile.blogs.categories,
-
-posts:[]
-
-}
-
-
-});
-
-
+const [data,setData]=useState(profile);
 
 
 
@@ -73,119 +22,296 @@ posts:[]
 
 useEffect(()=>{
 
+load();
+
+},[]);
 
 
 
 
 
-const identity={
 
-...profile.identity,
 
-...JSON.parse(
 
-localStorage.getItem("nexus_identity") ||
+async function load(){
 
-"{}"
 
-)
+
+try{
+
+
+
+const res =
+await fetch("/api/nexus");
+
+
+
+if(!res.ok){
+
+throw new Error("Nexus API offline");
+
+}
+
+
+
+const json =
+await res.json();
+
+
+
+
+
+
+
+
+
+// IDENTITY FIX
+
+const identity =
+
+json.identity
+
+?
+
+{
+
+...json.identity,
+
+email:
+
+json.identity.email
+
+?
+
+[json.identity.email]
+
+:
+
+profile.identity.email
+
+}
+
+:
+
+profile.identity;
+
+
+
+
+
+
+
+
+
+
+// EDUCATION FIX
+
+const education =
+
+(json.education || [])
+
+.map((edu:any)=>({
+
+...edu,
+
+
+focus:
+
+typeof edu.focus==="string"
+
+?
+
+edu.focus
+.split(",")
+.map((x:string)=>x.trim())
+
+:
+
+edu.focus
+
+
+}));
+
+
+
+
+
+
+
+
+
+
+// EXPERIENCE FIX
+
+const experience =
+
+(json.experience || [])
+
+.map((job:any)=>({
+
+...job,
+
+
+details:
+
+typeof job.details==="string"
+
+?
+
+job.details
+.split(",")
+.map((x:string)=>x.trim())
+
+:
+
+job.details
+
+
+}));
+
+
+
+
+
+
+
+
+
+// CERTIFICATION FIX
+
+const certifications =
+
+(json.certifications || [])
+
+.map((cert:any)=>({
+
+...cert,
+
+
+skills:
+
+typeof cert.skills==="string"
+
+?
+
+cert.skills
+.split(",")
+.map((x:string)=>x.trim())
+
+:
+
+cert.skills
+
+
+}));
+
+
+
+
+
+
+
+
+
+// PROJECT FIX
+
+const projects =
+
+(json.projects || [])
+
+.map((project:any)=>({
+
+...project,
+
+
+technologies:
+
+typeof project.technologies==="string"
+
+?
+
+project.technologies
+.split(",")
+.map((x:string)=>x.trim())
+
+:
+
+project.technologies
+
+
+}));
+
+
+
+
+
+
+
+
+
+
+// SKILLS DATABASE FIX 🔥
+
+const skillGroups:Record<string,string[]>={
+
+cybersecurity:[],
+
+tools:[],
+
+networking:[],
+
+programming:[],
+
+pharmacy:[]
 
 };
 
 
 
 
+if(Array.isArray(json.skills)){
+
+json.skills
+
+.forEach((skill:any)=>{
 
 
+if(skillGroups[skill.category]){
 
 
-
-const education = JSON.parse(
-
-localStorage.getItem("nexus_education") ||
-
-JSON.stringify(profile.education)
-
-)
-
-.sort((a:any,b:any)=>{
+skillGroups[skill.category].push(skill.name);
 
 
-const year=(x:string)=>{
-
-const y=x.match(/\d{4}/g);
-
-return y ? Number(y[y.length-1]) : 0;
-
-};
-
-
-return year(b.period)-year(a.period);
+}
 
 
 });
 
+}
+
+else if(json.skills && typeof json.skills==="object"){
+
+Object.entries(json.skills)
+
+.forEach(([category,skills])=>{
 
 
+skillGroups[category]=
+
+Array.isArray(skills)
+
+?
+
+skills.map(String)
+
+:
+
+[];
 
 
+});
 
-
-
-
-const experience = JSON.parse(
-
-localStorage.getItem("nexus_experience") ||
-
-JSON.stringify(profile.experience)
-
-);
-
-
-
-
-
-
-
-
-const skills = JSON.parse(
-
-localStorage.getItem("nexus_skills") ||
-
-JSON.stringify(profile.skills)
-
-);
-
-
-
-
-
-
-
-
-const certifications = JSON.parse(
-
-localStorage.getItem("nexus_certifications") ||
-
-JSON.stringify(profile.certifications)
-
-);
-
-
-
-
-
-
-
-
-
-const projects = JSON.parse(
-
-localStorage.getItem("nexus_projects") ||
-
-JSON.stringify(profile.projects)
-
-);
+}
 
 
 
@@ -196,13 +322,15 @@ JSON.stringify(profile.projects)
 
 
 
-const posts:BlogPost[] = JSON.parse(
+// BLOG DATABASE FIX 🔥
 
-localStorage.getItem("nexus_blogs") ||
+const blogs={
 
-"[]"
+posts:
 
-);
+json.blogs || []
+
+};
 
 
 
@@ -216,38 +344,26 @@ localStorage.getItem("nexus_blogs") ||
 setData({
 
 
-...(profile as any),
+...profile,
+
+...json,
 
 
 identity,
 
-
 education,
-
 
 experience,
 
-
-skills,
-
-
 certifications,
-
 
 projects,
 
 
-blogs:{
+skills:skillGroups,
 
 
-categories:profile.blogs.categories,
-
-
-posts
-
-
-}
-
+blogs
 
 
 });
@@ -257,8 +373,31 @@ posts
 
 
 
+}
 
-},[]);
+
+
+catch(error){
+
+
+
+console.error(
+
+"Nexus database offline",
+
+error
+
+);
+
+
+
+}
+
+
+
+}
+
+
 
 
 

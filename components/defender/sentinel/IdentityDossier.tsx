@@ -9,11 +9,30 @@ import { useNexusData } from "@/hooks/useNexusData";
 
 
 
+
+
 export default function IdentityDossier(){
 
 
 
-const profile = useNexusData();
+
+
+const profile =
+useNexusData();
+
+
+
+
+
+const latestEducation =
+profile.education?.[0];
+
+
+
+const latestExperience =
+profile.experience?.[0];
+
+
 
 
 
@@ -47,10 +66,15 @@ x:0
 className="
 
 border
+
 border-cyan-400/30
+
 rounded-2xl
+
 p-6
+
 bg-cyan-400/5
+
 backdrop-blur
 
 font-mono
@@ -67,24 +91,39 @@ nexus-hover
 
 
 
+
+
+{/* HEADER */}
+
+
+
 <div className="flex gap-5 items-center">
+
+
+
+
 
 
 
 <img
 
+
 src={profile.identity.avatar || "/profile.jpg"}
 
+
 alt={profile.identity.name}
+
 
 className="
 
 w-24
+
 h-24
 
 rounded-full
 
 border
+
 border-cyan-400
 
 object-cover
@@ -98,17 +137,26 @@ object-cover
 
 
 
+
+
+
 <div>
 
 
 
+
+
 <p className="
+
 text-cyan-300
+
 text-xs
+
 tracking-widest
+
 ">
 
-IDENTITY DOSSIER
+🛡 IDENTITY DOSSIER
 
 </p>
 
@@ -117,9 +165,15 @@ IDENTITY DOSSIER
 
 
 
+
+
+
 <h2 className="
-text-2xl
+
+text-3xl
+
 mt-2
+
 ">
 
 {profile.identity.name}
@@ -132,10 +186,15 @@ mt-2
 
 
 
+
 <p className="
+
 text-sm
+
 text-gray-400
+
 mt-2
+
 ">
 
 {profile.identity.location}
@@ -145,40 +204,246 @@ mt-2
 
 
 
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div className="mt-6">
 
 
 
 <p className="
-text-cyan-300
+
 text-xs
+
+text-green-400
+
+mt-3
+
 ">
 
-CURRENT ROLE
+● ACTIVE CYBERSECURITY PROFILE
 
 </p>
 
 
 
 
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+{/* SECURITY TRACK */}
+
+
+
+<div className="
+
+grid
+
+grid-cols-1
+
+md:grid-cols-3
+
+gap-4
+
+mt-8
+
+">
+
+
+
+
+
+
+
+
+
+<div className="
+
+border
+
+border-cyan-400/20
+
+rounded-xl
+
+p-4
+
+bg-black/30
+
+">
+
+
+
+
+<p className="text-cyan-300 text-xs">
+
+PRIMARY TRACK
+
+</p>
+
+
+
+<p className="text-gray-300 mt-2">
+
+SOC Analyst Pathway
+
+</p>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div className="
+
+border
+
+border-cyan-400/20
+
+rounded-xl
+
+p-4
+
+bg-black/30
+
+">
+
+
+
+
+<p className="text-cyan-300 text-xs">
+
+DOMAIN EDGE
+
+</p>
+
+
+
+<p className="text-gray-300 mt-2">
+
+Healthcare + Cybersecurity
+
+</p>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<div className="
+
+border
+
+border-cyan-400/20
+
+rounded-xl
+
+p-4
+
+bg-black/30
+
+">
+
+
+
+
+<p className="text-cyan-300 text-xs">
+
+STATUS
+
+</p>
+
+
+
+<p className="text-gray-300 mt-2">
+
+Building Security Capability
+
+</p>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+{/* CURRENT ROLE */}
+
+
+<section className="mt-8">
+
+
+
+
 <p className="
-mt-2
+
+text-cyan-300
+
+text-xs
+
+">
+
+CURRENT INTELLIGENCE PROFILE
+
+</p>
+
+
+
+
+
+
+<p className="
+
+mt-3
+
 text-gray-300
+
 ">
 
 {profile.identity.headline}
@@ -187,7 +452,8 @@ text-gray-300
 
 
 
-</div>
+
+</section>
 
 
 
@@ -197,25 +463,43 @@ text-gray-300
 
 
 
-<div className="mt-6">
+{/* SUMMARY */}
+
+
+
+<section className="mt-8">
+
+
 
 
 <p className="
+
 text-cyan-300
+
 text-xs
+
 ">
 
-PROFILE SUMMARY
+ANALYST SUMMARY
 
 </p>
 
 
 
 
+
+
+
 <p className="
-mt-2
+
+mt-3
+
 text-gray-400
+
+leading-relaxed
+
 whitespace-pre-line
+
 ">
 
 {profile.identity.summary}
@@ -224,6 +508,96 @@ whitespace-pre-line
 
 
 
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+{/* TRACE */}
+
+
+
+<div className="
+
+grid
+
+grid-cols-1
+
+md:grid-cols-2
+
+gap-4
+
+mt-8
+
+">
+
+
+
+
+
+
+
+
+
+<div className="
+
+border
+
+border-white/10
+
+rounded-xl
+
+p-4
+
+bg-black/20
+
+">
+
+
+
+
+<p className="
+
+text-cyan-300
+
+text-xs
+
+">
+
+LATEST EDUCATION
+
+</p>
+
+
+
+
+<p className="
+
+text-gray-300
+
+mt-2
+
+">
+
+{latestEducation?.degree}
+
+</p>
+
+
+
+
+
+
 </div>
 
 
@@ -233,17 +607,100 @@ whitespace-pre-line
 
 
 
-<div className="mt-6">
+
+
+<div className="
+
+border
+
+border-white/10
+
+rounded-xl
+
+p-4
+
+bg-black/20
+
+">
+
+
 
 
 <p className="
+
 text-cyan-300
+
 text-xs
+
 ">
 
-CONTACT CHANNELS
+OPERATION TRACE
 
 </p>
+
+
+
+
+<p className="
+
+text-gray-300
+
+mt-2
+
+">
+
+{latestExperience?.role}
+
+</p>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+{/* CONTACT */}
+
+
+
+<div className="mt-8">
+
+
+
+
+
+<p className="
+
+text-cyan-300
+
+text-xs
+
+">
+
+SECURE CONTACT CHANNELS
+
+</p>
+
 
 
 
@@ -252,21 +709,34 @@ CONTACT CHANNELS
 {profile.identity.email.map(mail=>(
 
 
+
+
 <p
+
 
 key={mail}
 
+
 className="
+
 text-gray-400
+
 text-sm
+
 mt-2
+
 "
 
 >
 
+
 {mail}
 
+
 </p>
+
+
+
 
 
 ))}
@@ -275,7 +745,11 @@ mt-2
 
 
 
+
+
 </div>
+
+
 
 
 
@@ -285,7 +759,6 @@ mt-2
 
 
 </motion.div>
-
 
 );
 

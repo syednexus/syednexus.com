@@ -1,31 +1,17 @@
 "use client";
 
-
-import { useEffect, useState } from "react";
-
-import { profile } from "@/data/profile";
-
+import {useEffect,useState} from "react";
 import NexusToast from "@/components/core/NexusToast";
 
 
-
-
-
-type Certification={
-
+type Cert={
+id?:number;
 name:string;
-
 issuer:string;
-
 status:string;
-
-category:string;
-
-skills:string[];
-
+category:string|null;
+skills:string;
 };
-
-
 
 
 
@@ -35,19 +21,11 @@ export default function CertificationEditor(){
 
 
 
+const [certs,setCerts]=useState<Cert[]>([]);
 
-
-const [certs,setCerts]=useState<Certification[]>([]);
-
-
-const [editing,setEditing]=useState<string|null>(null);
-
+const [editing,setEditing]=useState<Cert|null>(null);
 
 const [toast,setToast]=useState("");
-
-
-
-
 
 
 
@@ -59,7 +37,7 @@ issuer:"",
 
 status:"Completed",
 
-category:"Cybersecurity",
+category:"",
 
 skills:""
 
@@ -70,35 +48,33 @@ skills:""
 
 
 
-
-
-
 useEffect(()=>{
 
-
-
-const saved=
-
-localStorage.getItem("nexus_certifications");
-
-
-
-if(saved){
-
-setCerts(JSON.parse(saved));
-
-}
-
-else{
-
-setCerts(profile.certifications);
-
-}
-
-
+load();
 
 },[]);
 
+
+
+
+
+
+
+async function load(){
+
+
+const r =
+await fetch("/api/certifications");
+
+
+setCerts(
+
+await r.json()
+
+);
+
+
+}
 
 
 
@@ -113,11 +89,7 @@ function notify(msg:string){
 setToast(msg);
 
 
-setTimeout(()=>{
-
-setToast("");
-
-},2500);
+setTimeout(()=>setToast(""),2500);
 
 
 }
@@ -129,18 +101,48 @@ setToast("");
 
 
 
-
-
-function save(){
-
+async function save(){
 
 
 
+const res =
+await fetch("/api/certifications",{
 
-if(!form.name){
+method:"POST",
+
+credentials:"include",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+id:editing?.id,
+
+...form
+
+})
+
+});
+
+
+
+
+
+
+
+if(!res.ok){
+
+
+notify("Unauthorized - login again");
+
 
 return;
 
+
 }
 
 
@@ -148,114 +150,17 @@ return;
 
 
 
-const cert:Certification={
+notify(
 
-name:form.name,
+editing ?
 
-issuer:form.issuer,
-
-status:form.status,
-
-category:form.category,
-
-skills:
-
-form.skills
-
-.split(",")
-
-.map(x=>x.trim())
-
-};
-
-
-
-
-
-
-
-
-
-let updated:Certification[];
-
-
-
-
-
-if(editing){
-
-
-
-updated=
-
-certs.map(item=>
-
-item.name===editing
-
-?
-
-cert
+"Certification updated"
 
 :
 
-item
+"Certification added"
 
 );
-
-
-
-
-notify("Certification updated successfully");
-
-
-
-}
-
-
-
-else{
-
-
-
-updated=[
-
-cert,
-
-...certs
-
-];
-
-
-
-notify("Certification added successfully");
-
-
-
-}
-
-
-
-
-
-
-
-
-
-setCerts(updated);
-
-
-
-
-
-localStorage.setItem(
-
-"nexus_certifications",
-
-JSON.stringify(updated)
-
-);
-
-
 
 
 
@@ -274,12 +179,16 @@ issuer:"",
 
 status:"Completed",
 
-category:"Cybersecurity",
+category:"",
 
 skills:""
 
 });
 
+
+
+
+load();
 
 
 }
@@ -292,11 +201,12 @@ skills:""
 
 
 
-function edit(cert:Certification){
+
+function edit(cert:Cert){
 
 
 
-setEditing(cert.name);
+setEditing(cert);
 
 
 
@@ -308,12 +218,11 @@ issuer:cert.issuer,
 
 status:cert.status,
 
-category:cert.category,
+category:cert.category || "",
 
-skills:cert.skills.join(", ")
+skills:cert.skills
 
 });
-
 
 
 }
@@ -326,36 +235,49 @@ skills:cert.skills.join(", ")
 
 
 
-function remove(name:string){
+async function remove(id:number){
+
+
+
+const res =
+await fetch("/api/certifications",{
+
+method:"DELETE",
+
+credentials:"include",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+id
+
+})
+
+});
 
 
 
 
 
-const updated=
-
-certs.filter(
-
-cert=>cert.name!==name
-
-);
 
 
+if(!res.ok){
 
 
-
-setCerts(updated);
-
+notify("Unauthorized - login again");
 
 
+return;
 
-localStorage.setItem(
 
-"nexus_certifications",
+}
 
-JSON.stringify(updated)
 
-);
 
 
 
@@ -363,10 +285,10 @@ JSON.stringify(updated)
 notify("Certification removed");
 
 
+load();
+
 
 }
-
-
 
 
 
@@ -378,23 +300,7 @@ notify("Certification removed");
 
 return(
 
-<div className="
-
-border
-border-cyan-400/30
-
-rounded-xl
-
-p-5
-
-bg-black/40
-
-">
-
-
-
-
-
+<div className="space-y-5">
 
 
 
@@ -402,24 +308,9 @@ bg-black/40
 
 
 
+<p className="text-cyan-300 tracking-widest">
 
-
-
-
-
-
-
-<p className="
-
-text-cyan-300
-
-tracking-widest
-
-text-sm
-
-">
-
-CERTIFICATION VAULT
+🛡 CERT DATABASE
 
 </p>
 
@@ -428,15 +319,39 @@ CERTIFICATION VAULT
 
 
 
+{
+
+editing &&
+
+(
+
+<p className="text-yellow-300 text-sm">
+
+Editing: {editing.name}
+
+</p>
+
+)
+
+}
 
 
+
+
+
+
+
+{Object.keys(form).map(key=>(
 
 
 <input
 
-placeholder="Certification name"
+key={key}
 
-value={form.name}
+placeholder={key}
+
+value={form[key as keyof typeof form]}
+
 
 onChange={e=>
 
@@ -444,139 +359,19 @@ setForm({
 
 ...form,
 
-name:e.target.value
+[key]:e.target.value
 
 })
 
 }
+
 
 className="admin-input"
 
 />
 
 
-
-
-
-
-
-
-
-<input
-
-placeholder="Issuer"
-
-value={form.issuer}
-
-onChange={e=>
-
-setForm({
-
-...form,
-
-issuer:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Status"
-
-value={form.status}
-
-onChange={e=>
-
-setForm({
-
-...form,
-
-status:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Category"
-
-value={form.category}
-
-onChange={e=>
-
-setForm({
-
-...form,
-
-category:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Skills comma separated"
-
-value={form.skills}
-
-onChange={e=>
-
-setForm({
-
-...form,
-
-skills:e.target.value
-
-})
-
-}
-
-className="admin-input"
-
-/>
-
+))}
 
 
 
@@ -592,17 +387,19 @@ onClick={save}
 
 className="
 
-mt-5
-
 border
 
-border-cyan-400
+border-green-400
 
 px-5
 
 py-2
 
-rounded
+rounded-lg
+
+text-green-300
+
+hover:bg-green-400/10
 
 "
 
@@ -611,15 +408,13 @@ rounded
 
 {
 
-editing
+editing ?
 
-?
-
-"SAVE CHANGES"
+"UPDATE CERTIFICATION"
 
 :
 
-"ADD CERTIFICATION"
+"SAVE CERTIFICATION"
 
 }
 
@@ -636,11 +431,7 @@ editing
 
 
 
-<div className="mt-8 space-y-4">
-
-
-
-
+<div className="space-y-3">
 
 
 
@@ -648,12 +439,9 @@ editing
 
 
 
-
-
-
 <div
 
-key={cert.name}
+key={cert.id}
 
 className="
 
@@ -667,6 +455,12 @@ p-4
 
 bg-cyan-400/5
 
+flex
+
+justify-between
+
+items-center
+
 "
 
 >
@@ -674,20 +468,18 @@ bg-cyan-400/5
 
 
 
+<div>
 
 
-<h3>
+<p className="text-cyan-200">
 
 🛡 {cert.name}
 
-</h3>
+</p>
 
 
 
-
-
-
-<p className="text-gray-400 text-sm">
+<p className="text-xs text-gray-400">
 
 {cert.issuer} • {cert.status}
 
@@ -695,14 +487,17 @@ bg-cyan-400/5
 
 
 
+</div>
 
 
 
 
 
-<div className="flex gap-4 mt-4">
 
 
+
+
+<div className="flex gap-3">
 
 
 
@@ -712,7 +507,23 @@ bg-cyan-400/5
 
 onClick={()=>edit(cert)}
 
-className="text-blue-300"
+className="
+
+border
+
+border-yellow-400
+
+px-3
+
+py-1
+
+rounded
+
+text-yellow-300
+
+hover:bg-yellow-400/10
+
+"
 
 >
 
@@ -726,11 +537,28 @@ EDIT
 
 
 
+
 <button
 
-onClick={()=>remove(cert.name)}
+onClick={()=>remove(cert.id!)}
 
-className="text-red-400"
+className="
+
+border
+
+border-red-400
+
+px-3
+
+py-1
+
+rounded
+
+text-red-300
+
+hover:bg-red-400/10
+
+"
 
 >
 
@@ -742,20 +570,13 @@ DELETE
 
 
 
-
-
-
 </div>
 
 
 
 
 
-
 </div>
-
-
-
 
 
 ))}
@@ -763,22 +584,15 @@ DELETE
 
 
 
-
-
-
-
 </div>
 
 
 
 
 
-
 </div>
-
 
 );
-
 
 
 }

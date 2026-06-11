@@ -14,7 +14,68 @@ export default function CapabilityMatrix(){
 
 
 
-const profile = useNexusData();
+const profile =
+useNexusData();
+
+
+
+
+
+
+
+const readiness = [
+
+{
+
+name:"Networking Fundamentals",
+
+level:75
+
+},
+
+
+{
+
+name:"Security Operations",
+
+level:65
+
+},
+
+
+{
+
+name:"Vulnerability Assessment",
+
+level:70
+
+},
+
+
+{
+
+name:"Linux Environment",
+
+level:65
+
+},
+
+
+{
+
+name:"Governance & Risk",
+
+level:70
+
+}
+
+
+];
+
+
+
+
+
 
 
 
@@ -22,37 +83,49 @@ const profile = useNexusData();
 
 const groups = [
 
-{
-title:"CYBERSECURITY",
-items:profile.skills.cybersecurity
-},
-
 
 {
-title:"SECURITY TOOLS",
+
+title:"SECURITY STACK",
+
 items:profile.skills.tools
+
 },
 
 
+
 {
-title:"NETWORKING",
-items:profile.skills.networking
+
+title:"CYBER KNOWLEDGE",
+
+items:profile.skills.cybersecurity
+
 },
 
 
+
 {
+
 title:"PROGRAMMING",
+
 items:profile.skills.programming
+
 },
 
 
+
 {
-title:"HEALTHCARE",
+
+title:"DOMAIN ADVANTAGE",
+
 items:profile.skills.pharmacy
+
 }
 
 
+
 ];
+
 
 
 
@@ -84,10 +157,13 @@ y:0
 }}
 
 
+
 className="
 
 border
+
 border-green-400/30
+
 rounded-2xl
 
 p-6
@@ -108,15 +184,19 @@ nexus-hover
 
 
 
+
+
 <p className="
 
 text-green-300
+
 tracking-widest
+
 text-sm
 
 ">
 
-CAPABILITY MATRIX
+⚡ SENTINEL CAPABILITY MATRIX
 
 </p>
 
@@ -128,13 +208,166 @@ CAPABILITY MATRIX
 
 
 
+
+{/* READINESS */}
+
+
 <div className="
 
 mt-6
 
+space-y-5
+
+">
+
+
+
+
+
+
+{readiness.map(item=>(
+
+
+
+
+
+<div key={item.name}>
+
+
+
+
+
+
+<div className="
+
+flex
+
+justify-between
+
+text-sm
+
+mb-2
+
+">
+
+
+
+<span className="text-gray-300">
+
+{item.name}
+
+</span>
+
+
+
+
+<span className="text-green-300">
+
+{item.level}%
+
+</span>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<div className="
+
+h-2
+
+bg-gray-800
+
+rounded
+
+overflow-hidden
+
+">
+
+
+
+
+
+
+<div
+
+
+style={{
+
+width:`${item.level}%`
+
+}}
+
+
+className="
+
+h-full
+
+bg-green-400
+
+"
+
+/>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+))}
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+{/* SKILL GROUPS */}
+
+
+
+<div className="
+
+mt-8
+
 space-y-6
 
 ">
+
+
 
 
 
@@ -146,7 +379,14 @@ space-y-6
 
 
 
+
+
+
+
 <div key={group.title}>
+
+
+
 
 
 
@@ -156,11 +396,16 @@ text-xs
 
 text-green-400
 
+tracking-widest
+
 ">
 
 {group.title}
 
 </p>
+
+
+
 
 
 
@@ -184,7 +429,15 @@ mt-3
 
 
 
+
+
+
 {group.items.map(skill=>(
+
+
+
+
+
 
 
 
@@ -194,9 +447,11 @@ mt-3
 key={skill}
 
 
+
 className="
 
 border
+
 border-green-400/30
 
 rounded-full
@@ -209,9 +464,13 @@ text-sm
 
 text-gray-300
 
+bg-black/20
+
 "
 
 >
+
+
 
 
 
@@ -219,24 +478,14 @@ text-gray-300
 
 
 
+
+
+
 </span>
 
 
 
-))}
 
-
-
-
-
-
-
-</div>
-
-
-
-
-</div>
 
 
 
@@ -248,7 +497,36 @@ text-gray-300
 
 
 
+
+
 </div>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+))}
+
+
+
+
+
+
+
+
+
+</div>
+
 
 
 
@@ -261,6 +539,7 @@ text-gray-300
 
 
 );
+
 
 
 }

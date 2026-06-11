@@ -1,8 +1,9 @@
 "use client";
 
 
-import { useNexusData } from "@/hooks/useNexusData";
+import { motion } from "framer-motion";
 
+import { useNexusData } from "@/hooks/useNexusData";
 
 
 
@@ -18,14 +19,84 @@ const profile = useNexusData();
 
 
 
+
 const projects =
 
-profile.projects.filter(
+(profile.projects || []).filter(project=>
 
-project=>project.category==="Healthcare"
+project.category==="Healthcare" ||
+
+project.category==="Cybersecurity"
 
 );
 
+
+
+
+
+
+
+
+const archive =
+
+projects.length > 0
+
+?
+
+projects
+
+:
+
+[
+
+{
+
+name:"Healthcare Cybersecurity Research",
+
+status:"ACTIVE",
+
+description:
+"Research focused on protecting healthcare environments, clinical systems and sensitive patient information.",
+
+technologies:[
+
+"Security Governance",
+
+"Risk Management",
+
+"Healthcare Data",
+
+"Compliance"
+
+]
+
+},
+
+
+{
+
+name:"Digital Health Security",
+
+status:"RESEARCH",
+
+description:
+"Exploring cybersecurity principles applied to healthcare infrastructure and pharmaceutical technology.",
+
+technologies:[
+
+"Cybersecurity",
+
+"Privacy",
+
+"Threat Analysis",
+
+"Data Protection"
+
+]
+
+}
+
+];
 
 
 
@@ -37,11 +108,33 @@ project=>project.category==="Healthcare"
 
 return(
 
-<div className="
+<motion.div
+
+
+initial={{
+
+opacity:0,
+
+x:20
+
+}}
+
+
+animate={{
+
+opacity:1,
+
+x:0
+
+}}
+
+
+className="
 
 h-full
 
 border
+
 border-purple-400/30
 
 rounded-2xl
@@ -52,7 +145,16 @@ p-6
 
 font-mono
 
-">
+shadow-lg
+
+shadow-purple-500/10
+
+nexus-hover
+
+"
+
+>
+
 
 
 
@@ -70,7 +172,29 @@ text-sm
 
 ">
 
-PHARMA PROJECT ARCHIVE
+🔬 RESEARCH INTELLIGENCE ARCHIVE
+
+</p>
+
+
+
+
+
+
+
+
+
+<p className="
+
+text-xs
+
+text-gray-400
+
+mt-3
+
+">
+
+Healthcare security projects and research exploration
 
 </p>
 
@@ -88,18 +212,11 @@ PHARMA PROJECT ARCHIVE
 
 space-y-5
 
-mt-6
+mt-8
 
-">
+"
 
-
-
-
-
-
-
-
-{projects.map(project=>(
+>
 
 
 
@@ -107,15 +224,34 @@ mt-6
 
 
 
-<div
 
 
-key={project.name}
+{archive.map((project,index)=>(
+
+
+
+
+
+
+
+
+<motion.div
+
+
+key={`${project.name}-${index}`}
+
+
+whileHover={{
+
+scale:1.03
+
+}}
 
 
 className="
 
 border
+
 border-purple-400/20
 
 rounded-xl
@@ -124,11 +260,10 @@ p-4
 
 bg-purple-400/5
 
-nexus-hover
-
 "
 
 >
+
 
 
 
@@ -145,7 +280,11 @@ justify-between
 
 gap-5
 
-">
+"
+
+>
+
+
 
 
 
@@ -155,9 +294,11 @@ gap-5
 
 <h2>
 
-{project.name}
+🧪 {project.name}
 
 </h2>
+
+
 
 
 
@@ -171,11 +312,14 @@ text-xs
 
 text-purple-300
 
-">
+"
+
+>
 
 {project.status}
 
 </span>
+
 
 
 
@@ -203,14 +347,13 @@ text-gray-400
 
 mt-3
 
-">
+"
 
+>
 
 {project.description}
 
-
 </p>
-
 
 
 
@@ -232,7 +375,9 @@ gap-2
 
 mt-4
 
-">
+"
+
+>
 
 
 
@@ -240,7 +385,11 @@ mt-4
 
 
 
-{project.technologies.map(item=>(
+
+
+{(project.technologies || []).map((item,i)=>(
+
+
 
 
 
@@ -251,7 +400,7 @@ mt-4
 <span
 
 
-key={item}
+key={`${item}-${i}`}
 
 
 className="
@@ -262,19 +411,19 @@ border
 
 border-purple-400/20
 
-rounded
+rounded-full
 
-px-2
+px-3
 
 py-1
+
+text-purple-200
 
 "
 
 >
 
-
 {item}
-
 
 </span>
 
@@ -285,33 +434,6 @@ py-1
 
 
 
-))}
-
-
-
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
 
 ))}
 
@@ -333,8 +455,37 @@ py-1
 
 
 
+
+</motion.div>
+
+
+
+
+
+
+
+
+
+))}
+
+
+
+
+
+
+
+
+
 </div>
 
+
+
+
+
+
+
+
+</motion.div>
 
 );
 

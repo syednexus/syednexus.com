@@ -1,11 +1,14 @@
 "use client";
 
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { motion } from "framer-motion";
 
-import { useNexus } from "@/context/NexusContext";
+import { useNexusAI } from "@/hooks/useNexusAI";
+
+import { useNexusVoice } from "@/hooks/useNexusVoice";
+
 
 
 
@@ -16,26 +19,132 @@ export default function NexusCore(){
 
 
 
+const [open,setOpen]=useState(false);
+
+const [input,setInput]=useState("");
+
+
+
+const bottomRef =
+useRef<HTMLDivElement|null>(null);
+
+
+
+
 const {
 
-visitor,
+messages,
 
-currentSystem,
+ask
 
-mission,
-
-missionProgress,
-
-xp,
-
-achievements
-
-}=useNexus();
+}=useNexusAI();
 
 
 
 
-const [open,setOpen]=useState(false);
+const {
+
+start,
+
+stop,
+
+listening
+
+}=useNexusVoice();
+
+
+
+
+
+
+
+useEffect(()=>{
+
+
+bottomRef.current?.scrollIntoView({
+
+behavior:"smooth"
+
+});
+
+
+},[messages]);
+
+
+
+
+
+
+
+
+function send(){
+
+
+
+const text=input.trim();
+
+
+
+if(!text){
+
+return;
+
+}
+
+
+
+ask(text);
+
+
+setInput("");
+
+
+
+}
+
+
+
+
+
+
+
+
+function voiceCommand(){
+
+
+
+if(!listening){
+
+
+start();
+
+
+}
+
+
+else{
+
+
+stop((text)=>{
+
+
+setInput(text);
+
+
+ask(text);
+
+
+});
+
+
+}
+
+
+}
+
+
+
+
 
 
 
@@ -45,21 +154,124 @@ const [open,setOpen]=useState(false);
 
 return(
 
+<>
+
+
+
+
+
+
+
+{/* FLOATING AI BUTTON */}
+
+
+<motion.button
+
+
+whileHover={{
+
+scale:1.1
+
+}}
+
+
+whileTap={{
+
+scale:.9
+
+}}
+
+
+onClick={()=>setOpen(prev=>!prev)}
+
+
+
+className="
+
+fixed
+
+bottom-8
+
+right-8
+
+z-9999
+
+
+w-20
+
+h-20
+
+
+rounded-full
+
+
+border
+
+border-cyan-400
+
+
+bg-black
+
+
+shadow-xl
+
+shadow-cyan-500/40
+
+
+text-4xl
+
+
+"
+
+>
+
+
+🧠
+
+
+</motion.button>
+
+
+
+
+
+
+
+
+
+
+
+
+{/* AI WINDOW */}
+
+
+{
+
+
+open && (
+
+
+
+
+
 <motion.div
+
 
 initial={{
 
 opacity:0,
 
-x:-40
+y:50
 
 }}
+
+
 
 animate={{
 
 opacity:1,
 
-x:0
+y:0
 
 }}
 
@@ -69,62 +281,52 @@ className="
 
 fixed
 
-bottom-6
+right-8
 
-left-6
-
-z-50
-
-font-mono
-
-"
-
->
+bottom-32
 
 
+z-9999
 
 
+w-96
+
+max-w-[90vw]
 
 
+h-162.5
 
+max-h-[75vh]
 
-{/* COLLAPSED CARD */}
-
-
-
-{!open && (
-
-
-<button
-
-onClick={()=>setOpen(true)}
-
-
-className="
-
-w-72
 
 border
 
 border-cyan-400/40
 
+
 rounded-2xl
 
-bg-black/80
+
+bg-black/90
 
 backdrop-blur-xl
 
-p-5
 
-text-left
+font-mono
 
-shadow-lg
+
+flex
+
+flex-col
+
+
+overflow-hidden
+
+
+shadow-xl
 
 shadow-cyan-500/20
 
-hover:border-cyan-300
-
-transition-all
 
 "
 
@@ -132,167 +334,29 @@ transition-all
 
 
 
-<div className="flex gap-4 items-center">
 
 
 
-<div className="
 
-w-14
 
-h-14
 
-rounded-xl
-
-bg-cyan-400/20
-
-flex
-
-items-center
-
-justify-center
-
-text-3xl
-
-">
-
-🌌
-
-</div>
-
-
-
-
-
-
-<div>
-
-
-<p className="
-
-text-cyan-300
-
-tracking-widest
-
-">
-
-NEXUS CORE
-
-</p>
-
-
-
-<p className="
-
-text-xs
-
-text-gray-400
-
-">
-
-Identity engine online
-
-</p>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-<p className="
-
-mt-5
-
-text-green-400
-
-text-sm
-
-">
-
-● All systems operational
-
-</p>
-
-
-
-
-
-<p className="
-
-text-xs
-
-text-gray-500
-
-mt-3
-
-">
-
-Click to expand ↗
-
-</p>
-
-
-
-</button>
-
-)}
-
-
-
-
-
-
-
-
-
-{/* EXPANDED */}
-
-
-
-{open && (
-
+{/* HEADER */}
 
 
 <div
 
 className="
 
-w-96
-
-border
-
-border-cyan-400/40
-
-rounded-2xl
-
-bg-black/90
-
-backdrop-blur-xl
-
-p-6
-
-shadow-xl
-
-shadow-cyan-500/20
-
-"
-
->
+shrink-0
 
 
+p-4
 
 
+border-b
 
+border-cyan-400/20
 
-
-<div className="
 
 flex
 
@@ -300,19 +364,18 @@ justify-between
 
 items-center
 
-">
+
+"
+
+>
 
 
 
-<p className="
+<p className="text-cyan-300 tracking-widest">
 
-text-cyan-300
 
-tracking-widest
+🧠 NEXUS AI CORE
 
-">
-
-NEXUS COMMAND CORE
 
 </p>
 
@@ -323,59 +386,23 @@ NEXUS COMMAND CORE
 
 <button
 
+
 onClick={()=>setOpen(false)}
 
-className="text-gray-400"
+
+className="text-gray-400 hover:text-white"
+
 
 >
 
-—
+
+✕
+
 
 </button>
 
 
 
-</div>
-
-
-
-
-
-
-
-
-
-<div className="
-
-mt-6
-
-space-y-5
-
-text-sm
-
-">
-
-
-
-
-
-
-<div>
-
-
-<p className="text-gray-500">
-
-VISITOR PROFILE
-
-</p>
-
-
-<p>
-
-{visitor.toUpperCase()}
-
-</p>
-
 
 </div>
 
@@ -386,106 +413,66 @@ VISITOR PROFILE
 
 
 
-<div>
 
-
-<p className="text-gray-500">
-
-ACTIVE SYSTEM
-
-</p>
-
-
-<p>
-
-{currentSystem.toUpperCase()}
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div>
-
-
-<p className="text-gray-500">
-
-CURRENT MISSION
-
-</p>
-
-
-<p>
-
-{mission}
-
-</p>
-
-
-
-<div className="
-
-h-2
-
-bg-gray-800
-
-rounded
-
-mt-3
-
-overflow-hidden
-
-">
+{/* STATUS */}
 
 
 
 <div
 
-style={{
-
-width:`${missionProgress}%`
-
-}}
-
-
 className="
 
-h-full
+shrink-0
 
-bg-cyan-400
+px-4
 
-"
+py-2
 
-/>
-
-
-
-</div>
-
-
-
-<p className="
 
 text-xs
 
-text-cyan-300
 
-mt-1
+border-b
 
-">
-
-{missionProgress}% COMPLETE
-
-</p>
+border-cyan-400/10
 
 
+"
+
+>
+
+
+{
+
+
+listening
+
+
+?
+
+
+<span className="text-purple-300">
+
+
+🎧 Listening...
+
+
+</span>
+
+
+:
+
+
+<span className="text-green-400">
+
+
+● ONLINE
+
+
+</span>
+
+
+}
 
 
 </div>
@@ -498,43 +485,30 @@ mt-1
 
 
 
-<div>
-
-
-<p className="text-gray-500">
-
-NEXUS XP
-
-</p>
-
-
-<p>
-
-⚡ {xp}
-
-</p>
-
-
-</div>
+{/* CHAT AREA */}
 
 
 
+<div
+
+className="
 
 
+flex-1
 
 
+overflow-y-auto
 
 
-
-<div>
-
+p-4
 
 
-<p className="text-gray-500">
+space-y-4
 
-ACHIEVEMENTS
 
-</p>
+"
+
+>
 
 
 
@@ -542,30 +516,61 @@ ACHIEVEMENTS
 
 {
 
-achievements.length===0
+
+messages.map((msg,index)=>(
+
+
+
+<div
+
+
+key={index}
+
+
+
+className={`
+
+p-3
+
+
+rounded-xl
+
+
+text-sm
+
+
+leading-relaxed
+
+
+whitespace-pre-line
+
+
+${
+
+msg.role==="ai"
 
 ?
 
-<p className="text-gray-400">
-
-No achievements unlocked
-
-</p>
-
+"bg-cyan-400/10 text-cyan-200"
 
 :
 
+"bg-purple-400/10 text-purple-200"
 
-achievements.map(item=>(
+}
+
+
+`}
+
+
+>
+
+
+{msg.text}
 
 
 
-<p key={item.id}>
-
-{item.icon} {item.title}
-
-</p>
-
+</div>
 
 
 ))
@@ -576,6 +581,10 @@ achievements.map(item=>(
 
 
 
+<div ref={bottomRef}/>
+
+
+
 </div>
 
 
@@ -586,63 +595,172 @@ achievements.map(item=>(
 
 
 
-<div className="
+{/* INPUT */}
 
-pt-5
+
+
+<div
+
+className="
+
+shrink-0
+
+
+p-4
+
 
 border-t
 
 border-cyan-400/20
 
+
 flex
 
-gap-3
-
-">
+gap-2
 
 
+"
 
-<button className="core-btn">
+>
 
-Resume
+
+
+
+<input
+
+
+value={input}
+
+
+onChange={e=>setInput(e.target.value)}
+
+
+
+onKeyDown={e=>{
+
+
+if(e.key==="Enter"){
+
+send();
+
+}
+
+
+}}
+
+
+
+placeholder="Ask Nexus..."
+
+
+
+className="
+
+
+flex-1
+
+
+bg-black
+
+
+border
+
+border-cyan-400/20
+
+
+rounded
+
+
+px-3
+
+
+text-white
+
+
+outline-none
+
+
+"
+
+
+
+
+/>
+
+
+
+
+
+
+
+
+<button
+
+
+onClick={send}
+
+
+
+className="
+
+core-btn
+
+
+"
+
+>
+
+
+➤
+
 
 </button>
 
 
 
-<button className="core-btn">
 
-Contact
+
+
+
+
+<button
+
+
+onClick={voiceCommand}
+
+
+className="core-btn"
+
+
+>
+
+
+
+{
+
+
+listening
+
+?
+
+"⏹"
+
+:
+
+"🎙"
+
+
+}
+
+
 
 </button>
 
 
 
-<button className="core-btn">
-
-Report
-
-</button>
-
-
 
 
 </div>
-
-
-
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-)}
 
 
 
@@ -650,6 +768,21 @@ Report
 
 </motion.div>
 
+
+
+)
+
+
+}
+
+
+
+
+
+
+
+
+</>
 
 );
 

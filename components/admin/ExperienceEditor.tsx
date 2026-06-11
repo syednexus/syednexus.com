@@ -1,16 +1,12 @@
 "use client";
 
-
 import { useEffect,useState } from "react";
-
-import { profile } from "@/data/profile";
-
 import NexusToast from "@/components/core/NexusToast";
 
 
-
-
 type Experience={
+
+id?:number;
 
 role:string;
 
@@ -18,9 +14,9 @@ company:string;
 
 period:string;
 
-domain:string;
+domain:string|null;
 
-details:string[];
+details:string;
 
 };
 
@@ -34,12 +30,9 @@ export default function ExperienceEditor(){
 
 const [experience,setExperience]=useState<Experience[]>([]);
 
-
-const [editing,setEditing]=useState<string|null>(null);
-
+const [editing,setEditing]=useState<Experience|null>(null);
 
 const [toast,setToast]=useState("");
-
 
 
 
@@ -66,29 +59,32 @@ details:""
 
 useEffect(()=>{
 
-
-
-const saved=
-
-localStorage.getItem("nexus_experience");
-
-
-
-if(saved){
-
-setExperience(JSON.parse(saved));
-
-}
-
-else{
-
-setExperience(profile.experience);
-
-}
-
-
+load();
 
 },[]);
+
+
+
+
+
+
+
+
+async function load(){
+
+
+const res =
+await fetch("/api/experience");
+
+
+setExperience(
+
+await res.json()
+
+);
+
+
+}
 
 
 
@@ -103,11 +99,7 @@ function notify(msg:string){
 setToast(msg);
 
 
-setTimeout(()=>{
-
-setToast("");
-
-},2500);
+setTimeout(()=>setToast(""),2500);
 
 
 }
@@ -119,7 +111,9 @@ setToast("");
 
 
 
-function save(){
+
+
+async function save(){
 
 
 
@@ -133,103 +127,65 @@ return;
 
 
 
-const record:Experience={
+const res =
+await fetch("/api/experience",{
 
-role:form.role,
+method:"POST",
 
-company:form.company,
+credentials:"include",
 
-period:form.period,
+headers:{
 
-domain:form.domain,
+"Content-Type":"application/json"
 
-details:
+},
 
-form.details
+body:JSON.stringify({
 
-.split(",")
+id:editing?.id,
 
-.map(x=>x.trim())
+...form
 
-};
+})
 
-
-
-
-
-
-
-let updated:Experience[];
+});
 
 
 
 
-if(editing){
 
 
 
-updated=
+if(!res.ok){
 
-experience.map(item=>
 
-item.role===editing
+notify("Unauthorized - login again");
 
-?
 
-record
+return;
+
+
+}
+
+
+
+
+
+
+
+notify(
+
+editing ?
+
+"Experience updated"
 
 :
 
-item
+"Experience added"
 
 );
 
 
-
-notify("Experience updated successfully");
-
-
-
-}
-
-
-else{
-
-
-
-updated=[
-
-record,
-
-...experience
-
-];
-
-
-notify("Experience added successfully");
-
-
-
-}
-
-
-
-
-
-
-
-setExperience(updated);
-
-
-
-
-localStorage.setItem(
-
-"nexus_experience",
-
-JSON.stringify(updated)
-
-);
 
 
 
@@ -255,7 +211,15 @@ details:""
 
 
 
+
+
+load();
+
+
 }
+
+
+
 
 
 
@@ -268,7 +232,7 @@ function edit(item:Experience){
 
 
 
-setEditing(item.role);
+setEditing(item);
 
 
 
@@ -280,12 +244,11 @@ company:item.company,
 
 period:item.period,
 
-domain:item.domain,
+domain:item.domain || "",
 
-details:item.details.join(", ")
+details:item.details
 
 });
-
 
 
 }
@@ -297,37 +260,59 @@ details:item.details.join(", ")
 
 
 
-function remove(role:string){
+
+async function remove(id:number){
 
 
 
-const updated=
+const res =
+await fetch("/api/experience",{
 
-experience.filter(
+method:"DELETE",
 
-item=>item.role!==role
+credentials:"include",
 
-);
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+id
+
+})
+
+});
 
 
 
 
-setExperience(updated);
 
 
 
-localStorage.setItem(
+if(!res.ok){
 
-"nexus_experience",
 
-JSON.stringify(updated)
+notify("Unauthorized - login again");
 
-);
+
+return;
+
+
+}
+
+
+
+
 
 
 
 notify("Experience removed");
 
+
+load();
 
 
 }
@@ -342,21 +327,7 @@ notify("Experience removed");
 
 return(
 
-<div className="
-
-border
-border-yellow-400/30
-
-rounded-xl
-
-p-5
-
-bg-black/40
-
-">
-
-
-
+<div className="space-y-5">
 
 
 
@@ -366,19 +337,9 @@ bg-black/40
 
 
 
+<p className="text-yellow-300 tracking-widest text-sm">
 
-
-<p className="
-
-text-yellow-300
-
-tracking-widest
-
-text-sm
-
-">
-
-CAREER MANAGER
+💼 CAREER DATABASE MANAGER
 
 </p>
 
@@ -388,94 +349,65 @@ CAREER MANAGER
 
 
 
+{
+
+editing &&
+
+(
+
+<p className="text-yellow-300 text-sm">
+
+Editing: {editing.role}
+
+</p>
+
+)
+
+}
+
+
+
+
+
+
+
+
+
+{Object.keys(form).map(key=>(
+
+
 
 <input
 
-placeholder="Role"
+key={key}
 
-value={form.role}
+placeholder={key}
 
-onChange={e=>setForm({...form,role:e.target.value})}
+
+value={form[key as keyof typeof form]}
+
+
+
+onChange={e=>
+
+setForm({
+
+...form,
+
+[key]:e.target.value
+
+})
+
+}
+
 
 className="admin-input"
 
 />
 
 
+))}
 
-
-
-
-
-
-<input
-
-placeholder="Company"
-
-value={form.company}
-
-onChange={e=>setForm({...form,company:e.target.value})}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Period"
-
-value={form.period}
-
-onChange={e=>setForm({...form,period:e.target.value})}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-<input
-
-placeholder="Domain"
-
-value={form.domain}
-
-onChange={e=>setForm({...form,domain:e.target.value})}
-
-className="admin-input"
-
-/>
-
-
-
-
-
-
-
-
-<textarea
-
-placeholder="Details separated by comma"
-
-value={form.details}
-
-onChange={e=>setForm({...form,details:e.target.value})}
-
-className="admin-input min-h-32"
-
-/>
 
 
 
@@ -487,21 +419,25 @@ className="admin-input min-h-32"
 
 <button
 
+
 onClick={save}
+
 
 className="
 
-mt-5
-
 border
 
-border-yellow-400
+border-green-400
 
 px-5
 
 py-2
 
-rounded
+rounded-lg
+
+text-green-300
+
+hover:bg-green-400/10
 
 "
 
@@ -510,9 +446,7 @@ rounded
 
 {
 
-editing
-
-?
+editing ?
 
 "SAVE CHANGES"
 
@@ -533,23 +467,26 @@ editing
 
 
 
+<div className="space-y-3 mt-8">
 
 
-<div className="mt-8 space-y-4">
+{
 
+experience.map(item=>(
 
-
-{experience.map(item=>(
 
 
 
 <div
 
-key={item.role}
+
+key={item.id}
+
 
 className="
 
 border
+
 border-yellow-400/20
 
 rounded-xl
@@ -557,6 +494,14 @@ rounded-xl
 p-4
 
 bg-yellow-400/5
+
+
+flex
+
+justify-between
+
+items-center
+
 
 "
 
@@ -566,7 +511,11 @@ bg-yellow-400/5
 
 
 
-<h3>
+
+<div>
+
+
+<h3 className="text-yellow-200">
 
 💼 {item.role}
 
@@ -574,12 +523,12 @@ bg-yellow-400/5
 
 
 
-
-<p className="text-gray-400">
+<p className="text-sm text-gray-400">
 
 {item.company}
 
 </p>
+
 
 
 
@@ -591,18 +540,47 @@ bg-yellow-400/5
 
 
 
+</div>
 
 
 
 
-<div className="flex gap-4 mt-4">
+
+
+
+
+
+
+
+<div className="flex gap-3">
+
+
+
 
 
 <button
 
+
 onClick={()=>edit(item)}
 
-className="text-blue-300"
+
+className="
+
+border
+
+border-blue-400
+
+px-3
+
+py-1
+
+rounded
+
+text-blue-300
+
+hover:bg-blue-400/10
+
+"
 
 >
 
@@ -612,11 +590,35 @@ EDIT
 
 
 
+
+
+
+
+
+
 <button
 
-onClick={()=>remove(item.role)}
 
-className="text-red-400"
+onClick={()=>remove(item.id!)}
+
+
+className="
+
+border
+
+border-red-400
+
+px-3
+
+py-1
+
+rounded
+
+text-red-300
+
+hover:bg-red-400/10
+
+"
 
 >
 
@@ -626,17 +628,20 @@ DELETE
 
 
 
-</div>
-
-
-
 
 
 </div>
 
 
-))}
 
+
+
+</div>
+
+
+))
+
+}
 
 
 

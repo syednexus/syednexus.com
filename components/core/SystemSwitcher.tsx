@@ -1,173 +1,77 @@
 "use client";
 
-
 import { Mode } from "@/types/mode";
-
 import { useNexus } from "@/context/NexusContext";
-
 import { cn } from "@/lib/utils";
 
-
-
-
-
-type System={
-
-name:string;
-
-mode:Mode;
-
-icon:string;
-
+type System = {
+  name:string;
+  mode:Mode;
+  icon:string;
 };
-
-
-
-
-
 
 
 const systems:System[]=[
 
-
-
 {
-
 name:"GATEWAY",
-
 mode:"gateway",
-
 icon:"🌌"
-
 },
 
-
-
-
-
 {
-
 name:"SENTINEL",
-
 mode:"defender",
-
 icon:"🛡"
-
 },
 
-
-
-
-
 {
-
 name:"LAB",
-
 mode:"lab",
-
 icon:"⚔"
-
 },
 
-
-
-
-
 {
-
 name:"MEDCORE",
-
 mode:"medcore",
-
 icon:"🧬"
-
 },
 
-
-
-
-
 {
-
 name:"BLOGS",
-
 mode:"blogs",
-
 icon:"📝"
-
 }
-
-
 
 ];
 
 
 
 
-
-
-
-
-
-
-const avatarMap:Record<Mode,
-
-"gateway" |
-
-"sentinel" |
-
-"lab" |
-
-"medcore" |
-
-"owner"
-
+const avatarMap:Record<
+Mode,
+"gateway" | "sentinel" | "lab" | "medcore" | "owner"
 >={
-
-
 
 gateway:"gateway",
 
-
-
 defender:"sentinel",
-
-
 
 lab:"lab",
 
-
-
 medcore:"medcore",
-
-
 
 blogs:"gateway"
 
-
-
 };
-
-
-
-
-
 
 
 
 
 type Props={
-
 current:Mode;
-
 setMode:(mode:Mode)=>void;
-
 };
-
-
-
-
-
 
 
 
@@ -183,10 +87,6 @@ setMode
 
 
 
-
-
-
-
 const {
 
 setAvatar,
@@ -198,39 +98,19 @@ setCurrentSystem
 
 
 
-
-
-
-
-
-function switchSystem(
-
-mode:Mode
-
-){
-
+function switchSystem(mode:Mode){
 
 
 setMode(mode);
 
-
-
 setCurrentSystem(mode);
 
-
-
 setAvatar(
-
 avatarMap[mode]
-
 );
 
 
-
 }
-
-
-
 
 
 
@@ -244,32 +124,33 @@ return(
 
 aria-label="Nexus system navigation"
 
-
 className={cn(
 
-"fixed",
+"absolute",
 
-"top-20",
+"top-15",
 
-"right-5",
+"right-6",
 
 "z-50",
 
 "flex",
 
+"items-center",
+
+"justify-end",
+
 "gap-3",
 
-"font-mono"
+"font-mono",
+
+"max-w-[80vw]",
+
+"flex-wrap"
 
 )}
 
 >
-
-
-
-
-
-
 
 
 
@@ -281,33 +162,23 @@ className={cn(
 
 
 
-
-
-
 <button
-
 
 key={system.mode}
 
-
-
-aria-label={`Switch to ${system.name}`}
-
-
-
 onClick={()=>switchSystem(system.mode)}
-
-
 
 className={cn(
 
+"group",
+
 "border",
 
-"border-white/20",
+"border-purple-400/30",
 
 "rounded-xl",
 
-"bg-black/70",
+"bg-black/80",
 
 "backdrop-blur-xl",
 
@@ -317,11 +188,32 @@ className={cn(
 
 "text-sm",
 
-"hover:bg-white/10",
+"text-purple-200",
+
+
+"shadow-lg",
+
+"shadow-purple-500/20",
+
+
+"transition-all",
+
+"duration-300",
+
+"ease-out",
+
+
+"hover:bg-purple-500/20",
+
+"hover:border-purple-300",
+
+"hover:shadow-purple-500/50",
+
+"hover:-translate-y-1",
 
 "hover:scale-105",
 
-"transition"
+"active:scale-95"
 
 )}
 
@@ -329,13 +221,15 @@ className={cn(
 
 
 
-
-
-
-
 <span
 
-aria-hidden="true"
+className="
+inline-block
+text-lg
+transition-transform
+duration-300
+group-hover:rotate-12
+"
 
 >
 
@@ -343,12 +237,15 @@ aria-hidden="true"
 
 </span>
 
+
 {" "}
+
+
+<span className="tracking-widest whitespace-nowrap">
 
 {system.name}
 
-
-
+</span>
 
 
 
@@ -356,26 +253,15 @@ aria-hidden="true"
 </button>
 
 
+))
 
-
-
-
-
-))}
-
-
-
-
-
-
+}
 
 
 
 </nav>
 
-
 );
-
 
 
 }

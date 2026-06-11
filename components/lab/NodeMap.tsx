@@ -1,11 +1,21 @@
 "use client";
 
 
+import { motion } from "framer-motion";
+
+
+
+
+
 type Props={
 
 unlocked:string[];
 
 };
+
+
+
+
 
 
 
@@ -18,35 +28,49 @@ unlocked
 
 
 
+
+
+
+
+
 const nodes=[
+
 
 
 {
 id:"IDENTITY",
 icon:"👤",
-name:"Identity Server"
+name:"Identity Node",
+desc:"Professional profile archive"
 },
+
 
 
 {
 id:"SKILLS",
 icon:"🖥",
-name:"Linux Host"
+name:"Capability Server",
+desc:"Technical skill database"
 },
+
 
 
 {
 id:"PROJECTS",
 icon:"⚔",
-name:"Project Vault"
+name:"Project Vault",
+desc:"Security case files"
 },
+
 
 
 {
 id:"CERTS",
 icon:"🛡",
-name:"Credential Store"
+name:"Credential Store",
+desc:"Verified achievements"
 }
+
 
 
 ];
@@ -57,22 +81,103 @@ name:"Credential Store"
 
 
 
+
+
+
+const progress = Math.round(
+
+(unlocked.length / nodes.length) * 100
+
+);
+
+
+
+
+
+
+
+
+
+
 return(
 
-<div className="
+<motion.div
+
+
+initial={{
+
+opacity:0,
+
+scale:.96
+
+}}
+
+
+animate={{
+
+opacity:1,
+
+scale:1
+
+}}
+
+
+
+className="
 
 w-full
 
 border
+
 border-purple-400/30
+
 rounded-2xl
+
 bg-black/40
+
 p-8
+
 font-mono
+
 shadow-lg
+
 shadow-purple-500/10
 
-">
+"
+
+>
+
+
+
+
+
+
+
+
+
+{/* HEADER */}
+
+
+
+<div className="
+
+flex
+
+justify-between
+
+items-center
+
+"
+
+>
+
+
+
+
+
+
+
+<div>
 
 
 
@@ -82,12 +187,14 @@ shadow-purple-500/10
 <p className="
 
 text-purple-300
+
 tracking-widest
+
 text-sm
 
 ">
 
-ATTACK SURFACE MAP
+🛰 NEXUS NETWORK MAP
 
 </p>
 
@@ -97,18 +204,20 @@ ATTACK SURFACE MAP
 
 
 
-<div className="
 
-mt-10
+<p className="
 
-grid
-grid-cols-3
-gap-6
-items-center
-text-center
+text-xs
+
+text-gray-500
+
+mt-2
 
 ">
 
+Decrypt all nodes to reconstruct the intelligence vault
+
+</p>
 
 
 
@@ -116,24 +225,34 @@ text-center
 
 
 
-<div className="space-y-6">
+</div>
 
 
-{nodes.slice(0,2).map(node=>(
 
 
-<Node
-
-key={node.id}
-
-node={node}
-
-active={unlocked.includes(node.id)}
-
-/>
 
 
-))}
+
+
+<div className="
+
+text-green-400
+
+text-sm
+
+"
+
+>
+
+{progress}% SYNC
+
+</div>
+
+
+
+
+
+
 
 
 </div>
@@ -147,63 +266,330 @@ active={unlocked.includes(node.id)}
 
 
 
-<div>
+
+
+{/* PROGRESS */}
+
+
+
+<div className="
+
+h-2
+
+bg-gray-800
+
+rounded
+
+overflow-hidden
+
+mt-6
+
+"
+
+>
+
+
+
+
+
+
+
+
+<div
+
+
+style={{
+
+width:`${progress}%`
+
+}}
+
+
+className="
+
+h-full
+
+bg-purple-400
+
+transition-all
+
+"
+
+/>
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+{/* MAP */}
+
+
+
+<div className="
+
+mt-10
+
+grid
+
+grid-cols-3
+
+gap-6
+
+items-center
+
+text-center
+
+"
+
+>
+
+
+
+
+
+
+
+
+
+
+
+{/* LEFT NODES */}
+
+
+
+<div className="space-y-6">
+
+
+
+
+
+
+
+
+{nodes.slice(0,2).map(node=>(
+
+
+
+
+
+
+
+
+
+<Node
+
+
+key={node.id}
+
+
+node={node}
+
+
+active={unlocked.includes(node.id)}
+
+
+/>
+
+
+
+
+
+
+
+
+
+))}
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/* CORE */}
+
+
+
+<motion.div
+
+
+
+animate={{
+
+scale:[1,.97,1]
+
+}}
+
+
+
+transition={{
+
+duration:3,
+
+repeat:Infinity
+
+}}
+
+
+
+>
+
+
+
+
+
+
+
+
 
 
 <div className="
 
 border
+
 border-purple-400
+
 rounded-full
-w-40
-h-40
+
+w-44
+
+h-44
+
 mx-auto
+
 flex
+
 items-center
+
 justify-center
+
 bg-purple-500/10
-nexus-hover
-">
+
+shadow-lg
+
+shadow-purple-500/20
+
+"
+
+>
+
+
+
+
+
+
+
+
 
 
 <div>
 
 
-<div className="text-4xl">
+
+
+
+
+
+<div className="text-5xl">
 
 🧠
 
 </div>
 
 
-<div className="text-sm mt-2">
-
-NEXUS CORE
-
-</div>
-
-
-</div>
-
-
-</div>
 
 
 
-<div className="
 
-mt-6
-text-xs
-text-gray-400
+
+
+<p className="
+
+text-sm
+
+mt-3
+
+text-purple-300
 
 ">
 
-Encrypted intelligence hub
+NEXUS CORE
+
+</p>
+
+
+
+
+
+
+
+
+
+<p className="
+
+text-xs
+
+text-gray-500
+
+mt-1
+
+">
+
+AI Vault
+
+</p>
+
+
+
+
+
+
+
+
 
 </div>
 
 
 
+
+
+
+
+
+
 </div>
 
 
@@ -211,37 +597,98 @@ Encrypted intelligence hub
 
 
 
+
+
+
+
+<p className="
+
+mt-5
+
+text-xs
+
+text-gray-400
+
+"
+
+>
+
+Central intelligence system
+
+</p>
+
+
+
+
+
+
+
+
+
+</motion.div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/* RIGHT NODES */}
 
 
 
 <div className="space-y-6">
 
 
+
+
+
+
+
+
 {nodes.slice(2).map(node=>(
+
+
+
+
+
+
+
 
 
 <Node
 
+
 key={node.id}
+
 
 node={node}
 
+
 active={unlocked.includes(node.id)}
 
+
 />
+
+
+
+
+
+
+
 
 
 ))}
 
 
-</div>
 
-
-
-
-
-
-</div>
 
 
 
@@ -251,10 +698,82 @@ active={unlocked.includes(node.id)}
 
 </div>
 
-)
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+{/* HELP */}
+
+
+
+<div className="
+
+mt-8
+
+border
+
+border-purple-400/20
+
+rounded-xl
+
+p-4
+
+text-xs
+
+text-gray-400
+
+bg-black/30
+
+"
+
+>
+
+Terminal commands:
+
+<span className="text-purple-300">
+
+{" "}unlock identity • unlock skills • unlock projects • unlock certs
+
+</span>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+</motion.div>
+
+);
+
 
 
 }
+
+
+
+
 
 
 
@@ -280,6 +799,8 @@ icon:string;
 
 name:string;
 
+desc:string;
+
 };
 
 active:boolean;
@@ -288,10 +809,27 @@ active:boolean;
 
 
 
+
+
+
+
+
 return(
 
+<motion.div
 
-<div className={`
+
+whileHover={{
+
+scale:1.05
+
+}}
+
+
+
+className={
+
+`
 
 border
 
@@ -301,14 +839,13 @@ p-4
 
 transition
 
-nexus-hover
 ${
 
 active
 
 ?
 
-"border-green-400 bg-green-400/10 text-green-300"
+"border-green-400 bg-green-400/10 text-green-300 shadow-green-500/20"
 
 :
 
@@ -316,7 +853,16 @@ active
 
 }
 
-`}>
+`
+
+}
+
+>
+
+
+
+
+
 
 
 
@@ -328,26 +874,69 @@ active
 
 
 
-<p className="
+
+
+
+
+
+
+<h3 className="
 
 text-sm
-mt-2
+
+mt-3
 
 ">
 
 {node.name}
 
-</p>
+</h3>
+
+
+
+
+
+
 
 
 
 <p className="
 
 text-xs
+
 mt-2
+
+text-gray-500
 
 ">
 
+{node.desc}
+
+</p>
+
+
+
+
+
+
+
+
+
+<p className={
+
+`
+
+text-xs
+
+mt-3
+
+${active ? "text-green-400":"text-red-400"}
+
+`
+
+}
+
+>
 
 {
 
@@ -355,24 +944,28 @@ active
 
 ?
 
-"ONLINE"
+"● ONLINE"
 
 :
 
-"LOCKED"
+"○ LOCKED"
 
 }
-
 
 </p>
 
 
 
 
-</div>
 
 
-)
+
+
+
+</motion.div>
+
+);
+
 
 
 }

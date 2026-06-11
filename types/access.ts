@@ -4,4 +4,6 @@ export type AccessLevel =
 
 "root" |
 
-"owner";
+"owner" |
+
+"auth";

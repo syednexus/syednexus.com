@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 
+// LAB MODULES
 
 import Terminal from "./Terminal";
 import NodeMap from "./NodeMap";
@@ -15,16 +16,20 @@ import LabIdentity from "./LabIdentity";
 import SecurityArsenal from "./SecurityArsenal";
 
 
+// ADMIN AUTH
 
-import { Mode } from "@/types/mode";
+import AdminLogin from "@/components/admin/AdminLogin";
+import LogoutButton from "@/components/admin/LogoutButton";
+
+// TYPES
+
 import { AccessLevel } from "@/types/access";
 
 
 
 
-type Props={
 
-setMode:(mode:Mode)=>void;
+type Props = {
 
 access:AccessLevel;
 
@@ -37,9 +42,10 @@ setAccess:(access:AccessLevel)=>void;
 
 
 
-export default function NexusLab({
 
-setMode,
+
+
+export default function NexusLab({
 
 access,
 
@@ -52,9 +58,26 @@ setAccess
 
 
 
-const [booted,setBooted]=useState(
 
-access==="root" || access==="owner"
+
+const hasAccess =
+
+access==="root" ||
+
+access==="owner";
+
+
+
+
+
+
+
+
+const [booted,setBooted] =
+
+useState(
+
+hasAccess
 
 );
 
@@ -62,17 +85,27 @@ access==="root" || access==="owner"
 
 
 
-const [unlocked,setUnlocked]=useState<string[]>(
 
-access==="root" || access==="owner"
+
+
+const [unlocked,setUnlocked] =
+
+useState<string[]>(
+
+hasAccess
 
 ?
 
 [
+
 "IDENTITY",
+
 "SKILLS",
+
 "PROJECTS",
+
 "CERTS"
+
 ]
 
 :
@@ -87,9 +120,13 @@ access==="root" || access==="owner"
 
 
 
-const [completed,setCompleted]=useState(
 
-access==="root" || access==="owner"
+
+const [completed,setCompleted] =
+
+useState(
+
+hasAccess
 
 );
 
@@ -99,8 +136,11 @@ access==="root" || access==="owner"
 
 
 
-const [logs,setLogs]=useState<string[]>([
 
+
+const [logs,setLogs] =
+
+useState<string[]>([
 
 access==="owner"
 
@@ -111,7 +151,6 @@ access==="owner"
 :
 
 "[+] Guest session initialized"
-
 
 ]);
 
@@ -140,7 +179,6 @@ return prev;
 
 
 
-
 setLogs(old=>[
 
 ...old,
@@ -152,13 +190,16 @@ setLogs(old=>[
 
 
 
+return [
 
-return [...prev,name];
+...prev,
 
+name
+
+];
 
 
 });
-
 
 
 }
@@ -172,13 +213,17 @@ return [...prev,name];
 
 
 
-// Visitor completed all missions = ROOT read only
-
 useEffect(()=>{
 
 
 
-if(unlocked.length>=4 && !completed){
+if(
+
+unlocked.length>=4 &&
+
+!completed
+
+){
 
 
 
@@ -187,6 +232,7 @@ setCompleted(true);
 
 
 setAccess("root");
+
 
 
 
@@ -201,12 +247,19 @@ setLogs(prev=>[
 ]);
 
 
-
 }
 
 
 
-},[unlocked,completed,setAccess]);
+},[
+
+unlocked,
+
+completed,
+
+setAccess
+
+]);
 
 
 
@@ -216,7 +269,10 @@ setLogs(prev=>[
 
 
 
-// Password success = OWNER admin
+
+
+
+// OWNER COOKIE SESSION RESTORE
 
 
 useEffect(()=>{
@@ -224,6 +280,10 @@ useEffect(()=>{
 
 
 if(access==="owner"){
+
+
+
+setBooted(true);
 
 
 
@@ -247,14 +307,37 @@ setCompleted(true);
 
 
 
-setLogs(prev=>[
+
+setLogs(prev=>{
+
+
+
+if(
+
+prev.includes(
+
+"[OWNER] Administrator privileges activated"
+
+)
+
+){
+
+return prev;
+
+}
+
+
+
+return [
 
 ...prev,
 
 "[OWNER] Administrator privileges activated"
 
-]);
+];
 
+
+});
 
 
 }
@@ -271,20 +354,24 @@ setLogs(prev=>[
 
 
 
-if(!booted){
 
+
+
+// SECURE LOGIN SCREEN
+
+
+if(access==="auth"){
 
 
 return(
 
-<BootScreen
+<AdminLogin
 
-complete={()=>setBooted(true)}
+success={()=>setAccess("owner")}
 
 />
 
 );
-
 
 
 }
@@ -298,9 +385,35 @@ complete={()=>setBooted(true)}
 
 
 
+if(!booted){
+
+
 return(
 
-<main className="
+<BootScreen
+
+complete={()=>setBooted(true)}
+
+/>
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+return(
+
+<main
+
+className="
 
 min-h-screen
 
@@ -314,8 +427,9 @@ to-[#14091f]
 
 text-white
 
-">
+"
 
+>
 
 
 
@@ -326,25 +440,40 @@ text-white
 
 unlocked={unlocked}
 
+access={access}
+
+
 
 />
 
 
 
 
+{
+
+access==="owner"
+
+&&
+
+(
+
+<div className="p-5">
+
+<LogoutButton
+
+setAccess={setAccess}
+
+/>
+
+</div>
+
+)
+
+}
 
 
 
-
-<section className="
-
-p-6
-
-space-y-6
-
-">
-
-
+<section className="p-6 space-y-6">
 
 
 
@@ -357,16 +486,7 @@ space-y-6
 
 
 
-
-<div className="
-
-grid
-
-grid-cols-12
-
-gap-6
-
-">
+<div className="grid grid-cols-12 gap-6">
 
 
 
@@ -374,19 +494,9 @@ gap-6
 
 
 
-<div className="
-
-col-span-12
-
-xl:col-span-3
-
-space-y-6
-
-">
 
 
-
-
+<aside className="col-span-12 xl:col-span-3 space-y-6">
 
 
 <MissionPanel
@@ -396,17 +506,11 @@ unlocked={unlocked}
 />
 
 
-
-
-
 <SecurityArsenal/>
 
 
+</aside>
 
-
-
-
-</div>
 
 
 
@@ -417,7 +521,9 @@ unlocked={unlocked}
 
 
 
-<div className="
+<section
+
+className="
 
 col-span-12
 
@@ -429,10 +535,9 @@ items-center
 
 justify-center
 
-">
+"
 
-
-
+>
 
 
 {
@@ -449,18 +554,16 @@ access={access}
 
 :
 
-<NodeMap unlocked={unlocked}/>
+<NodeMap
+
+unlocked={unlocked}
+
+/>
 
 }
 
 
-
-
-
-
-
-</div>
-
+</section>
 
 
 
@@ -470,28 +573,14 @@ access={access}
 
 
 
-
-<div className="
-
-col-span-12
-
-xl:col-span-3
-
-space-y-5
-
-">
+<aside className="col-span-12 xl:col-span-3 space-y-5">
 
 
+<SystemLog
 
+logs={logs}
 
-
-
-<SystemLog logs={logs}/>
-
-
-
-
-
+/>
 
 
 <Terminal
@@ -500,17 +589,33 @@ unlock={unlock}
 
 setAccess={setAccess}
 
+access={access}
+
 />
 
-</div>
+</aside>
+
+
+
+
+
+
+
 
 </div>
+
+
 
 </section>
+
+
+
 
 
 </main>
 
 );
+
+
 
 }

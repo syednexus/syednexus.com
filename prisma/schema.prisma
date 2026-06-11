@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Identity {
+
+id Int @id @default(autoincrement())
+
+name String
+
+headline String
+
+summary String
+
+location String?
+
+avatar String?
+
+email String?
+
+createdAt DateTime @default(now())
+
+updatedAt DateTime @updatedAt
+
+}
+
+
+
+model Education {
+
+id Int @id @default(autoincrement())
+
+degree String
+
+institution String
+
+period String
+
+field String?
+
+focus String
+
+}
+
+
+
+model Experience {
+
+id Int @id @default(autoincrement())
+
+role String
+
+company String
+
+period String
+
+domain String?
+
+details String
+
+}
+
+
+
+model Skill {
+
+id Int @id @default(autoincrement())
+
+category String
+
+name String
+
+}
+
+
+
+model Certification {
+
+id Int @id @default(autoincrement())
+
+name String
+
+issuer String
+
+status String
+
+category String?
+
+skills String
+
+}
+
+
+
+model Project {
+
+id Int @id @default(autoincrement())
+
+name String
+
+category String
+
+status String
+
+description String
+
+technologies String
+
+}
+
+
+
+model Blog {
+
+id Int @id @default(autoincrement())
+
+title String
+
+category String
+
+content String
+
+tags String?
+
+date DateTime @default(now())
+
+}
+
+model AdminUser {
+
+id Int @id @default(autoincrement())
+
+
+username String @unique
+
+
+passwordHash String
+
+
+recoveryKeyHash String?
+
+
+recoveryEmail String?
+
+
+resetTokenHash String?
+
+
+resetExpires DateTime?
+
+
+createdAt DateTime @default(now())
+
+
+updatedAt DateTime @updatedAt
+
+}
+model AiMemory {
+
+  id Int @id @default(autoincrement())
+
+  category String
+
+  content String
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+}
