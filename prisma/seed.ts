@@ -1,31 +1,61 @@
+import "dotenv/config";
+
+
 import { PrismaClient } from "../lib/generated/prisma/client";
 
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 import { profile } from "../data/profile";
 
 
 
-const adapter =
-new PrismaBetterSqlite3({
 
-url:"file:./prisma/nexus.db"
+
+const databaseUrl =
+
+process.env.DATABASE_URL;
+
+
+
+
+
+if(!databaseUrl){
+
+
+throw new Error(
+
+"DATABASE_URL missing"
+
+);
+
+
+}
+
+
+
+
+
+
+const adapter =
+
+new PrismaPg({
+
+connectionString:databaseUrl
 
 });
 
 
 
+
+
+
 const prisma =
+
 new PrismaClient({
 
 adapter
 
 });
-
-
-
-
-
 
 
 

@@ -3,28 +3,25 @@ import "dotenv/config";
 
 import { PrismaClient } from "@/lib/generated/prisma/client";
 
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 
 
 
 
-
-const databaseUrl =
+const connectionString =
 
 process.env.DATABASE_URL;
 
 
 
 
-
-
-if(!databaseUrl){
+if(!connectionString){
 
 
 throw new Error(
 
-"DATABASE_URL missing. Check .env file."
+"DATABASE_URL missing"
 
 );
 
@@ -36,9 +33,11 @@ throw new Error(
 
 
 
-const adapter = new PrismaBetterSqlite3({
+const adapter =
 
-url:databaseUrl
+new PrismaPg({
+
+connectionString
 
 });
 
@@ -48,11 +47,16 @@ url:databaseUrl
 
 
 
-const globalForPrisma = globalThis as unknown as {
+
+const globalForPrisma =
+
+globalThis as unknown as {
 
 prisma?:PrismaClient;
 
 };
+
+
 
 
 
@@ -70,6 +74,7 @@ new PrismaClient({
 adapter
 
 });
+
 
 
 
