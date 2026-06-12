@@ -15,7 +15,14 @@ email:[
 "syedmohiuddin@syednexus.com"
 ],
 
+linkedin:"",
+
+github:"",
+
+resume:"",
+
 headline:
+
 "Master of Cybersecurity Student | Interim Operations Supervisor | Healthcare & Cybersecurity Professional",
 
 summary:`

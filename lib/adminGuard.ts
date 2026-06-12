@@ -1,9 +1,22 @@
 import { cookies } from "next/headers";
-import { adminSessionCookie, verifyAdminSessionToken } from "@/lib/auth";
+
+import {
+
+adminSessionCookie,
+
+verifyAdminSessionToken
+
+} from "@/lib/auth";
+
+
 
 
 
 export async function requireAdmin(){
+
+
+try{
+
 
 
 const cookieStore =
@@ -11,26 +24,51 @@ await cookies();
 
 
 
+
 const session =
-cookieStore.get(adminSessionCookie.name);
+cookieStore.get(
+
+adminSessionCookie.name
+
+);
 
 
 
-if(
-
-!verifyAdminSessionToken(session?.value)
-
-){
 
 
-return false;
+return verifyAdminSessionToken(
+
+session?.value
+
+);
+
 
 
 }
 
 
 
-return true;
+catch(error){
+
+
+
+console.error(
+
+"ADMIN GUARD ERROR",
+
+error
+
+);
+
+
+
+
+return false;
+
+
+
+}
+
 
 
 }

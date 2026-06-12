@@ -2,8 +2,34 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 
-
 import { requireAdmin } from "@/lib/adminGuard";
+
+
+
+
+
+
+function clean(value:unknown){
+
+
+return typeof value==="string"
+
+?
+
+value.trim()
+
+:
+
+"";
+
+
+}
+
+
+
+
+
+
 
 
 
@@ -14,12 +40,63 @@ import { requireAdmin } from "@/lib/adminGuard";
 export async function GET(){
 
 
+try{
+
+
+
+const education =
+await prisma.education.findMany({
+
+orderBy:{
+
+id:"desc"
+
+}
+
+});
+
+
+
+
+return NextResponse.json(education);
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"EDUCATION READ ERROR",
+
+error
+
+);
+
+
+
 
 return NextResponse.json(
 
-await prisma.education.findMany()
+{
+error:"Education unavailable"
+},
+
+{
+status:500
+}
 
 );
+
+
+
+}
 
 
 
@@ -33,27 +110,40 @@ await prisma.education.findMany()
 
 
 
-// OWNER ONLY CREATE / UPDATE
+
+
+// OWNER CREATE / UPDATE
 
 
 export async function POST(req:Request){
 
+
+
+try{
+
+
+
+
+
 if(!(await requireAdmin())){
 
-return Response.json(
+
+
+return NextResponse.json(
+
 {
 error:"Unauthorized"
 },
+
 {
 status:401
 }
+
 );
 
+
+
 }
-
-
-
-
 
 
 
@@ -73,71 +163,64 @@ await req.json();
 
 
 
-const data =
 
-body.id
-
-?
-
-await prisma.education.update({
-
-where:{
-
-id:body.id
-
-},
+const payload={
 
 
-data:{
-
-degree:body.degree,
-
-institution:body.institution,
-
-period:body.period,
-
-field:body.field,
-
-focus:body.focus
-
-}
+degree:
+clean(body.degree),
 
 
-})
+institution:
+clean(body.institution),
 
 
-:
+period:
+clean(body.period),
 
 
-await prisma.education.create({
+field:
+clean(body.field),
 
-data:{
 
-degree:body.degree,
+focus:
+clean(body.focus)
 
-institution:body.institution,
 
-period:body.period,
-
-field:body.field,
-
-focus:body.focus
-
-}
-
-});
+};
 
 
 
 
 
 
+
+
+
+
+if(
+
+!payload.degree ||
+
+!payload.institution ||
+
+payload.degree.length > 150 ||
+
+payload.focus.length > 1500
+
+){
 
 
 
 return NextResponse.json(
 
-data
+{
+error:"Invalid education data"
+},
+
+{
+status:400
+}
 
 );
 
@@ -153,10 +236,117 @@ data
 
 
 
-// OWNER ONLY DELETE
+
+const education =
+
+typeof body.id==="number"
+
+?
+
+
+await prisma.education.update({
+
+where:{
+
+id:body.id
+
+},
+
+data:payload
+
+})
+
+
+:
+
+
+await prisma.education.create({
+
+data:payload
+
+});
+
+
+
+
+
+
+
+
+
+return NextResponse.json(
+
+education
+
+);
+
+
+
+
+
+
+}
+
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"EDUCATION SAVE ERROR",
+
+error
+
+);
+
+
+
+
+
+return NextResponse.json(
+
+{
+error:"Education save failed"
+},
+
+{
+status:500
+}
+
+);
+
+
+
+}
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// OWNER DELETE
 
 
 export async function DELETE(req:Request){
+
+
+
+try{
+
+
 
 
 
@@ -168,7 +358,6 @@ if(!(await requireAdmin())){
 return NextResponse.json(
 
 {
-success:false,
 error:"Unauthorized"
 },
 
@@ -189,8 +378,37 @@ status:401
 
 
 
-const {id} =
+
+const body =
 await req.json();
+
+
+
+
+
+
+
+
+if(typeof body.id !== "number"){
+
+
+
+return NextResponse.json(
+
+{
+error:"Invalid education id"
+},
+
+{
+status:400
+}
+
+);
+
+
+
+}
+
 
 
 
@@ -201,13 +419,17 @@ await req.json();
 
 await prisma.education.delete({
 
+
 where:{
 
-id
+id:body.id
 
 }
 
+
 });
+
+
 
 
 
@@ -221,6 +443,48 @@ return NextResponse.json({
 success:true
 
 });
+
+
+
+
+
+
+}
+
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"EDUCATION DELETE ERROR",
+
+error
+
+);
+
+
+
+
+
+return NextResponse.json(
+
+{
+error:"Delete failed"
+},
+
+{
+status:500
+}
+
+);
+
+
+
+}
 
 
 

@@ -10,39 +10,28 @@ import { isAdmin } from "@/lib/auth";
 
 
 
-
-
 export async function POST(req:Request){
-
 
 
 try{
 
 
 
-
-
 if(!(await isAdmin())){
 
 
-
 return NextResponse.json(
-
 {
 success:false,
 error:"Unauthorized"
 },
-
 {
 status:401
 }
-
 );
 
 
-
 }
-
 
 
 
@@ -56,31 +45,141 @@ await req.json();
 
 
 
+const {
+
+currentPassword,
+
+newPassword
+
+}=body;
+
+
+
+
+
 
 
 if(
 
-!body.password ||
+typeof currentPassword !== "string" ||
 
-body.password.length < 6
+typeof newPassword !== "string"
 
 ){
 
 
-
 return NextResponse.json(
-
 {
 success:false,
-error:"Password too short"
+error:"Invalid request"
 },
-
 {
 status:400
 }
+);
+
+
+}
+
+
+
+
+
+
+
+
+if(newPassword.length < 8){
+
+
+return NextResponse.json(
+{
+success:false,
+error:"Password must be at least 8 characters"
+},
+{
+status:400
+}
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+const admin =
+await prisma.adminUser.findUnique({
+
+where:{
+
+username:"owner"
+
+}
+
+});
+
+
+
+
+
+
+
+
+if(!admin){
+
+
+return NextResponse.json(
+{
+success:false,
+error:"Admin missing"
+},
+{
+status:404
+}
+);
+
+
+}
+
+
+
+
+
+
+
+
+const valid =
+await bcrypt.compare(
+
+currentPassword,
+
+admin.passwordHash
 
 );
 
+
+
+
+
+
+
+if(!valid){
+
+
+return NextResponse.json(
+{
+success:false,
+error:"Incorrect current password"
+},
+{
+status:401
+}
+);
 
 
 }
@@ -96,7 +195,7 @@ status:400
 const hash =
 await bcrypt.hash(
 
-body.password,
+newPassword,
 
 12
 
@@ -118,7 +217,6 @@ where:{
 username:"owner"
 
 },
-
 
 
 data:{
@@ -150,14 +248,10 @@ message:"Password updated"
 
 
 
-
-
 }
 
 
-
 catch(error){
-
 
 
 console.error(
@@ -171,20 +265,15 @@ error
 
 
 
-
 return NextResponse.json(
-
 {
 success:false,
 error:"Update failed"
 },
-
 {
 status:500
 }
-
 );
-
 
 
 }

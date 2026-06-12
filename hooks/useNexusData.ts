@@ -65,17 +65,19 @@ await res.json();
 
 
 
-// IDENTITY FIX
+// IDENTITY 
 
 const identity =
-
 json.identity
 
 ?
 
 {
 
+...profile.identity,
+
 ...json.identity,
+
 
 email:
 
@@ -87,18 +89,29 @@ json.identity.email
 
 :
 
-profile.identity.email
+profile.identity.email,
+
+
+linkedin:
+
+json.identity.linkedin || "",
+
+
+github:
+
+json.identity.github || "",
+
+
+resume:
+
+json.identity.resume || ""
+
 
 }
 
 :
 
 profile.identity;
-
-
-
-
-
 
 
 

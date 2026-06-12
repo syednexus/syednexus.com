@@ -8,18 +8,91 @@ import { requireAdmin } from "@/lib/adminGuard";
 
 
 
+function clean(value:unknown){
+
+
+return typeof value==="string"
+
+?
+
+value.trim()
+
+:
+
+"";
+
+
+}
+
+
+
+
+
+
+
+
+
 // PUBLIC READ
 
 
 export async function GET(){
 
 
+try{
+
+
+
+const certifications =
+await prisma.certification.findMany({
+
+orderBy:{
+
+id:"desc"
+
+}
+
+});
+
+
+
+
+
+return NextResponse.json(certifications);
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"CERTIFICATION READ ERROR",
+
+error
+
+);
+
+
 
 return NextResponse.json(
 
-await prisma.certification.findMany()
+{
+error:"Certifications unavailable"
+},
+
+{
+status:500
+}
 
 );
+
+
+}
 
 
 
@@ -33,10 +106,18 @@ await prisma.certification.findMany()
 
 
 
-// OWNER ONLY CREATE / UPDATE
+
+
+// OWNER CREATE / UPDATE
 
 
 export async function POST(req:Request){
+
+
+
+try{
+
+
 
 
 
@@ -48,7 +129,6 @@ if(!(await requireAdmin())){
 return NextResponse.json(
 
 {
-success:false,
 error:"Unauthorized"
 },
 
@@ -59,8 +139,8 @@ status:401
 );
 
 
-
 }
+
 
 
 
@@ -78,13 +158,88 @@ await req.json();
 
 
 
-const data =
+const payload={
 
-body.id
+
+name:
+clean(body.name),
+
+
+issuer:
+clean(body.issuer),
+
+
+status:
+clean(body.status),
+
+
+category:
+clean(body.category),
+
+
+skills:
+clean(body.skills)
+
+
+};
+
+
+
+
+
+
+
+
+
+if(
+
+!payload.name ||
+
+!payload.issuer ||
+
+payload.name.length > 150 ||
+
+payload.skills.length > 1000
+
+){
+
+
+
+return NextResponse.json(
+
+{
+error:"Invalid certification data"
+},
+
+{
+status:400
+}
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+const certification =
+
+typeof body.id==="number"
 
 ?
 
+
 await prisma.certification.update({
+
 
 where:{
 
@@ -93,21 +248,7 @@ id:body.id
 },
 
 
-data:{
-
-
-name:body.name,
-
-issuer:body.issuer,
-
-status:body.status,
-
-category:body.category,
-
-skills:body.skills
-
-
-}
+data:payload
 
 
 })
@@ -118,19 +259,8 @@ skills:body.skills
 
 await prisma.certification.create({
 
-data:{
 
-name:body.name,
-
-issuer:body.issuer,
-
-status:body.status,
-
-category:body.category,
-
-skills:body.skills
-
-}
+data:payload
 
 
 });
@@ -142,11 +272,51 @@ skills:body.skills
 
 
 
-return NextResponse.json(
 
-data
+return NextResponse.json(certification);
+
+
+
+
+
+
+}
+
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"CERTIFICATION SAVE ERROR",
+
+error
 
 );
+
+
+
+
+
+return NextResponse.json(
+
+{
+error:"Certification save failed"
+},
+
+{
+status:500
+}
+
+);
+
+
+
+}
+
 
 
 
@@ -160,10 +330,19 @@ data
 
 
 
-// OWNER ONLY DELETE
+
+
+// OWNER DELETE
 
 
 export async function DELETE(req:Request){
+
+
+
+try{
+
+
+
 
 
 
@@ -174,12 +353,47 @@ if(!(await requireAdmin())){
 return NextResponse.json(
 
 {
-success:false,
 error:"Unauthorized"
 },
 
 {
 status:401
+}
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+const body =
+await req.json();
+
+
+
+
+
+
+
+
+if(typeof body.id !== "number"){
+
+
+
+return NextResponse.json(
+
+{
+error:"Invalid certification id"
+},
+
+{
+status:400
 }
 
 );
@@ -195,23 +409,16 @@ status:401
 
 
 
-const {id} =
-await req.json();
-
-
-
-
-
-
-
 
 await prisma.certification.delete({
 
+
 where:{
 
-id
+id:body.id
 
 }
+
 
 });
 
@@ -227,6 +434,47 @@ return NextResponse.json({
 success:true
 
 });
+
+
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"CERTIFICATION DELETE ERROR",
+
+error
+
+);
+
+
+
+
+return NextResponse.json(
+
+{
+error:"Delete failed"
+},
+
+{
+status:500
+}
+
+);
+
+
+
+}
 
 
 

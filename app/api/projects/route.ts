@@ -7,9 +7,40 @@ import { requireAdmin } from "@/lib/adminGuard";
 
 
 
-// PUBLIC - DISPLAY PROJECTS
+
+
+
+function clean(value:unknown){
+
+return typeof value==="string"
+
+?
+
+value.trim()
+
+:
+
+"";
+
+}
+
+
+
+
+
+
+
+
+
+
+// PUBLIC READ
+
 
 export async function GET(){
+
+
+try{
+
 
 
 const projects =
@@ -25,11 +56,45 @@ id:"desc"
 
 
 
-return NextResponse.json(
 
-projects
+return NextResponse.json(projects);
+
+
+
+}
+
+
+catch(error){
+
+
+
+console.error(
+
+"PROJECT READ ERROR",
+
+error
 
 );
+
+
+
+
+return NextResponse.json(
+
+{
+error:"Projects unavailable"
+},
+
+{
+status:500
+}
+
+);
+
+
+
+}
+
 
 
 }
@@ -42,21 +107,36 @@ projects
 
 
 
-// OWNER ONLY - CREATE / UPDATE PROJECT
+
+
+// OWNER CREATE / UPDATE
 
 
 export async function POST(req:Request){
 
+
+
+try{
+
+
+
+
+
 if(!(await requireAdmin())){
 
-return Response.json(
+
+return NextResponse.json(
+
 {
 error:"Unauthorized"
 },
+
 {
 status:401
 }
+
 );
+
 
 }
 
@@ -76,8 +156,80 @@ await req.json();
 
 
 
+
+const payload={
+
+
+name:
+clean(body.name),
+
+
+category:
+clean(body.category),
+
+
+status:
+clean(body.status),
+
+
+description:
+clean(body.description),
+
+
+technologies:
+clean(body.technologies)
+
+
+};
+
+
+
+
+
+
+
+
+
+if(
+
+!payload.name ||
+
+payload.name.length > 100 ||
+
+payload.description.length > 2000
+
+){
+
+
+
+return NextResponse.json(
+
+{
+error:"Invalid project data"
+},
+
+{
+status:400
+}
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
 const project =
-body.id
+
+typeof body.id==="number"
 
 ?
 
@@ -91,21 +243,7 @@ id:body.id
 },
 
 
-data:{
-
-
-name:body.name,
-
-category:body.category,
-
-status:body.status,
-
-description:body.description,
-
-technologies:body.technologies
-
-
-}
+data:payload
 
 
 })
@@ -116,23 +254,7 @@ technologies:body.technologies
 
 await prisma.project.create({
 
-
-data:{
-
-
-name:body.name,
-
-category:body.category,
-
-status:body.status,
-
-description:body.description,
-
-technologies:body.technologies
-
-
-}
-
+data:payload
 
 });
 
@@ -144,11 +266,49 @@ technologies:body.technologies
 
 
 
-return NextResponse.json(
+return NextResponse.json(project);
 
-project
+
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"PROJECT SAVE ERROR",
+
+error
 
 );
+
+
+
+
+
+return NextResponse.json(
+
+{
+error:"Project save failed"
+},
+
+{
+status:500
+}
+
+);
+
+
+
+}
 
 
 
@@ -162,21 +322,29 @@ project
 
 
 
-// OWNER ONLY - DELETE PROJECT
+
+
+
+// OWNER DELETE
 
 
 export async function DELETE(req:Request){
 
 
 
-if(!(await requireAdmin())){
+try{
 
+
+
+
+
+
+if(!(await requireAdmin())){
 
 
 return NextResponse.json(
 
 {
-success:false,
 error:"Unauthorized"
 },
 
@@ -187,7 +355,6 @@ status:401
 );
 
 
-
 }
 
 
@@ -197,8 +364,35 @@ status:401
 
 
 
-const {id} =
+const body =
 await req.json();
+
+
+
+
+
+
+
+if(typeof body.id !== "number"){
+
+
+return NextResponse.json(
+
+{
+error:"Invalid project id"
+},
+
+{
+status:400
+}
+
+);
+
+
+}
+
+
+
 
 
 
@@ -209,11 +403,12 @@ await prisma.project.delete({
 
 where:{
 
-id
+id:body.id
 
 }
 
 });
+
 
 
 
@@ -226,6 +421,48 @@ return NextResponse.json({
 success:true
 
 });
+
+
+
+
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.error(
+
+"PROJECT DELETE ERROR",
+
+error
+
+);
+
+
+
+
+
+return NextResponse.json(
+
+{
+error:"Delete failed"
+},
+
+{
+status:500
+}
+
+);
+
+
+
+}
 
 
 

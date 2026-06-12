@@ -637,7 +637,10 @@ Object.values(profile.skills)
 
 
 
-<div className="mt-8">
+<div className="
+mt-8
+w-full
+">
 
 <ActivityTimeline/>
 

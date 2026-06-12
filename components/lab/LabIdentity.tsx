@@ -1,10 +1,28 @@
 "use client";
 
 
-import { profile } from "@/data/profile";
+import { useNexusData } from "@/hooks/useNexusData";
+
+import SocialLinks from "@/components/core/SocialLinks";
+
+
+
 
 
 export default function LabIdentity(){
+
+
+
+const profile =
+useNexusData();
+
+
+
+const identity =
+profile.identity;
+
+
+
 
 
 return(
@@ -23,15 +41,31 @@ shadow-cyan-500/10
 ">
 
 
-<div className="flex items-center gap-6">
+
+
+
+<div className="
+
+flex
+flex-col
+md:flex-row
+items-center
+md:items-start
+gap-6
+
+">
+
+
+
+
 
 
 
 <img
 
-src={profile.identity.avatar || "/profile.jpg"}
+src={identity.avatar || "/profile.jpg"}
 
-alt={profile.identity.name}
+alt={identity.name || "Profile"}
 
 className="
 
@@ -49,7 +83,16 @@ object-cover
 
 
 
-<div>
+
+
+
+
+
+<div className="flex-1">
+
+
+
+
 
 
 <p className="
@@ -66,6 +109,11 @@ NEXUS SECURITY OPERATOR
 
 
 
+
+
+
+
+
 <h1 className="
 
 text-3xl
@@ -74,9 +122,13 @@ mt-2
 
 ">
 
-{profile.identity.name}
+{identity.name}
 
 </h1>
+
+
+
+
 
 
 
@@ -88,9 +140,35 @@ mt-2
 
 ">
 
-{profile.identity.headline}
+{identity.headline}
 
 </p>
+
+
+
+
+
+
+
+{identity.location && (
+
+<p className="
+
+text-gray-500
+text-sm
+mt-2
+
+">
+
+📍 {identity.location}
+
+</p>
+
+)}
+
+
+
+
 
 
 
@@ -100,22 +178,33 @@ mt-2
 
 flex
 gap-3
-mt-4
+mt-5
 flex-wrap
 
 ">
 
 
 
+
+
+
+
+
 {[
 
 "Linux",
+
 "Networking",
+
 "Vulnerability Assessment",
+
 "Web Security",
+
 "SOC Analysis"
 
 ].map(skill=>(
+
+
 
 
 <span
@@ -136,29 +225,64 @@ text-cyan-300
 
 >
 
+
 {skill}
 
+
 </span>
+
+
 
 
 ))}
 
 
 
-</div>
 
 
-
-</div>
-
-
-</div>
 
 
 
 </div>
 
-)
+
+
+
+
+
+
+
+
+{/* SOCIAL LINKS */}
+
+<SocialLinks/>
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+);
+
 
 
 }

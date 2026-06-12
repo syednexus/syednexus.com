@@ -8,7 +8,9 @@ import { useState } from "react";
 export default function PasswordManager(){
 
 
-const [password,setPassword]=useState("");
+const [currentPassword,setCurrentPassword]=useState("");
+
+const [newPassword,setNewPassword]=useState("");
 
 const [confirm,setConfirm]=useState("");
 
@@ -24,10 +26,19 @@ const [loading,setLoading]=useState(false);
 async function updatePassword(){
 
 
-if(!password || !confirm){
+
+if(
+
+!currentPassword ||
+
+!newPassword ||
+
+!confirm
+
+){
 
 
-setMessage("Enter password fields");
+setMessage("Complete all password fields");
 
 return;
 
@@ -36,7 +47,22 @@ return;
 
 
 
-if(password!==confirm){
+
+if(newPassword.length < 8){
+
+
+setMessage("Password requires minimum 8 characters");
+
+return;
+
+
+}
+
+
+
+
+
+if(newPassword!==confirm){
 
 
 setMessage("Passwords do not match");
@@ -49,7 +75,13 @@ return;
 
 
 
+
+
+
 setLoading(true);
+
+
+
 
 
 
@@ -63,21 +95,36 @@ await fetch(
 
 method:"POST",
 
+credentials:"include",
+
 headers:{
 
 "Content-Type":"application/json"
 
 },
 
+
 body:JSON.stringify({
 
-password
+currentPassword,
+
+newPassword
 
 })
+
 
 }
 
 );
+
+
+
+
+
+
+
+const data =
+await res.json();
 
 
 
@@ -87,24 +134,36 @@ password
 if(res.ok){
 
 
+
 setMessage(
+
 "Password updated successfully"
+
 );
 
 
-setPassword("");
+
+setCurrentPassword("");
+
+setNewPassword("");
 
 setConfirm("");
 
 
+
 }
+
 
 
 else{
 
 
 setMessage(
+
+data.error ||
+
 "Password update failed"
+
 );
 
 
@@ -112,7 +171,10 @@ setMessage(
 
 
 
+
+
 setLoading(false);
+
 
 
 }
@@ -139,6 +201,9 @@ bg-black/40
 
 
 
+
+
+
 <p className="
 text-red-300
 tracking-widest
@@ -153,6 +218,9 @@ SECURITY CONFIGURATION
 
 
 
+
+
+
 <div className="
 mt-5
 text-sm
@@ -161,18 +229,20 @@ text-green-400
 ">
 
 <p>
-Authentication:DATABASE
+Authentication: DATABASE
 </p>
 
 <p>
-Password Source:PRISMA HASH
+Storage: BCRYPT HASH
 </p>
 
 <p>
-Encryption:BCRYPT
+Session: HMAC SIGNED TOKEN
 </p>
+
 
 </div>
+
 
 
 
@@ -186,25 +256,40 @@ Encryption:BCRYPT
 
 type="password"
 
-value={password}
+value={currentPassword}
+
+placeholder="Current password"
+
+onChange={e=>setCurrentPassword(e.target.value)}
+
+className="admin-input"
+
+/>
+
+
+
+
+
+
+
+
+
+<input
+
+type="password"
+
+value={newPassword}
 
 placeholder="New password"
 
-onChange={e=>setPassword(e.target.value)}
+onChange={e=>setNewPassword(e.target.value)}
 
-className="
-
-mt-5
-w-full
-bg-black
-border
-border-red-400/30
-rounded
-p-3
-
-"
+className="admin-input"
 
 />
+
+
+
 
 
 
@@ -218,23 +303,16 @@ type="password"
 
 value={confirm}
 
-placeholder="Confirm password"
+placeholder="Confirm new password"
 
 onChange={e=>setConfirm(e.target.value)}
 
-className="
-
-mt-3
-w-full
-bg-black
-border
-border-red-400/30
-rounded
-p-3
-
-"
+className="admin-input"
 
 />
+
+
+
 
 
 
@@ -257,9 +335,12 @@ px-4
 py-2
 rounded
 
+hover:bg-red-400/10
+
 "
 
 >
+
 
 
 {
@@ -277,7 +358,10 @@ loading
 }
 
 
+
 </button>
+
+
 
 
 
@@ -296,8 +380,12 @@ text-sm
 
 
 
+
+
 </div>
 
 );
+
+
 
 }

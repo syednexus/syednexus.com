@@ -8,7 +8,7 @@ import { useNexusData } from "@/hooks/useNexusData";
 
 
 
-type BlogPost = {
+type BlogPost={
 
 id:number;
 
@@ -18,14 +18,17 @@ category:string;
 
 content:string;
 
-tags?:string;
+tags?:string | null;
 
 date:string | Date;
 
 };
 
 
-const defaultCategories = [
+
+
+
+const defaultCategories=[
 
 "Cybersecurity",
 
@@ -46,13 +49,6 @@ const defaultCategories = [
 ];
 
 
-type BlogData = {
-
-posts:BlogPost[];
-
-};
-
-
 
 
 
@@ -64,28 +60,21 @@ export default function NexusBlogs(){
 
 
 
-
-
-
 const profile =
 useNexusData();
 
 
 
 
-
-
-const [category,setCategory] =
+const [category,setCategory]=
 useState("All");
 
 
-
-const [search,setSearch] =
+const [search,setSearch]=
 useState("");
 
 
-
-const [selectedPost,setSelectedPost] =
+const [selectedPost,setSelectedPost]=
 useState<BlogPost|null>(null);
 
 
@@ -97,21 +86,28 @@ useState<BlogPost|null>(null);
 
 
 
-
-// FIX PRISMA DATA TYPE
-
-
-const blogs =
-
-profile.blogs as BlogData | undefined;
-
-
-
+// SUPPORT DATABASE + STATIC BLOG FORMAT
 
 
 const posts:BlogPost[] =
 
-blogs?.posts ?? [];
+Array.isArray(profile.blogs)
+
+?
+
+profile.blogs as BlogPost[]
+
+:
+
+Array.isArray(profile.blogs?.posts)
+
+?
+
+profile.blogs.posts
+
+:
+
+[];
 
 
 
@@ -121,25 +117,28 @@ blogs?.posts ?? [];
 
 
 
+const categories=[
 
-// CREATE CATEGORIES
-
-
-const categories = [
 
 "All",
+
 
 ...Array.from(
 
 new Set([
 
+
 ...defaultCategories,
+
 
 ...posts.map(post=>post.category)
 
+
 ])
 
+
 )
+
 
 ];
 
@@ -151,16 +150,9 @@ new Set([
 
 
 
-// FILTER ENGINE
-
 
 const filtered =
-
 posts.filter(post=>{
-
-
-
-
 
 
 const matchCategory =
@@ -173,7 +165,9 @@ post.category===category;
 
 
 
-const searchable = [
+
+
+const searchable=[
 
 post.title,
 
@@ -193,28 +187,15 @@ post.tags || ""
 
 
 
-
-
-const matchSearch =
-
-searchable.includes(
-
-search.toLowerCase()
-
-);
-
-
-
-
-
-
-
 return (
 
-matchCategory && matchSearch
+matchCategory
+
+&&
+
+searchable.includes(search.toLowerCase())
 
 );
-
 
 
 });
@@ -227,15 +208,12 @@ matchCategory && matchSearch
 
 
 
-
 function formatDate(date:string | Date){
-
 
 
 return new Date(date)
 
 .toLocaleDateString();
-
 
 
 }
@@ -249,13 +227,7 @@ return new Date(date)
 
 
 
-
-
-// ARTICLE MODE
-
-
 if(selectedPost){
-
 
 
 return(
@@ -264,15 +236,11 @@ return(
 
 
 
-
-
-
-
 <button
 
 onClick={()=>setSelectedPost(null)}
 
-className="border border-purple-400/30 rounded-xl px-5 py-2 text-purple-300 hover:bg-purple-400/10 transition"
+className="border border-purple-400/30 rounded-xl px-5 py-2 text-purple-300 hover:bg-purple-400/10"
 
 >
 
@@ -284,16 +252,7 @@ className="border border-purple-400/30 rounded-xl px-5 py-2 text-purple-300 hove
 
 
 
-
-
-
-
 <article className="max-w-5xl mx-auto mt-10 border border-purple-400/20 rounded-2xl p-10 bg-purple-400/5">
-
-
-
-
-
 
 
 <p className="text-purple-300 text-sm">
@@ -304,19 +263,11 @@ className="border border-purple-400/30 rounded-xl px-5 py-2 text-purple-300 hove
 
 
 
-
-
-
-
 <h1 className="text-5xl mt-5">
 
 {selectedPost.title}
 
 </h1>
-
-
-
-
 
 
 
@@ -330,10 +281,6 @@ className="border border-purple-400/30 rounded-xl px-5 py-2 text-purple-300 hove
 
 
 
-
-
-
-
 <div className="mt-10 text-gray-300 leading-8 whitespace-pre-line">
 
 {selectedPost.content}
@@ -342,18 +289,12 @@ className="border border-purple-400/30 rounded-xl px-5 py-2 text-purple-300 hove
 
 
 
-
-
-
-
 </article>
-
 
 
 </main>
 
 );
-
 
 
 }
@@ -366,13 +307,6 @@ className="border border-purple-400/30 rounded-xl px-5 py-2 text-purple-300 hove
 
 
 
-
-
-
-
-// ARCHIVE MODE
-
-
 return(
 
 <main className="min-h-screen bg-linear-to-br from-[#08040f] via-[#10172a] to-black text-white font-mono p-8">
@@ -381,14 +315,7 @@ return(
 
 
 
-
-
-
-
 <header className="border border-purple-400/30 rounded-2xl p-8 bg-purple-400/5">
-
-
-
 
 
 <p className="text-purple-300 tracking-widest text-sm">
@@ -396,9 +323,6 @@ return(
 📚 NEXUS KNOWLEDGE ARCHIVE
 
 </p>
-
-
-
 
 
 
@@ -410,17 +334,11 @@ Research Logs
 
 
 
-
-
-
 <p className="text-gray-400 mt-4">
 
 Cybersecurity • Healthcare Security • Research • Learning Notes
 
 </p>
-
-
-
 
 
 
@@ -437,23 +355,17 @@ Cybersecurity • Healthcare Security • Research • Learning Notes
 <section className="mt-8 border border-purple-400/20 rounded-xl p-5 bg-black/30">
 
 
-
-
-
-
 <input
 
 value={search}
 
-onChange={(e)=>setSearch(e.target.value)}
+onChange={e=>setSearch(e.target.value)}
 
 placeholder="Search intelligence archive..."
 
-className="w-full bg-black border border-purple-400/30 rounded-xl px-4 py-3 outline-none text-purple-200"
+className="w-full bg-black border border-purple-400/30 rounded-xl px-4 py-3 text-purple-200"
 
 />
-
-
 
 
 
@@ -463,12 +375,7 @@ className="w-full bg-black border border-purple-400/30 rounded-xl px-4 py-3 outl
 <div className="flex gap-3 flex-wrap mt-5">
 
 
-
-{
-
-
-categories.map(item=>(
-
+{categories.map(item=>(
 
 
 <button
@@ -477,19 +384,29 @@ key={item}
 
 onClick={()=>setCategory(item)}
 
-className={`border rounded-full px-5 py-2 transition ${
+className={
+
+`
+
+border rounded-full px-5 py-2 transition
+
+${
 
 category===item
 
 ?
 
-"border-purple-300 bg-purple-400/20 text-white"
+"border-purple-300 bg-purple-400/20"
 
 :
 
 "border-purple-400/30 text-purple-300"
 
-}`}
+}
+
+`
+
+}
 
 >
 
@@ -498,17 +415,10 @@ category===item
 </button>
 
 
-
-))
-
-
-}
-
+))}
 
 
 </div>
-
-
 
 
 
@@ -522,20 +432,15 @@ category===item
 
 
 
-
 <section className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
-
-
-
-
-
-
-
 
 
 {
 
-filtered.length===0 &&
+
+filtered.length===0
+
+&&
 
 
 <div className="border border-gray-700 rounded-xl p-8 text-gray-400">
@@ -553,21 +458,15 @@ No matching intelligence logs found.
 
 
 
-
-
-
-
 {
 
 
-filtered.map((post,index)=>(
-
-
+filtered.map(post=>(
 
 
 <article
 
-key={post.id ?? `${post.title}-${post.date}-${index}`}
+key={post.id}
 
 className="border border-purple-400/20 rounded-2xl p-6 bg-purple-400/5 hover:bg-purple-400/10 transition"
 
@@ -575,15 +474,7 @@ className="border border-purple-400/20 rounded-2xl p-6 bg-purple-400/5 hover:bg-
 
 
 
-
-
-
-
-
-<div className="flex justify-between items-center">
-
-
-
+<div className="flex justify-between">
 
 
 <span className="text-xs text-purple-300">
@@ -591,9 +482,6 @@ className="border border-purple-400/20 rounded-2xl p-6 bg-purple-400/5 hover:bg-
 {post.category}
 
 </span>
-
-
-
 
 
 
@@ -605,12 +493,7 @@ className="border border-purple-400/20 rounded-2xl p-6 bg-purple-400/5 hover:bg-
 
 
 
-
-
-
 </div>
-
-
 
 
 
@@ -627,20 +510,13 @@ className="border border-purple-400/20 rounded-2xl p-6 bg-purple-400/5 hover:bg-
 
 
 
-
-
-
 <p className="text-gray-400 mt-5 line-clamp-3">
-
 
 {post.content.slice(0,180)}
 
 ...
 
-
 </p>
-
-
 
 
 
@@ -655,9 +531,7 @@ className="mt-6 text-purple-300 text-sm hover:underline"
 
 >
 
-
 READ INTELLIGENCE →
-
 
 </button>
 
@@ -665,11 +539,7 @@ READ INTELLIGENCE →
 
 
 
-
-
-
 </article>
-
 
 
 ))
@@ -682,16 +552,9 @@ READ INTELLIGENCE →
 </section>
 
 
-
-
-
-
-
 </main>
 
-
 );
-
 
 
 }

@@ -10,9 +10,7 @@ import { prisma } from "@/lib/prisma";
 
 
 
-
 export async function POST(req:Request){
-
 
 
 try{
@@ -20,10 +18,7 @@ try{
 
 
 const body =
-
 await req.json();
-
-
 
 
 
@@ -34,49 +29,7 @@ recoveryKey,
 
 newPassword
 
-} = body;
-
-
-
-
-
-
-
-
-
-if(
-
-!recoveryKey ||
-
-!newPassword
-
-){
-
-
-
-return NextResponse.json(
-
-{
-
-success:false,
-
-error:"Missing recovery information"
-
-},
-
-{
-
-status:400
-
-}
-
-);
-
-
-
-}
-
-
+}=body;
 
 
 
@@ -88,46 +41,114 @@ if(
 
 typeof recoveryKey !== "string" ||
 
-typeof newPassword !== "string" ||
-
-newPassword.length < 8
+typeof newPassword !== "string"
 
 ){
 
 
 return NextResponse.json(
-
 {
-
 success:false,
-
 error:"Invalid recovery information"
-
 },
-
 {
-
 status:400
-
 }
-
 );
 
 
 }
 
 
+
+
+
+
+
+const cleanRecoveryKey =
+recoveryKey.trim();
+
+
+
+const cleanPassword =
+newPassword.trim();
+
+
+
+
+
+
+
+
+if(
+
+cleanRecoveryKey.length < 8 ||
+
+cleanPassword.length < 8
+
+){
+
+
+
+return NextResponse.json(
+{
+success:false,
+error:"Invalid recovery information"
+},
+{
+status:400
+}
+);
+
+
+}
+
+
+
+
+
+
+
+
+const strongPassword =
+
+/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+
+
+if(!strongPassword.test(cleanPassword)){
+
+
+
+return NextResponse.json(
+{
+success:false,
+error:"Password complexity requirement failed"
+},
+{
+status:400
+}
+);
+
+
+}
+
+
+
+
+
+
+
+
+
 const admin =
-
 await prisma.adminUser.findUnique({
-
 
 where:{
 
 username:"owner"
 
 }
-
 
 });
 
@@ -150,23 +171,14 @@ if(
 
 
 return NextResponse.json(
-
 {
-
 success:false,
-
 error:"Recovery unavailable"
-
 },
-
 {
-
 status:401
-
 }
-
 );
-
 
 
 }
@@ -181,9 +193,15 @@ status:401
 
 const validRecovery =
 await bcrypt.compare(
-recoveryKey.trim(),
+
+cleanRecoveryKey,
+
 admin.recoveryKeyHash
+
 );
+
+
+
 
 
 
@@ -193,23 +211,14 @@ if(!validRecovery){
 
 
 return NextResponse.json(
-
 {
-
 success:false,
-
 error:"Invalid recovery key"
-
 },
-
 {
-
 status:401
-
 }
-
 );
-
 
 
 }
@@ -224,10 +233,9 @@ status:401
 
 
 const newHash =
-
 await bcrypt.hash(
 
-newPassword,
+cleanPassword,
 
 12
 
@@ -244,13 +252,11 @@ newPassword,
 
 await prisma.adminUser.update({
 
-
 where:{
 
 username:"owner"
 
 },
-
 
 data:{
 
@@ -258,9 +264,7 @@ passwordHash:newHash
 
 }
 
-
 });
-
 
 
 
@@ -283,10 +287,8 @@ message:"Password recovered"
 
 
 
-
-
-
 }
+
 
 catch(error){
 
@@ -304,27 +306,17 @@ error
 
 
 return NextResponse.json(
-
 {
-
 success:false,
-
 error:"Recovery failed"
-
 },
-
 {
-
 status:500
-
 }
-
 );
 
 
-
 }
-
 
 
 

@@ -9,10 +9,7 @@ import { useActivity } from "@/hooks/useActivity";
 
 
 
-
 export default function ActivityTimeline(){
-
-
 
 
 
@@ -23,9 +20,6 @@ activity,
 clearActivity
 
 }=useActivity();
-
-
-
 
 
 
@@ -54,7 +48,12 @@ y:0
 }}
 
 
+
 className="
+
+w-full
+
+min-h-65
 
 border
 
@@ -65,6 +64,8 @@ rounded-2xl
 p-6
 
 bg-black/40
+
+backdrop-blur-xl
 
 font-mono
 
@@ -81,7 +82,7 @@ shadow-blue-500/10
 
 
 
-
+{/* HEADER */}
 
 <div className="
 
@@ -91,6 +92,12 @@ justify-between
 
 items-center
 
+border-b
+
+border-blue-400/10
+
+pb-4
+
 "
 
 >
@@ -99,6 +106,7 @@ items-center
 
 
 
+<div>
 
 
 <p className="
@@ -118,6 +126,25 @@ text-sm
 
 
 
+<p className="
+
+text-gray-500
+
+text-xs
+
+mt-2
+
+">
+
+System events and interaction history
+
+</p>
+
+
+</div>
+
+
+
 
 
 
@@ -134,7 +161,21 @@ text-xs
 
 text-gray-400
 
-hover:text-red-400
+border
+
+border-red-400/20
+
+rounded-lg
+
+px-3
+
+py-1
+
+hover:text-red-300
+
+hover:bg-red-400/10
+
+transition
 
 "
 
@@ -143,8 +184,6 @@ hover:text-red-400
 CLEAR
 
 </button>
-
-
 
 
 
@@ -160,7 +199,7 @@ CLEAR
 
 
 
-
+{/* BODY */}
 
 <div className="
 
@@ -172,6 +211,8 @@ max-h-80
 
 overflow-y-auto
 
+pr-2
+
 "
 
 >
@@ -181,19 +222,29 @@ overflow-y-auto
 
 
 
+{
 
+activity.length===0
 
+?
 
+(
 
-{activity.length===0 && (
+<div className="
 
+h-32
 
+flex
 
-<p className="
+items-center
+
+justify-center
 
 text-gray-500
 
 text-sm
+
+tracking-wide
 
 "
 
@@ -201,39 +252,53 @@ text-sm
 
 No system activity recorded.
 
-</p>
+</div>
 
+)
 
+:
 
-)}
-
-
-
-
-
-
+activity.map(item=>(
 
 
 
 
 
 
-{activity.map(item=>(
-
-
-
-
-
-
-
-
-<div
+<motion.div
 
 
 key={item.id}
 
 
+initial={{
+
+opacity:0,
+
+x:-10
+
+}}
+
+
+animate={{
+
+opacity:1,
+
+x:0
+
+}}
+
+
+
 className="
+
+grid
+
+grid-cols-[120px_1fr_120px]
+
+items-center
+
+gap-5
 
 border
 
@@ -241,17 +306,21 @@ border-blue-400/20
 
 rounded-xl
 
-p-4
+px-5
+
+py-4
 
 bg-blue-400/5
+
+hover:bg-blue-400/10
+
+hover:border-blue-300/40
+
+transition
 
 "
 
 >
-
-
-
-
 
 
 
@@ -279,14 +348,11 @@ text-xs
 
 
 
-
 <p className="
 
 text-gray-300
 
 text-sm
-
-mt-2
 
 "
 
@@ -302,15 +368,13 @@ mt-2
 
 
 
-
-
 <p className="
 
 text-gray-500
 
 text-xs
 
-mt-2
+text-right
 
 "
 
@@ -325,24 +389,15 @@ mt-2
 
 
 
-
-
-
-</div>
-
+</motion.div>
 
 
 
 
 
+))
 
-
-))}
-
-
-
-
-
+}
 
 
 

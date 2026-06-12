@@ -5,16 +5,11 @@ import { motion } from "framer-motion";
 
 
 
-
-
-
 type Props={
 
 logs:string[];
 
 };
-
-
 
 
 
@@ -30,8 +25,6 @@ logs
 
 
 
-
-
 return(
 
 <motion.div
@@ -41,7 +34,7 @@ initial={{
 
 opacity:0,
 
-x:20
+y:20
 
 }}
 
@@ -50,13 +43,17 @@ animate={{
 
 opacity:1,
 
-x:0
+y:0
 
 }}
 
 
 
 className="
+
+w-full
+
+min-h-72
 
 border
 
@@ -66,7 +63,9 @@ rounded-2xl
 
 bg-black/50
 
-p-5
+backdrop-blur-xl
+
+p-6
 
 font-mono
 
@@ -74,9 +73,7 @@ shadow-lg
 
 shadow-blue-500/10
 
-h-72
-
-overflow-y-auto
+overflow-hidden
 
 "
 
@@ -86,8 +83,29 @@ overflow-y-auto
 
 
 
+{/* HEADER */}
+
+<div className="
+
+flex
+
+items-center
+
+justify-between
+
+border-b
+
+border-blue-400/10
+
+pb-4
+
+"
+
+>
 
 
+
+<div>
 
 
 <p className="
@@ -106,12 +124,6 @@ text-sm
 
 
 
-
-
-
-
-
-
 <p className="
 
 text-xs
@@ -127,11 +139,55 @@ Real-time Nexus activity stream
 </p>
 
 
+</div>
+
+
+
+
+<button
+
+className="
+
+text-xs
+
+text-gray-400
+
+border
+
+border-blue-400/20
+
+rounded-lg
+
+px-3
+
+py-1
+
+hover:text-blue-300
+
+hover:bg-blue-400/10
+
+transition
+
+"
+
+>
+
+CLEAR
+
+</button>
+
+
+
+
+</div>
 
 
 
 
 
+
+
+{/* LOG AREA */}
 
 
 <div className="
@@ -142,13 +198,15 @@ space-y-3
 
 text-sm
 
+max-h-56
+
+overflow-y-auto
+
+pr-2
+
 "
 
 >
-
-
-
-
 
 
 
@@ -160,19 +218,35 @@ logs.length===0
 
 ?
 
-<p className="text-gray-500">
+(
 
-No activity detected
+<div className="
 
-</p>
+h-32
+
+flex
+
+items-center
+
+justify-center
+
+text-gray-500
+
+tracking-wide
+
+"
+
+>
+
+No system activity recorded.
+
+</div>
+
+)
 
 :
 
 logs.map((log,index)=>(
-
-
-
-
 
 
 
@@ -205,16 +279,27 @@ x:0
 
 className="
 
+flex
+
+gap-3
+
 text-green-400
+
+bg-green-400/5
+
+border
+
+border-green-400/10
+
+rounded-lg
+
+px-3
+
+py-2
 
 "
 
 >
-
-
-
-
-
 
 
 
@@ -226,26 +311,18 @@ text-green-400
 
 
 
-{" "}
 
-
+<span>
 
 {log}
 
-
-
-
+</span>
 
 
 
 
 
 </motion.div>
-
-
-
-
-
 
 
 
@@ -257,16 +334,7 @@ text-green-400
 
 
 
-
-
-
-
-
 </div>
-
-
-
-
 
 
 

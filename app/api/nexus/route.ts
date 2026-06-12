@@ -1,11 +1,20 @@
+import { NextResponse } from "next/server";
+
 import { prisma } from "@/lib/prisma";
+
+
+
 
 
 
 export async function GET(){
 
 
+
 try{
+
+
+
 
 
 const [
@@ -24,11 +33,14 @@ projects,
 
 blogs
 
-] = await Promise.all([
+
+]=await Promise.all([
 
 
 
-// SAFE IDENTITY
+
+
+
 
 prisma.identity.findFirst({
 
@@ -42,7 +54,15 @@ summary:true,
 
 location:true,
 
-avatar:true
+avatar:true,
+
+email:true,
+
+linkedin:true,
+
+github:true,
+
+resume:true
 
 }
 
@@ -52,7 +72,7 @@ avatar:true
 
 
 
-// SAFE EDUCATION
+
 
 prisma.education.findMany({
 
@@ -76,7 +96,8 @@ focus:true
 
 
 
-// SAFE EXPERIENCE
+
+
 
 prisma.experience.findMany({
 
@@ -100,7 +121,8 @@ details:true
 
 
 
-// SAFE SKILLS
+
+
 
 prisma.skill.findMany({
 
@@ -118,7 +140,9 @@ name:true
 
 
 
-// SAFE CERTS
+
+
+
 
 prisma.certification.findMany({
 
@@ -143,7 +167,7 @@ skills:true
 
 
 
-// SAFE PROJECTS
+
 
 prisma.project.findMany({
 
@@ -167,7 +191,8 @@ technologies:true
 
 
 
-// SAFE BLOGS
+
+
 
 prisma.blog.findMany({
 
@@ -187,15 +212,19 @@ date:true
 
 },
 
+
 orderBy:{
 
 date:"desc"
 
 }
 
+
 })
 
+
 ]);
+
 
 
 
@@ -223,17 +252,24 @@ pharmacy:[] as string[]
 
 
 
+
+
 skills.forEach(skill=>{
 
 
-if(skill.category in skillGroups){
+const category =
+skill.category as keyof typeof skillGroups;
 
 
-skillGroups[
 
-skill.category as keyof typeof skillGroups
+if(skillGroups[category]){
 
-].push(skill.name);
+
+skillGroups[category].push(
+
+skill.name
+
+);
 
 
 }
@@ -248,10 +284,38 @@ skill.category as keyof typeof skillGroups
 
 
 
-return Response.json({
+
+return NextResponse.json({
 
 
-identity,
+
+identity:
+
+
+
+identity || {
+
+name:"",
+
+headline:"",
+
+summary:"",
+
+location:null,
+
+avatar:null,
+
+email:null,
+
+linkedin:null,
+
+github:null,
+
+resume:null
+
+},
+
+
 
 
 education,
@@ -276,7 +340,10 @@ posts:blogs
 }
 
 
+
 });
+
+
 
 
 
@@ -287,7 +354,10 @@ posts:blogs
 }
 
 
+
 catch(error){
+
+
 
 
 
@@ -301,27 +371,47 @@ error
 
 
 
-return Response.json(
+
+
+
+return NextResponse.json(
+
 
 {
 
-error:
+identity:null,
 
-"Nexus unavailable"
+education:[],
+
+experience:[],
+
+skills:{},
+
+certifications:[],
+
+projects:[],
+
+blogs:{
+
+posts:[]
+
+}
 
 },
 
+
 {
-
-status:500
-
+status:200
 }
+
 
 );
 
 
 
+
 }
+
 
 
 

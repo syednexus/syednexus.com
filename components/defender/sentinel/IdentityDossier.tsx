@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 
 import { useNexusData } from "@/hooks/useNexusData";
 
+import SocialLinks from "@/components/core/SocialLinks";
+
 
 
 
@@ -15,11 +17,8 @@ export default function IdentityDossier(){
 
 
 
-
-
 const profile =
 useNexusData();
-
 
 
 
@@ -36,13 +35,36 @@ profile.experience?.[0];
 
 
 
+const emails =
+
+Array.isArray(profile.identity.email)
+
+?
+
+profile.identity.email
+
+:
+
+profile.identity.email
+
+?
+
+[profile.identity.email]
+
+:
+
+[];
+
+
+
+
+
 
 
 
 return(
 
 <motion.div
-
 
 initial={{
 
@@ -62,23 +84,15 @@ x:0
 }}
 
 
-
 className="
 
 border
-
 border-cyan-400/30
-
 rounded-2xl
-
 p-6
-
 bg-cyan-400/5
-
 backdrop-blur
-
 font-mono
-
 nexus-hover
 
 "
@@ -103,29 +117,19 @@ nexus-hover
 
 
 
-
-
 <img
-
 
 src={profile.identity.avatar || "/profile.jpg"}
 
-
 alt={profile.identity.name}
-
 
 className="
 
 w-24
-
 h-24
-
 rounded-full
-
 border
-
 border-cyan-400
-
 object-cover
 
 "
@@ -138,10 +142,7 @@ object-cover
 
 
 
-
-
 <div>
-
 
 
 
@@ -149,9 +150,7 @@ object-cover
 <p className="
 
 text-cyan-300
-
 text-xs
-
 tracking-widest
 
 ">
@@ -166,12 +165,9 @@ tracking-widest
 
 
 
-
-
 <h2 className="
 
 text-3xl
-
 mt-2
 
 ">
@@ -186,13 +182,10 @@ mt-2
 
 
 
-
 <p className="
 
 text-sm
-
 text-gray-400
-
 mt-2
 
 ">
@@ -206,13 +199,10 @@ mt-2
 
 
 
-
 <p className="
 
 text-xs
-
 text-green-400
-
 mt-3
 
 ">
@@ -225,15 +215,13 @@ mt-3
 
 
 
-
 </div>
 
 
 
-
-
-
 </div>
+
+
 
 
 
@@ -250,13 +238,9 @@ mt-3
 <div className="
 
 grid
-
 grid-cols-1
-
 md:grid-cols-3
-
 gap-4
-
 mt-8
 
 ">
@@ -267,23 +251,15 @@ mt-8
 
 
 
-
-
 <div className="
 
 border
-
 border-cyan-400/20
-
 rounded-xl
-
 p-4
-
 bg-black/30
 
 ">
-
-
 
 
 <p className="text-cyan-300 text-xs">
@@ -293,14 +269,11 @@ PRIMARY TRACK
 </p>
 
 
-
 <p className="text-gray-300 mt-2">
 
 SOC Analyst Pathway
 
 </p>
-
-
 
 
 </div>
@@ -312,22 +285,15 @@ SOC Analyst Pathway
 
 
 
-
 <div className="
 
 border
-
 border-cyan-400/20
-
 rounded-xl
-
 p-4
-
 bg-black/30
 
 ">
-
-
 
 
 <p className="text-cyan-300 text-xs">
@@ -337,7 +303,6 @@ DOMAIN EDGE
 </p>
 
 
-
 <p className="text-gray-300 mt-2">
 
 Healthcare + Cybersecurity
@@ -345,10 +310,7 @@ Healthcare + Cybersecurity
 </p>
 
 
-
-
 </div>
-
 
 
 
@@ -361,18 +323,12 @@ Healthcare + Cybersecurity
 <div className="
 
 border
-
 border-cyan-400/20
-
 rounded-xl
-
 p-4
-
 bg-black/30
 
 ">
-
-
 
 
 <p className="text-cyan-300 text-xs">
@@ -382,7 +338,6 @@ STATUS
 </p>
 
 
-
 <p className="text-gray-300 mt-2">
 
 Building Security Capability
@@ -390,19 +345,12 @@ Building Security Capability
 </p>
 
 
-
-
 </div>
 
 
 
 
-
-
-
-
 </div>
-
 
 
 
@@ -419,15 +367,7 @@ Building Security Capability
 <section className="mt-8">
 
 
-
-
-<p className="
-
-text-cyan-300
-
-text-xs
-
-">
+<p className="text-cyan-300 text-xs">
 
 CURRENT INTELLIGENCE PROFILE
 
@@ -435,21 +375,11 @@ CURRENT INTELLIGENCE PROFILE
 
 
 
-
-
-
-<p className="
-
-mt-3
-
-text-gray-300
-
-">
+<p className="mt-3 text-gray-300">
 
 {profile.identity.headline}
 
 </p>
-
 
 
 
@@ -470,15 +400,7 @@ text-gray-300
 <section className="mt-8">
 
 
-
-
-<p className="
-
-text-cyan-300
-
-text-xs
-
-">
+<p className="text-cyan-300 text-xs">
 
 ANALYST SUMMARY
 
@@ -486,18 +408,11 @@ ANALYST SUMMARY
 
 
 
-
-
-
-
 <p className="
 
 mt-3
-
 text-gray-400
-
 leading-relaxed
-
 whitespace-pre-line
 
 ">
@@ -505,10 +420,6 @@ whitespace-pre-line
 {profile.identity.summary}
 
 </p>
-
-
-
-
 
 
 </section>
@@ -530,13 +441,9 @@ whitespace-pre-line
 <div className="
 
 grid
-
 grid-cols-1
-
 md:grid-cols-2
-
 gap-4
-
 mt-8
 
 ">
@@ -547,32 +454,18 @@ mt-8
 
 
 
-
-
 <div className="
 
 border
-
 border-white/10
-
 rounded-xl
-
 p-4
-
 bg-black/20
 
 ">
 
 
-
-
-<p className="
-
-text-cyan-300
-
-text-xs
-
-">
+<p className="text-cyan-300 text-xs">
 
 LATEST EDUCATION
 
@@ -580,14 +473,7 @@ LATEST EDUCATION
 
 
 
-
-<p className="
-
-text-gray-300
-
-mt-2
-
-">
+<p className="text-gray-300 mt-2">
 
 {latestEducation?.degree}
 
@@ -595,11 +481,7 @@ mt-2
 
 
 
-
-
-
 </div>
-
 
 
 
@@ -612,27 +494,15 @@ mt-2
 <div className="
 
 border
-
 border-white/10
-
 rounded-xl
-
 p-4
-
 bg-black/20
 
 ">
 
 
-
-
-<p className="
-
-text-cyan-300
-
-text-xs
-
-">
+<p className="text-cyan-300 text-xs">
 
 OPERATION TRACE
 
@@ -640,36 +510,20 @@ OPERATION TRACE
 
 
 
-
-<p className="
-
-text-gray-300
-
-mt-2
-
-">
+<p className="text-gray-300 mt-2">
 
 {latestExperience?.role}
 
 </p>
 
 
-
-
-
 </div>
 
 
 
 
 
-
-
-
-
 </div>
-
-
 
 
 
@@ -686,13 +540,9 @@ mt-2
 <div className="mt-8">
 
 
-
-
-
 <p className="
 
 text-cyan-300
-
 text-xs
 
 ">
@@ -705,44 +555,37 @@ SECURE CONTACT CHANNELS
 
 
 
-
-{profile.identity.email.map(mail=>(
-
-
+{emails.map(mail=>(
 
 
 <p
 
-
 key={mail}
-
 
 className="
 
 text-gray-400
-
 text-sm
-
 mt-2
 
 "
 
 >
 
-
-{mail}
-
+📧 {mail}
 
 </p>
-
-
-
 
 
 ))}
 
 
 
+
+
+
+
+<SocialLinks/>
 
 
 
@@ -756,11 +599,10 @@ mt-2
 
 
 
-
-
 </motion.div>
 
 );
+
 
 
 }
