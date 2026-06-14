@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 
 import { prisma } from "@/lib/prisma";
+import { isRateLimited } from "@/lib/rateLimit";
 
 
 
@@ -14,6 +15,20 @@ export async function POST(req:Request){
 
 
 try{
+
+if(isRateLimited(req,"admin-recovery",3,60*60*1000)){
+
+return NextResponse.json(
+{
+success:false,
+error:"Too many recovery attempts"
+},
+{
+status:429
+}
+);
+
+}
 
 
 

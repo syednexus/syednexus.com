@@ -62,8 +62,18 @@ adapter
 async function main(){
 
 
-console.log("🌱 Starting Nexus seed...");
+if(
+process.env.ALLOW_DB_SEED !== "true"
+){
 
+throw new Error(
+"🚨 Database seed blocked. Set ALLOW_DB_SEED=true to continue."
+);
+
+}
+
+
+console.log("🌱 Starting Nexus seed...");
 
 
 // CLEAN OLD DATA

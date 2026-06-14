@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 
 import { prisma } from "@/lib/prisma";
 import { adminSessionCookie, createAdminSessionToken } from "@/lib/auth";
+import { isRateLimited } from "@/lib/rateLimit";
 
 
 
@@ -13,6 +14,22 @@ export async function POST(req:Request){
 
 
 try{
+
+if(isRateLimited(req,"admin-login",5,15*60*1000)){
+
+return NextResponse.json(
+
+{
+error:"TOO MANY ATTEMPTS"
+},
+
+{
+status:429
+}
+
+);
+
+}
 
 
 const body =
@@ -62,7 +79,7 @@ if(!admin){
 
 
 return NextResponse.json(
-{error:"NO ADMIN"},
+{error:"INVALID"},
 {status:401}
 );
 
@@ -149,7 +166,7 @@ return response;
 
 }
 
-catch(error){
+catch{
 
 
 

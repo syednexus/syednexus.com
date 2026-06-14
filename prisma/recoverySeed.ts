@@ -48,7 +48,7 @@ recoveryKey,
 
 
 
-await prisma.adminUser.update({
+await prisma.adminUser.upsert({
 
 
 where:{
@@ -58,7 +58,26 @@ username:"owner"
 },
 
 
-data:{
+update:{
+
+recoveryKeyHash:hash
+
+},
+
+
+create:{
+
+username:"owner",
+
+passwordHash:await bcrypt.hash(
+
+process.env.ADMIN_PASSWORD ||
+
+crypto.randomBytes(24).toString("hex"),
+
+12
+
+),
 
 recoveryKeyHash:hash
 

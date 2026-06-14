@@ -211,7 +211,6 @@ projects,
 
 blogs,
 
-aiMemory
 
 
 ]=await Promise.all([
@@ -273,7 +272,7 @@ projects,
 
 blogs,
 
-aiMemory
+
 
 };
 
