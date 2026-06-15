@@ -15,11 +15,11 @@ email:[
 "syedmohiuddin@syednexus.com"
 ],
 
-linkedin:"",
+linkedin:"https://www.linkedin.com/in/syedmohiuddin7",
 
-github:"",
+github:"https://github.com/syednexus",
 
-resume:"",
+resume:"/Resume.pdf",
 
 headline:
 

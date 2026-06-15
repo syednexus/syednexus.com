@@ -5,14 +5,9 @@ import { GoogleGenAI } from "@google/genai";
 import { prisma } from "@/lib/prisma";
 
 
+export const runtime = "nodejs";
 
-
-const ai =
-new GoogleGenAI({
-
-apiKey:process.env.GEMINI_API_KEY!
-
-});
+export const dynamic = "force-dynamic";
 
 
 
@@ -22,6 +17,26 @@ apiKey:process.env.GEMINI_API_KEY!
 
 
 async function runGemini(prompt:string){
+
+const apiKey =
+process.env.GEMINI_API_KEY;
+
+
+if(!apiKey){
+
+console.error("GEMINI_API_KEY missing");
+
+return null;
+
+}
+
+
+const ai =
+new GoogleGenAI({
+
+apiKey
+
+});
 
 
 
@@ -72,8 +87,9 @@ return response.text;
 catch(error){
 
 
-console.log(
-`${model} unavailable`
+console.error(
+`${model} unavailable`,
+error
 );
 
 

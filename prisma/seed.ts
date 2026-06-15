@@ -133,6 +133,20 @@ profile.identity.email[0]
 
 profile.identity.email
 
+,
+
+
+linkedin:
+profile.identity.linkedin,
+
+
+github:
+profile.identity.github,
+
+
+resume:
+profile.identity.resume
+
 }
 
 });
