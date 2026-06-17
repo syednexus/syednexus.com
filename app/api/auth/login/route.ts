@@ -166,23 +166,21 @@ return response;
 
 }
 
-catch{
+catch(error){
 
-
+console.error(
+"LOGIN ERROR",
+error
+);
 
 return NextResponse.json(
-
 {
 error:"AUTH FAILED"
 },
-
 {
 status:500
 }
-
 );
-
-
 
 }
 
