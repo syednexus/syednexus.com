@@ -7,13 +7,12 @@ import { motion } from "framer-motion";
 
 import { useNexus } from "@/context/NexusContext";
 
-import { avatarProfiles } from "@/data/avatar";
-
 
 
 
 
 export default function NexusAvatar(){
+
 
 
 const {
@@ -32,102 +31,84 @@ completeObjective
 
 
 
+
 const [open,setOpen] =
 useState(false);
 
 
 
+const [command,setCommand] =
+useState("");
+
+
+
+const [terminal,setTerminal] =
+useState<string[]>([
+
+"Nexus CLI initialized",
+
+"type help"
+
+]);
 
 
 
 
-const avatarData={
-
-
-gateway:{
-
-icon:"🌌",
-
-title:"NEXUS GUIDE",
-
-role:"Digital Intelligence Assistant",
-
-outfit:"Core Interface",
-
-message:"Welcome. Select a Nexus pathway to begin."
-
-},
-
-
-
-sentinel:{
-
-icon:"🛡",
-
-title:"SENTINEL ANALYST",
-
-role:"Cybersecurity Intelligence Agent",
-
-outfit:"SOC Analyst Gear",
-
-message:"Monitoring cybersecurity intelligence."
-
-},
 
 
 
 
-lab:{
 
-icon:"🥷",
-
-title:"CYBER OPERATOR",
-
-role:"Security Research Assistant",
-
-outfit:"Operator Interface",
-
-message:"Security lab environment active."
-
-},
+function executeCommand(){
 
 
 
+const cmd =
+command.toLowerCase().trim();
 
-medcore:{
 
-icon:"🥼",
 
-title:"MEDCORE SPECIALIST",
-
-role:"Healthcare Intelligence Agent",
-
-outfit:"Medical Research Coat",
-
-message:"Healthcare intelligence systems online."
-
-},
+let response =
+"Unknown command. Type help";
 
 
 
 
-owner:{
 
-icon:"👑",
 
-title:"NEXUS ARCHITECT",
+if(cmd==="help"){
 
-role:"System Administrator",
 
-outfit:"Command Interface",
+response =
 
-message:"Administrator control active."
+`
+Available commands:
+
+profile
+projects
+soc
+medcore
+resume
+system
+clear
+`;
 
 }
 
 
 
-};
+
+else if(cmd==="profile"){
+
+
+changeSystem("gateway");
+
+
+response =
+"Loading Nexus profile interface...";
+
+
+}
 
 
 
@@ -135,43 +116,15 @@ message:"Administrator control active."
 
 
 
-const current =
-avatarData[avatar];
-
-
-const actions =
-avatarProfiles[avatar].actions;
-
-
-
-
-
-
-
-
-
-function executeAction(action:string){
-
-
-
-const command =
-action.toLowerCase();
-
-
-
-
-if(
-
-command.includes("project") ||
-
-command.includes("lab")
-
-){
+else if(cmd==="projects"){
 
 
 changeSystem("lab");
 
-return;
+
+response =
+"Opening project environment...";
+
 
 }
 
@@ -179,20 +132,17 @@ return;
 
 
 
-if(
 
-command.includes("cyber") ||
 
-command.includes("sentinel") ||
-
-command.includes("skill")
-
-){
+else if(cmd==="soc"){
 
 
 changeSystem("defender");
 
-return;
+
+response =
+"Sentinel SOC simulation loading...";
+
 
 }
 
@@ -200,20 +150,17 @@ return;
 
 
 
-if(
 
-command.includes("health") ||
 
-command.includes("medical") ||
-
-command.includes("pharma")
-
-){
+else if(cmd==="medcore"){
 
 
 changeSystem("medcore");
 
-return;
+
+response =
+"MedCore intelligence system online...";
+
 
 }
 
@@ -222,11 +169,12 @@ return;
 
 
 
-if(command.includes("resume")){
 
+else if(cmd==="resume"){
 
 
 completeObjective("resume");
+
 
 window.open(
 
@@ -237,10 +185,74 @@ window.open(
 );
 
 
+
+response =
+"Opening resume...";
+
+
+}
+
+
+
+
+
+
+
+else if(cmd==="system"){
+
+
+response =
+
+`
+Visitor : ${visitor}
+
+Mode    : ${avatar}
+
+Status  : ONLINE
+`;
+
+
+}
+
+
+
+
+
+
+else if(cmd==="clear"){
+
+
+setTerminal([]);
+
+
+setCommand("");
+
+
 return;
 
 
 }
+
+
+
+
+
+
+
+setTerminal([
+
+...terminal,
+
+"syed@nexus:~$ "+command,
+
+response
+
+]);
+
+
+
+setCommand("");
+
 
 
 }
@@ -255,14 +267,20 @@ return;
 
 return(
 
-<motion.div
+<>
+
+
+{/* TERMINAL BUTTON */}
+
+
+<motion.button
 
 
 initial={{
 
 opacity:0,
 
-x:-40
+scale:0.8
 
 }}
 
@@ -271,9 +289,91 @@ animate={{
 
 opacity:1,
 
-x:0
+scale:1
 
 }}
+
+
+
+onClick={()=>setOpen(true)}
+
+
+
+className="
+
+fixed
+left-6
+bottom-6
+
+z-50
+
+w-16
+h-16
+
+rounded-lg
+
+bg-black/80
+backdrop-blur
+
+border
+border-green-400
+
+text-green-400
+
+font-mono
+font-bold
+text-xl
+
+shadow-lg
+shadow-green-500/30
+
+hover:scale-110
+transition
+
+"
+
+>
+
+
+&gt;_
+
+
+</motion.button>
+
+
+
+
+
+
+
+
+
+{open && (
+
+
+
+<motion.div
+
+
+initial={{
+
+opacity:0,
+
+y:30
+
+}}
+
+
+
+animate={{
+
+opacity:1,
+
+y:0
+
+}}
+
+
 
 
 className="
@@ -282,15 +382,43 @@ fixed
 
 left-6
 
-bottom-6
+bottom-28
 
 z-50
 
+
+
+w-105
+
+h-105
+
+
+
+bg-black
+
+
+
+border
+
+border-green-500
+
+
+
+rounded-xl
+
+
+
+shadow-xl
+
+shadow-green-500/20
+
+
+
 font-mono
 
-max-h-[90vh]
 
-overflow-y-auto
+
+overflow-hidden
 
 "
 
@@ -302,33 +430,36 @@ overflow-y-auto
 
 
 
-{
 
-open
+{/* HEADER */}
 
-?
 
-(
 
 <div
 
 className="
 
-w-72
+flex
 
-border
+items-center
 
-border-purple-400/40
+justify-between
 
-rounded-2xl
 
-bg-[#020617]
 
-p-5
+px-4
 
-shadow-xl
+py-3
 
-shadow-purple-500/20
+
+
+border-b
+
+border-green-900
+
+
+
+bg-green-950/20
 
 "
 
@@ -336,136 +467,26 @@ shadow-purple-500/20
 
 
 
+<div>
 
 
+<p
 
-<div className="flex justify-between items-center">
+className="
 
+text-green-400
 
-<p className="text-purple-300 text-xs tracking-widest">
+text-sm
 
-AVATAR ENGINE
+tracking-widest
 
-</p>
-
-
-
-<button
-
-onClick={()=>setOpen(false)}
-
-className="text-gray-400"
+"
 
 >
 
-—
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-<motion.div
-
-
-animate={{
-
-y:[0,-8,0]
-
-}}
-
-
-transition={{
-
-duration:3,
-
-repeat:Infinity
-
-}}
-
-
-className="text-center mt-5"
-
->
-
-
-<div className="text-6xl">
-
-{current.icon}
-
-</div>
-
-
-
-<h2 className="text-purple-300 mt-3">
-
-{current.title}
-
-</h2>
-
-
-
-<p className="text-xs text-gray-400">
-
-{current.role}
+SYED@NEXUS:~$
 
 </p>
-
-
-
-</motion.div>
-
-
-
-
-
-
-
-
-<div className="mt-5 text-xs space-y-3">
-
-
-<p>
-
-VISITOR:
-
-<span className="text-purple-300">
-
-{" "}
-
-{visitor.toUpperCase()}
-
-</span>
-
-</p>
-
-
-
-
-
-<p>
-
-OUTFIT:
-
-<span className="text-purple-300">
-
-{" "}
-
-{current.outfit}
-
-</span>
-
-
-</p>
-
-
 
 
 
@@ -474,144 +495,248 @@ OUTFIT:
 
 className="
 
-border-t
+text-xs
 
-border-purple-400/20
-
-pt-3
-
-text-gray-300
+text-gray-500
 
 "
 
 >
 
-"{current.message}"
+{avatar.toUpperCase()} MODE
+
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+<button
+
+
+onClick={()=>setOpen(false)}
+
+
+className="
+
+text-gray-400
+
+hover:text-white
+
+"
+
+>
+
+
+×
+
+
+</button>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+{/* TERMINAL OUTPUT */}
+
+
+
+<div
+
+
+className="
+
+h-75
+
+p-4
+
+
+
+overflow-auto
+
+
+
+text-sm
+
+text-green-400
+
+
+
+space-y-2
+
+"
+
+>
+
+
+
+{
+
+
+terminal.map((line,index)=>(
+
+
+
+<p key={index}
+
+className="whitespace-pre-line"
+
+>
+
+
+{line}
+
 
 </p>
 
 
 
-</div>
-
-
-
-
-
-
-
-
-<div className="mt-5 space-y-2">
-
-
-{
-
-actions.map(action=>(
-
-
-<button
-
-
-key={action}
-
-
-onClick={()=>executeAction(action)}
-
-
-className="
-
-w-full
-
-border
-
-border-purple-400/20
-
-rounded-lg
-
-py-2
-
-text-xs
-
-text-purple-200
-
-hover:bg-purple-400/10
-
-transition
-
-"
-
->
-
-
-{action}
-
-
-</button>
-
-
 ))
 
+
 }
 
 
-</div>
-
-
-
-
 
 </div>
 
 
-)
-
-:
-
-(
-
-<button
 
 
-onClick={()=>setOpen(true)}
+
+
+
+
+
+{/* COMMAND INPUT */}
+
+
+
+
+<div
 
 
 className="
 
-w-16
+border-t
 
-h-16
+border-green-900
 
-rounded-full
 
-border
 
-border-purple-400
+p-3
 
-bg-[#020617]
 
-text-3xl
 
-shadow-lg
+flex
 
-shadow-purple-500/30
+items-center
 
-hover:scale-110
-
-transition
+gap-2
 
 "
 
 >
 
 
-{current.icon}
+
+<span
+
+className="text-green-500"
+
+>
+
+$
+
+</span>
 
 
-</button>
+
+
+
+
+<input
+
+
+value={command}
+
+
+
+onChange={(e)=>
+
+setCommand(
+
+e.target.value
 
 )
 
 }
+
+
+
+
+onKeyDown={(e)=>{
+
+
+if(e.key==="Enter"){
+
+
+executeCommand();
+
+
+}
+
+
+}}
+
+
+
+className="
+
+flex-1
+
+
+
+bg-transparent
+
+
+
+outline-none
+
+
+
+text-green-400
+
+"
+
+
+
+autoFocus
+
+
+/>
+
+
+
+
+</div>
+
+
 
 
 
@@ -619,7 +744,17 @@ transition
 
 </motion.div>
 
+
+
+)}
+
+
+
+</>
+
+
 );
+
 
 
 }
