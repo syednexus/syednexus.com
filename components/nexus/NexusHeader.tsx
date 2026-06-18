@@ -8,9 +8,35 @@ import { useNexusSound } from "./NexusSound";
 import NexusFeedback from "./NexusFeedback";
 
 
+import {
+
+signIn,
+
+signOut,
+
+useSession
+
+} from "next-auth/react";
+
+
+
+
+
+
 
 
 export default function NexusHeader(){
+
+
+
+const {
+
+data:session,
+
+status
+
+}=useSession();
+
 
 
 
@@ -26,8 +52,11 @@ toggleSound
 
 
 
-return (
 
+
+
+
+return (
 
 <header
 
@@ -50,7 +79,6 @@ border-green-900/40
 "
 
 >
-
 
 
 <div
@@ -80,7 +108,6 @@ justify-between
 
 
 
-
 {/* LOGO */}
 
 
@@ -100,11 +127,11 @@ tracking-widest
 
 >
 
-
 SYED NEXUS
 
-
 </Link>
+
+
 
 
 
@@ -135,7 +162,6 @@ text-gray-400
 >
 
 
-
 <Link
 
 href="/"
@@ -144,9 +170,7 @@ className="hover:text-green-400 transition"
 
 >
 
-
 Home
-
 
 </Link>
 
@@ -162,9 +186,7 @@ className="hover:text-green-400 transition"
 
 >
 
-
 Portfolio
-
 
 </Link>
 
@@ -181,9 +203,7 @@ className="hover:text-green-400 transition"
 
 >
 
-
 SOC
-
 
 </Link>
 
@@ -200,9 +220,7 @@ className="hover:text-green-400 transition"
 
 >
 
-
 Lab
-
 
 </Link>
 
@@ -219,9 +237,7 @@ className="hover:text-green-400 transition"
 
 >
 
-
 Games
-
 
 </Link>
 
@@ -238,9 +254,7 @@ className="hover:text-green-400 transition"
 
 >
 
-
 Blog
-
 
 </Link>
 
@@ -256,7 +270,7 @@ Blog
 
 
 
-{/* ACTION AREA */}
+{/* ACTIONS */}
 
 
 <div
@@ -275,10 +289,15 @@ gap-3
 
 
 
-
 <NexusFeedback />
-<button
 
+
+
+
+
+
+
+<button
 
 onClick={toggleSound}
 
@@ -289,9 +308,11 @@ border
 
 border-green-700
 
+
 px-3
 
 py-1
+
 
 rounded
 
@@ -311,7 +332,6 @@ transition
 >
 
 
-
 {
 
 enabled
@@ -327,7 +347,6 @@ enabled
 }
 
 
-
 </button>
 
 
@@ -338,8 +357,50 @@ enabled
 
 
 
+{/* AUTH AREA */}
+
+
+
+{
+
+status==="loading"
+
+?
+
+(
+
+<span
+
+className="
+
+text-green-400
+
+text-xs
+
+"
+
+>
+
+...
+
+</span>
+
+)
+
+
+
+:
+
+!session
+
+?
+
+(
 
 <button
+
+
+onClick={()=>signIn("google")}
 
 
 className="
@@ -369,9 +430,136 @@ transition
 
 >
 
-
 Login
 
+</button>
+
+)
+
+
+
+:
+
+(
+
+<div
+
+className="
+
+flex
+
+items-center
+
+gap-3
+
+text-green-400
+
+"
+
+>
+
+
+
+<span
+
+className="text-sm"
+
+>
+
+
+{
+
+session.user?.name ??
+
+"User"
+
+}
+
+
+</span>
+
+
+
+
+
+
+
+
+
+{
+
+session.user?.role==="OWNER"
+
+&&
+
+<Link
+
+
+href="/vault"
+
+
+className="
+
+border
+
+border-yellow-500
+
+
+px-3
+
+py-1
+
+
+rounded
+
+
+text-yellow-400
+
+"
+
+>
+
+Control
+
+</Link>
+
+}
+
+
+
+
+
+
+
+
+<button
+
+
+onClick={()=>signOut()}
+
+
+className="
+
+border
+
+border-red-700
+
+
+px-3
+
+py-1
+
+
+rounded
+
+
+text-red-400
+
+"
+
+>
+
+Logout
 
 </button>
 
@@ -379,6 +567,13 @@ Login
 
 
 
+</div>
+
+)
+
+}
+
+
 
 </div>
 
@@ -387,13 +582,12 @@ Login
 
 
 </div>
-
 
 
 </header>
 
-
 );
+
 
 
 }

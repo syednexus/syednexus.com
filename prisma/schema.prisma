@@ -181,3 +181,155 @@ model AiMemory {
   updatedAt DateTime @updatedAt
 
 }
+
+model User {
+
+  id String @id @default(cuid())
+
+  name String?
+
+  email String @unique
+
+  image String?
+
+  role Role @default(USER)
+
+
+  passwordHash String?
+
+
+  mfaEnabled Boolean @default(false)
+
+  mfaSecret String?
+
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+
+  accounts Account[]
+
+  sessions Session[]
+
+  loginEvents LoginEvent[]
+
+}
+
+
+
+
+
+model Account {
+
+  id String @id @default(cuid())
+
+
+  userId String
+
+
+  type String
+
+  provider String
+
+  providerAccountId String
+
+
+  refresh_token String?
+
+  access_token String?
+
+  expires_at Int?
+
+  token_type String?
+
+  scope String?
+
+  id_token String?
+
+  session_state String?
+
+
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+
+
+  @@unique([provider, providerAccountId])
+
+}
+
+
+
+
+
+
+model Session {
+
+  id String @id @default(cuid())
+
+
+  sessionToken String @unique
+
+
+  userId String
+
+
+  expires DateTime
+
+
+  deviceId String?
+
+
+  active Boolean @default(true)
+
+
+  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
+
+}
+
+
+
+
+
+
+
+
+model LoginEvent {
+
+  id Int @id @default(autoincrement())
+
+
+  userId String?
+
+
+  email String?
+
+
+  success Boolean
+
+
+  ip String?
+
+
+  createdAt DateTime @default(now())
+
+
+  user User? @relation(fields:[userId], references:[id])
+
+}
+
+
+
+
+
+
+
+
+enum Role {
+
+OWNER
+
+MANAGER
+
+USER
+
+}

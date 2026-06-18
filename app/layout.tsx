@@ -8,6 +8,8 @@ import { NexusSoundProvider } from "@/components/nexus/NexusSound";
 
 import NexusFooter from "@/components/nexus/NexusFooter";
 
+import AuthProvider from "@/components/nexus/AuthProvider";
+
 export const metadata: Metadata = {
 
 title:"Syed Nexus | Cybersecurity Journey",
@@ -38,6 +40,7 @@ return (
 
 <html
 lang="en"
+data-scroll-behavior="smooth"
 className="h-full antialiased"
 >
 
@@ -49,6 +52,7 @@ flex
 flex-col
 "
 >
+<AuthProvider>
 
 <NexusSoundProvider>
 
@@ -68,11 +72,13 @@ pt-20
 
 </main>
 
-
+<NexusFooter />
 
 <CookieConsent />
 
 </NexusSoundProvider>
+
+</AuthProvider>
 
 </body>
 
