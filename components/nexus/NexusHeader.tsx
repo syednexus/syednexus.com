@@ -37,8 +37,10 @@ status
 
 }=useSession();
 
+const isOwner =
+session?.user?.role === "OWNER";
 
-
+void isOwner;
 
 const {
 
@@ -482,48 +484,6 @@ session.user?.name ??
 
 
 
-
-
-
-
-{
-
-session.user?.role==="OWNER"
-
-&&
-
-<Link
-
-
-href="/vault"
-
-
-className="
-
-border
-
-border-yellow-500
-
-
-px-3
-
-py-1
-
-
-rounded
-
-
-text-yellow-400
-
-"
-
->
-
-Control
-
-</Link>
-
-}
 
 
 

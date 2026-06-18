@@ -10,6 +10,10 @@ import NexusFooter from "@/components/nexus/NexusFooter";
 
 import AuthProvider from "@/components/nexus/AuthProvider";
 
+import NexusAvatar from "@/components/nexus/avatar/NexusAvatar";
+
+import { NexusProvider } from "@/context/NexusContext";
+
 export const metadata: Metadata = {
 
 title:"Syed Nexus | Cybersecurity Journey",
@@ -54,29 +58,38 @@ flex-col
 >
 <AuthProvider>
 
+<NexusProvider>
+
 <NexusSoundProvider>
+
 
 <NexusHeader />
 
 
 <main
-
 className="
 flex-1
 pt-20
 "
-
 >
 
 {children}
 
 </main>
 
+
 <NexusFooter />
+
+
+<NexusAvatar />
+
 
 <CookieConsent />
 
+
 </NexusSoundProvider>
+
+</NexusProvider>
 
 </AuthProvider>
 

@@ -1,9 +1,11 @@
 import { getServerSession } from "next-auth";
+
 import { authOptions } from "@/auth";
+
 import { redirect } from "next/navigation";
 
 
-export default async function Vault(){
+export default async function VaultPage(){
 
 
 const session =
@@ -11,7 +13,8 @@ await getServerSession(authOptions);
 
 
 if(
-session?.user?.role !== "OWNER"
+!session ||
+session.user?.role !== "OWNER"
 ){
 
 redirect("/");
@@ -21,27 +24,36 @@ redirect("/");
 
 return(
 
-<main className="
+<main
+className="
 min-h-screen
 bg-black
 text-green-400
 p-10
-font-mono
-">
+"
+>
 
-<h1 className="
+<h1
+className="
 text-4xl
 font-bold
-">
+tracking-widest
+"
+>
 
 NEXUS VAULT
 
 </h1>
 
 
-<p className="mt-5 text-gray-400">
+<p
+className="
+mt-5
+text-gray-400
+"
+>
 
-Private knowledge system unlocked.
+Owner command environment active.
 
 </p>
 
@@ -49,6 +61,5 @@ Private knowledge system unlocked.
 </main>
 
 );
-
 
 }
