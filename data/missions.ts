@@ -1,50 +1,7 @@
 import { Mission } from "@/types/mission";
+import { cyberGamesPack001 } from "@/prisma/seed/cyberGamesPack001";
 
-export const missions: Mission[] = [
-  {
-    id: "linux-navigator",
-    slug: "linux-navigator",
-    title: "Linux Navigator",
-    description: "Navigate the filesystem and locate hidden flags using core Linux commands.",
-    type: "LINUX_GAME",
-    difficulty: "beginner",
-    xpReward: 75,
-    duration: "15 min",
-    tags: ["linux", "cli", "navigation"],
-  },
-  {
-    id: "packet-pursuit",
-    slug: "packet-pursuit",
-    title: "Packet Pursuit",
-    description: "Trace suspicious traffic patterns across a simulated network segment.",
-    type: "NETWORK_GAME",
-    difficulty: "intermediate",
-    xpReward: 100,
-    duration: "20 min",
-    tags: ["network", "tcp", "analysis"],
-  },
-  {
-    id: "shell-sprint",
-    slug: "shell-sprint",
-    title: "Shell Sprint",
-    description: "Chain terminal commands to unlock each stage of the challenge vault.",
-    type: "COMMAND_CHALLENGE",
-    difficulty: "intermediate",
-    xpReward: 90,
-    duration: "18 min",
-    tags: ["bash", "commands", "speed"],
-  },
-  {
-    id: "cyber-quiz-alpha",
-    slug: "cyber-quiz-alpha",
-    title: "Cyber Quiz Alpha",
-    description: "Test foundational security knowledge across networking and identity.",
-    type: "QUIZ",
-    difficulty: "beginner",
-    xpReward: 50,
-    duration: "10 min",
-    tags: ["quiz", "fundamentals"],
-  },
+const platformMissions: Mission[] = [
   {
     id: "alert-triage-101",
     slug: "alert-triage-101",
@@ -222,6 +179,8 @@ export const missions: Mission[] = [
     tags: ["ai", "phishing", "detection"],
   },
 ];
+
+export const missions: Mission[] = [...cyberGamesPack001, ...platformMissions];
 
 export function getMissionBySlug(slug: string): Mission | undefined {
   return missions.find((mission) => mission.slug === slug);

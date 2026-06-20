@@ -1,6 +1,7 @@
 export type MissionType =
   | "LINUX_GAME"
   | "NETWORK_GAME"
+  | "PACKET_ANALYSIS"
   | "COMMAND_CHALLENGE"
   | "QUIZ"
   | "SOC_ALERT"
@@ -37,6 +38,7 @@ export type Mission = {
 export const MISSION_TYPE_LABELS: Record<MissionType, string> = {
   LINUX_GAME: "Linux Game",
   NETWORK_GAME: "Network Game",
+  PACKET_ANALYSIS: "Packet Analysis",
   COMMAND_CHALLENGE: "Command Challenge",
   QUIZ: "Quiz",
   SOC_ALERT: "SOC Alert",
@@ -62,7 +64,7 @@ export const MODULE_MISSION_TYPES = {
     "LINUX_GAME",
     "NETWORK_GAME",
     "COMMAND_CHALLENGE",
-    "QUIZ",
+    "PACKET_ANALYSIS",
   ] as MissionType[],
   soc: [
     "SOC_ALERT",

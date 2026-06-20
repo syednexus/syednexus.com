@@ -6,7 +6,13 @@ import { useParams } from "next/navigation";
 
 import { useMissions } from "@/context/MissionsProvider";
 import { useNexus } from "@/context/NexusContext";
+import NexusTerminal from "@/components/mission/NexusTerminal";
+import NetworkSimulator from "@/components/mission/NetworkSimulator";
 import { getRankFromXp } from "@/lib/rank";
+import {
+  getMissionSimulator,
+  getMissionSimulatorLabel,
+} from "@/lib/missionRouting";
 import { MISSION_TYPE_LABELS } from "@/types/mission";
 
 export default function MissionPage() {
@@ -23,6 +29,7 @@ export default function MissionPage() {
   const mission = getMissionBySlug(slug);
   const completed = isMissionCompleted(slug);
   const rank = getRankFromXp(xp);
+  const simulator = mission ? getMissionSimulator(mission.type) : null;
 
   useEffect(() => {
     if (!mission) {
@@ -46,10 +53,10 @@ export default function MissionPage() {
             The requested mission does not exist in the Nexus catalog.
           </p>
           <Link
-            href="/"
+            href="/games"
             className="mt-6 inline-block rounded border border-green-800 px-4 py-2 text-sm text-green-300 transition hover:bg-green-950/30"
           >
-            Return to Nexus OS
+            Return to Cyber Games
           </Link>
         </section>
       </main>
@@ -60,10 +67,10 @@ export default function MissionPage() {
     <main className="min-h-screen bg-black px-8 py-12 text-green-400">
       <section className="mx-auto max-w-4xl">
         <Link
-          href="/"
+          href="/games"
           className="text-sm text-gray-500 transition hover:text-green-400"
         >
-          ← Back to Nexus OS
+          ← Back to Cyber Games
         </Link>
 
         <div className="mt-6 rounded-2xl border border-green-900/40 bg-black/40 p-8 md:p-10">
@@ -73,6 +80,12 @@ export default function MissionPage() {
             <span>{mission.difficulty}</span>
             <span>•</span>
             <span>{mission.duration}</span>
+            {simulator && (
+              <>
+                <span>•</span>
+                <span>{getMissionSimulatorLabel(simulator)}</span>
+              </>
+            )}
           </div>
 
           <h1 className="mt-4 text-4xl font-bold tracking-wide text-green-300">
@@ -109,19 +122,41 @@ export default function MissionPage() {
             </div>
           </div>
 
-          <div className="mt-8 rounded-xl border border-green-900/30 bg-green-950/10 p-5 text-sm leading-7 text-gray-400">
-            Mission engine routing is active for this challenge type. Complete the
-            scenario workflow to register progress and earn XP toward your Nexus rank.
+          <div className="mt-8">
+            {simulator === "NexusTerminal" && (
+              <NexusTerminal
+                mission={mission}
+                completed={completed}
+                onComplete={() => completeMission(mission.slug)}
+              />
+            )}
+
+            {simulator === "NetworkSimulator" && (
+              <NetworkSimulator
+                mission={mission}
+                completed={completed}
+                onComplete={() => completeMission(mission.slug)}
+              />
+            )}
+
+            {!simulator && (
+              <div className="rounded-xl border border-green-900/30 bg-green-950/10 p-5 text-sm leading-7 text-gray-400">
+                Mission engine routing is active for this challenge type. Complete the
+                scenario workflow to register progress and earn XP toward your Nexus rank.
+              </div>
+            )}
           </div>
 
-          <button
-            type="button"
-            disabled={completed}
-            onClick={() => completeMission(mission.slug)}
-            className="mt-8 rounded border border-green-700 px-5 py-3 text-sm font-medium text-green-300 transition hover:bg-green-950/40 disabled:cursor-not-allowed disabled:border-gray-800 disabled:text-gray-600"
-          >
-            {completed ? "Mission Completed" : "Complete Mission"}
-          </button>
+          {!simulator && (
+            <button
+              type="button"
+              disabled={completed}
+              onClick={() => completeMission(mission.slug)}
+              className="mt-8 rounded border border-green-700 px-5 py-3 text-sm font-medium text-green-300 transition hover:bg-green-950/40 disabled:cursor-not-allowed disabled:border-gray-800 disabled:text-gray-600"
+            >
+              {completed ? "Mission Completed" : "Complete Mission"}
+            </button>
+          )}
         </div>
       </section>
     </main>

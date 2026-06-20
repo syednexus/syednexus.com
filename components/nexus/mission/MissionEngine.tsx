@@ -4,7 +4,13 @@ import { useEffect } from "react";
 
 import { useNexus } from "@/context/NexusContext";
 import { useMissionsOptional } from "@/context/MissionsProvider";
+import {
+  getMissionSimulator,
+  MISSION_SIMULATOR_ROUTER,
+} from "@/lib/missionRouting";
 import { MissionType } from "@/types/mission";
+
+export { getMissionSimulator, MISSION_SIMULATOR_ROUTER };
 
 type MissionRouteHandler = {
   achievementId: string;
@@ -25,6 +31,12 @@ const MISSION_TYPE_ROUTER: Record<MissionType, MissionRouteHandler> = {
     achievementTitle: "Network Runner",
     achievementDescription: "Completed a network game mission",
     achievementIcon: "🌐",
+  },
+  PACKET_ANALYSIS: {
+    achievementId: "packet_analysis_complete",
+    achievementTitle: "Packet Analyst",
+    achievementDescription: "Completed a packet analysis mission",
+    achievementIcon: "📦",
   },
   COMMAND_CHALLENGE: {
     achievementId: "command_challenge_complete",
@@ -215,11 +227,14 @@ export default function MissionEngine() {
     }
 
     const route = MISSION_TYPE_ROUTER[activeMission.type];
+    const simulator = getMissionSimulator(activeMission.type);
 
     unlockAchievement({
       id: `${route.achievementId}_active`,
       title: `${route.achievementTitle} Engaged`,
-      description: `Entered ${activeMission.title}`,
+      description: simulator
+        ? `Entered ${activeMission.title} via ${simulator}`
+        : `Entered ${activeMission.title}`,
       icon: route.achievementIcon,
     });
   }, [activeMission, unlockAchievement]);
