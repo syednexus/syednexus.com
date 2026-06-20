@@ -3,23 +3,35 @@
 import { useMemo } from "react";
 
 import { useAnalystOptional } from "@/context/AnalystProvider";
-import { useMissions } from "@/context/MissionsProvider";
-import { useNexus } from "@/context/NexusContext";
+import { useMissionsOptional } from "@/context/MissionsProvider";
+import { useNexusOptional } from "@/context/NexusContext";
 import { getRankFromXp } from "@/lib/rank";
+
+const DEFAULT_STATS = {
+  rank: getRankFromXp(0),
+  xp: 0,
+  completedMissions: 0,
+  totalMissions: 0,
+  completionPercentage: 0,
+};
 
 export function useOperatorStats() {
   const analyst = useAnalystOptional();
-  const { xp } = useNexus();
-  const { missions, completedSlugs } = useMissions();
+  const nexus = useNexusOptional();
+  const missions = useMissionsOptional();
 
   return useMemo(() => {
     if (analyst) {
       return analyst;
     }
 
-    const rank = getRankFromXp(xp);
-    const completedMissions = completedSlugs.length;
-    const totalMissions = missions.length;
+    if (!nexus || !missions) {
+      return DEFAULT_STATS;
+    }
+
+    const rank = getRankFromXp(nexus.xp);
+    const completedMissions = missions.completedSlugs.length;
+    const totalMissions = missions.missions.length;
     const completionPercentage =
       totalMissions > 0
         ? Math.round((completedMissions / totalMissions) * 100)
@@ -27,10 +39,10 @@ export function useOperatorStats() {
 
     return {
       rank,
-      xp,
+      xp: nexus.xp,
       completedMissions,
       totalMissions,
       completionPercentage,
     };
-  }, [analyst, completedSlugs, missions, xp]);
+  }, [analyst, missions, nexus]);
 }

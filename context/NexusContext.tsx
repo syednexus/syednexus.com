@@ -711,3 +711,7 @@ return context;
 
 
 }
+
+export function useNexusOptional() {
+  return useContext(NexusContext);
+}

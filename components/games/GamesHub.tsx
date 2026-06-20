@@ -3,25 +3,49 @@
 import Link from "next/link";
 import { useMemo } from "react";
 
-import { useMissions } from "@/context/MissionsProvider";
+import { useMissionsOptional } from "@/context/MissionsProvider";
 import GameCategory from "@/components/games/GameCategory";
 import { cyberGamesCategories } from "@/data/cyberGamesPack001";
 import { useOperatorStats } from "@/hooks/useOperatorStats";
 
 export default function GamesHub() {
   const { rank, xp } = useOperatorStats();
-  const { getMissionBySlug, isMissionCompleted } = useMissions();
+  const missionsContext = useMissionsOptional();
 
-  const categories = useMemo(
-    () =>
-      Object.values(cyberGamesCategories).map((category) => ({
-        ...category,
-        missions: category.slugs
-          .map((slug) => getMissionBySlug(slug))
-          .filter((mission): mission is NonNullable<typeof mission> => Boolean(mission)),
-      })),
-    [getMissionBySlug],
-  );
+  const categories = useMemo(() => {
+    if (!missionsContext) {
+      return [];
+    }
+
+    return Object.values(cyberGamesCategories).map((category) => ({
+      ...category,
+      missions: category.slugs
+        .map((slug) => missionsContext.getMissionBySlug(slug))
+        .filter((mission): mission is NonNullable<typeof mission> => Boolean(mission)),
+    }));
+  }, [missionsContext]);
+
+  if (!missionsContext) {
+    return (
+      <div className="min-h-screen bg-black px-6 py-10 text-green-400 md:px-8">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-red-900/40 bg-black/40 p-10 text-center">
+          <h1 className="text-2xl font-bold text-red-300">Games Hub Offline</h1>
+          <p className="mt-4 text-sm leading-7 text-gray-400">
+            Mission providers are not mounted. Ensure you are on the Nexus OS feature
+            branch, restart <code className="text-green-400">npm run dev</code>, then reload.
+          </p>
+          <Link
+            href="/nexus"
+            className="mt-6 inline-block rounded border border-green-800 px-4 py-2 text-sm text-green-300"
+          >
+            Back to Nexus OS
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const { isMissionCompleted } = missionsContext;
 
   const totalGames = categories.reduce((sum, category) => sum + category.missions.length, 0);
   const completedGames = categories.reduce(
@@ -31,7 +55,7 @@ export default function GamesHub() {
   );
 
   return (
-    <main className="min-h-screen bg-black px-6 py-10 text-green-400 md:px-8">
+    <div className="min-h-screen bg-black px-6 py-10 text-green-400 md:px-8">
       <section className="mx-auto max-w-7xl">
         <header className="mb-10 border-b border-green-900/40 pb-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -89,6 +113,6 @@ export default function GamesHub() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }
