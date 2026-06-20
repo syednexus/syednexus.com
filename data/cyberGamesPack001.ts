@@ -251,6 +251,36 @@ const PACKET_ANALYSIS_ARENA: GameSeed[] = [
   },
 ];
 
+const QUIZ_ARENA: GameSeed[] = [
+  {
+    title: "Cyber Quiz Alpha",
+    description: "Test foundational security knowledge across networking and identity.",
+    type: "QUIZ",
+    difficulty: "beginner",
+    xpReward: 50,
+    duration: "10 min",
+    tags: ["quiz", "fundamentals"],
+  },
+  {
+    title: "Security Fundamentals Quiz",
+    description: "Answer rapid-fire questions on CIA triad, authentication, and access control.",
+    type: "QUIZ",
+    difficulty: "beginner",
+    xpReward: 55,
+    duration: "12 min",
+    tags: ["quiz", "security", "basics"],
+  },
+  {
+    title: "Network Basics Quiz",
+    description: "Validate your understanding of IPs, ports, DNS, and common protocols.",
+    type: "QUIZ",
+    difficulty: "intermediate",
+    xpReward: 60,
+    duration: "14 min",
+    tags: ["quiz", "network", "protocols"],
+  },
+];
+
 function toMission(seed: GameSeed, packId: string): Mission {
   const slug = slugify(seed.title);
 
@@ -273,6 +303,7 @@ export const cyberGamesPack001: Mission[] = [
   ...LINUX_ARENA.map((seed) => toMission(seed, PACK_ID)),
   ...NETWORKING_ARENA.map((seed) => toMission(seed, PACK_ID)),
   ...PACKET_ANALYSIS_ARENA.map((seed) => toMission(seed, PACK_ID)),
+  ...QUIZ_ARENA.map((seed) => toMission(seed, PACK_ID)),
 ];
 
 export const cyberGamesCategories = {
@@ -293,5 +324,11 @@ export const cyberGamesCategories = {
     description: "PCAP investigations, traffic filtering, and credential leak hunts.",
     types: ["PACKET_ANALYSIS"] as Mission["type"][],
     slugs: PACKET_ANALYSIS_ARENA.map((seed) => slugify(seed.title)),
+  },
+  quizArena: {
+    title: "Quiz Arcade",
+    description: "Fast-paced cybersecurity knowledge checks and fundamentals review.",
+    types: ["QUIZ"] as Mission["type"][],
+    slugs: QUIZ_ARENA.map((seed) => slugify(seed.title)),
   },
 };

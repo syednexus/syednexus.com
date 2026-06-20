@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useMemo } from "react";
 
-import { useAnalyst } from "@/context/AnalystProvider";
 import { useMissions } from "@/context/MissionsProvider";
 import GameCategory from "@/components/games/GameCategory";
-import { cyberGamesCategories } from "@/prisma/seed/cyberGamesPack001";
+import { cyberGamesCategories } from "@/data/cyberGamesPack001";
+import { useOperatorStats } from "@/hooks/useOperatorStats";
 
 export default function GamesHub() {
-  const { rank, xp } = useAnalyst();
+  const { rank, xp } = useOperatorStats();
   const { getMissionBySlug, isMissionCompleted } = useMissions();
 
   const categories = useMemo(
@@ -49,7 +49,7 @@ export default function GamesHub() {
                 CYBER GAMES
               </h1>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-gray-400 md:text-base">
-                Train in the Linux Arena, Networking Arena, and Packet Analysis labs.
+                Train in the Linux Arena, Networking Arena, Packet Analysis labs, and Quiz Arcade.
                 Every game routes through the shared mission engine and XP progression.
               </p>
             </div>

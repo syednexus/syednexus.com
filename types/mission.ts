@@ -65,6 +65,7 @@ export const MODULE_MISSION_TYPES = {
     "NETWORK_GAME",
     "COMMAND_CHALLENGE",
     "PACKET_ANALYSIS",
+    "QUIZ",
   ] as MissionType[],
   soc: [
     "SOC_ALERT",

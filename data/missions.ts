@@ -1,5 +1,8 @@
 import { Mission } from "@/types/mission";
-import { cyberGamesPack001 } from "@/prisma/seed/cyberGamesPack001";
+import { cyberGamesPack001 } from "@/data/cyberGamesPack001";
+
+// In-memory mission catalog. Cyber games are sourced from data/cyberGamesPack001.ts
+// (not Prisma — no Mission table in schema).
 
 const platformMissions: Mission[] = [
   {

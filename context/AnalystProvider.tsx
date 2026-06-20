@@ -57,3 +57,7 @@ export function useAnalyst() {
 
   return context;
 }
+
+export function useAnalystOptional() {
+  return useContext(AnalystContext);
+}

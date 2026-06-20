@@ -1,9 +1,9 @@
 "use client";
 
-import { useAnalyst } from "@/context/AnalystProvider";
+import { useOperatorStats } from "@/hooks/useOperatorStats";
 
 export default function OperatorProfile() {
-  const { rank, xp, completedMissions, totalMissions } = useAnalyst();
+  const { rank, xp, completedMissions, totalMissions } = useOperatorStats();
 
   return (
     <div className="grid gap-4 rounded-2xl border border-green-900/50 bg-black/40 p-5 backdrop-blur-md sm:grid-cols-2 lg:grid-cols-4">
