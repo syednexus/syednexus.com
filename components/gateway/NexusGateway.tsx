@@ -30,7 +30,7 @@ const modules = [
   {
     name: "Cyber Range",
     desc: "Hands-on Security Labs",
-    path: "/lab",
+    path: "/nexus",
     status: "LAB",
   },
   {

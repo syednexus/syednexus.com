@@ -16,7 +16,9 @@ export type MissionType =
   | "MEMORY_ANALYSIS"
   | "FILE_RECOVERY"
   | "TOOL_SIMULATION"
-  | "CAREER_SCENARIO";
+  | "CAREER_SCENARIO"
+  | "PROMPT_INJECTION"
+  | "AI_PHISHING_DETECTION";
 
 export type MissionDifficulty = "beginner" | "intermediate" | "advanced";
 
@@ -51,6 +53,8 @@ export const MISSION_TYPE_LABELS: Record<MissionType, string> = {
   FILE_RECOVERY: "File Recovery",
   TOOL_SIMULATION: "Tool Simulation",
   CAREER_SCENARIO: "Career Scenario",
+  PROMPT_INJECTION: "Prompt Injection",
+  AI_PHISHING_DETECTION: "AI Phishing Detection",
 };
 
 export const MODULE_MISSION_TYPES = {
@@ -80,4 +84,5 @@ export const MODULE_MISSION_TYPES = {
   ] as MissionType[],
   tools: ["TOOL_SIMULATION"] as MissionType[],
   career: ["CAREER_SCENARIO"] as MissionType[],
+  aiLab: ["PROMPT_INJECTION", "AI_PHISHING_DETECTION"] as MissionType[],
 };

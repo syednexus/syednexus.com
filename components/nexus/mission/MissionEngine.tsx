@@ -122,6 +122,18 @@ const MISSION_TYPE_ROUTER: Record<MissionType, MissionRouteHandler> = {
     achievementDescription: "Completed a career scenario mission",
     achievementIcon: "🎯",
   },
+  PROMPT_INJECTION: {
+    achievementId: "prompt_injection_complete",
+    achievementTitle: "Prompt Defender",
+    achievementDescription: "Completed a prompt injection mission",
+    achievementIcon: "🤖",
+  },
+  AI_PHISHING_DETECTION: {
+    achievementId: "ai_phishing_complete",
+    achievementTitle: "AI Threat Analyst",
+    achievementDescription: "Completed an AI phishing detection mission",
+    achievementIcon: "🛡️",
+  },
 };
 
 export default function MissionEngine() {

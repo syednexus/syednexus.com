@@ -199,6 +199,28 @@ export const missions: Mission[] = [
     duration: "20 min",
     tags: ["career", "soc", "scenario"],
   },
+  {
+    id: "prompt-injection-lab",
+    slug: "prompt-injection-lab",
+    title: "Prompt Injection Lab",
+    description: "Identify and neutralize prompt injection attempts against an AI assistant.",
+    type: "PROMPT_INJECTION",
+    difficulty: "intermediate",
+    xpReward: 110,
+    duration: "22 min",
+    tags: ["ai", "llm", "injection"],
+  },
+  {
+    id: "ai-phishing-detector",
+    slug: "ai-phishing-detector",
+    title: "AI Phishing Detector",
+    description: "Analyze AI-generated phishing content and classify malicious intent.",
+    type: "AI_PHISHING_DETECTION",
+    difficulty: "beginner",
+    xpReward: 85,
+    duration: "18 min",
+    tags: ["ai", "phishing", "detection"],
+  },
 ];
 
 export function getMissionBySlug(slug: string): Mission | undefined {
