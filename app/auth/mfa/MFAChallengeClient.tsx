@@ -10,7 +10,14 @@ export default function MFAChallengeClient() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/vault";
+  const rawCallback = searchParams.get("callbackUrl") || "";
+  // Prevent open redirect: only allow relative paths within this origin
+  const callbackUrl =
+    rawCallback.startsWith("/") &&
+    !rawCallback.startsWith("//") &&
+    !rawCallback.startsWith("/\\")
+      ? rawCallback
+      : "/vault";
 
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
@@ -48,14 +55,19 @@ export default function MFAChallengeClient() {
         body: JSON.stringify({ token })
       });
 
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as {
+        error?: string;
+        mfaProof?: string;
+        verifiedAt?: number;
+      };
 
       if (!response.ok) {
         setError(data.error ?? "Verification failed");
         return;
       }
 
-      await update({ mfaVerified: true });
+      // Pass server-signed proof so jwt callback can safely set mfaVerified=true
+      await update({ mfaVerifiedProof: data.mfaProof, verifiedAt: data.verifiedAt });
       router.replace(callbackUrl);
     } catch {
       setError("Network error — try again");

@@ -4,10 +4,19 @@ import bcrypt from "bcrypt";
 
 import { prisma } from "@/lib/prisma";
 
+import { isRateLimited } from "@/lib/rateLimit";
 
+const PASSWORD_COMPLEXITY = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{12,}$/;
 
 export async function POST(req:Request){
 
+// Rate limit: 3 attempts per 60 minutes per IP — recovery is high-value
+if (isRateLimited(req, "admin:recover", 3, 60 * 60 * 1000)) {
+  return NextResponse.json(
+    { success: false, error: "Too many recovery attempts — wait 60 minutes" },
+    { status: 429 }
+  );
+}
 
 try{
 
@@ -29,7 +38,7 @@ typeof body.newPassword === "string"
 
 
 
-if(!recoveryKey || newPassword.length < 8){
+if(!recoveryKey || !PASSWORD_COMPLEXITY.test(newPassword)){
 
 return NextResponse.json(
 
@@ -37,7 +46,7 @@ return NextResponse.json(
 
 success:false,
 
-error:"Recovery key and new password (8+ chars) required"
+error:"Recovery key and a strong password (12+ chars, upper, lower, number, symbol) required"
 
 },
 

@@ -68,12 +68,17 @@ export default function MFASetup() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token })
       });
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as {
+        error?: string;
+        mfaProof?: string;
+        verifiedAt?: number;
+      };
       if (!response.ok) {
         setError(data.error ?? "Invalid code");
         return;
       }
-      await update({ mfaEnabled: true, mfaVerified: true });
+      // Pass server-signed proof so jwt callback safely sets mfaEnabled+mfaVerified=true
+      await update({ mfaEnabledProof: data.mfaProof, verifiedAt: data.verifiedAt });
       setSetup(null);
       setToken("");
       setMfaEnabled(true);
@@ -100,7 +105,9 @@ export default function MFASetup() {
         setError(data.error ?? "Invalid code");
         return;
       }
-      await update({ mfaEnabled: false, mfaVerified: true });
+      // DB now has mfaEnabled=false. Trigger jwt refresh (no sensitive fields).
+      // The jwt callback will read from DB and clear MFA state automatically.
+      await update({});
       setMfaEnabled(false);
       setToken("");
       setMessage("MFA disabled.");

@@ -14,9 +14,14 @@ export type FeedbackResult =
   | { ok: true; method: "mailto"; mailto: string }
   | { ok: false; error: string; mailto: string };
 
+function sanitizeHeaderField(value: string | undefined): string {
+  return (value ?? "").replace(/[\r\n\t]/g, " ").trim().slice(0, 100);
+}
+
 export function buildFeedbackMailto(payload: FeedbackPayload): string {
+  const safeCategory = sanitizeHeaderField(payload.category ?? "Feedback");
   const subject = encodeURIComponent(
-    `[Nexus ${payload.category ?? "Feedback"}]${payload.email ? ` from ${payload.email}` : ""}`
+    `[Nexus ${safeCategory}]${payload.email ? ` from ${sanitizeHeaderField(payload.email)}` : ""}`
   );
   const body = encodeURIComponent(
     `${payload.message}\n\n---\nPage: ${payload.page ?? "unknown"}\nReply-to: ${payload.email ?? "not provided"}`
@@ -48,7 +53,7 @@ export async function sendFeedbackEmail(payload: FeedbackPayload): Promise<Feedb
         from: FEEDBACK_FROM,
         to: [FEEDBACK_TO],
         reply_to: payload.email || undefined,
-        subject: `[Nexus ${payload.category ?? "Feedback"}]${payload.email ? ` — ${payload.email}` : ""}`,
+        subject: `[Nexus ${sanitizeHeaderField(payload.category ?? "Feedback")}]${payload.email ? ` — ${sanitizeHeaderField(payload.email)}` : ""}`,
         text: `${payload.message}\n\n---\nPage: ${payload.page ?? "unknown"}`
       })
     });

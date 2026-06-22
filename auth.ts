@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 
 import { prisma } from "@/lib/prisma";
 import { isMfaTrustValid } from "@/lib/security/mfaSession";
+import { verifyMfaProof } from "@/lib/security/mfaProof";
 
 function ownerEmail(): string | undefined {
   return process.env.OWNER_EMAIL?.trim().toLowerCase();
@@ -53,13 +54,18 @@ export const authOptions: NextAuthOptions = {
           token.mfaEnabled = dbUser?.mfaEnabled ?? false;
 
           if (!(dbUser?.mfaEnabled ?? false)) {
+            // MFA not enabled in DB → no challenge needed
             token.mfaVerified = true;
             delete token.mfaVerifiedAt;
             delete token.lastActivityAt;
           } else if (user) {
+            // Initial login and MFA is enabled → require fresh TOTP challenge
             token.mfaVerified = false;
             delete token.mfaVerifiedAt;
             delete token.lastActivityAt;
+          } else if (token.mfaVerified && !isMfaTrustValid(token)) {
+            // Trust window (2h inactive / 12h absolute) expired
+            token.mfaVerified = false;
           }
         } else {
           delete token.role;
@@ -70,41 +76,65 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
-      if (trigger === "update" && session) {
-        const patch = session as {
-          mfaVerified?: boolean;
-          mfaEnabled?: boolean;
+      // ── SECURE SESSION UPDATES ──────────────────────────────────────────
+      // MFA state changes REQUIRE a server-issued HMAC proof.
+      // Client cannot forge these without knowing NEXUS_SECRET.
+      // Accepting bare mfaVerified/mfaEnabled booleans from the client
+      // is intentionally removed — that was the critical vulnerability.
+      if (trigger === "update" && session && token.email) {
+        type SecurePatch = {
+          // Proof set by /api/auth/mfa/verify after successful TOTP
+          mfaVerifiedProof?: string;
+          // Proof set by /api/auth/mfa/enable after first TOTP confirmation
+          mfaEnabledProof?: string;
+          // Timestamp at which the proof was issued (for window validation)
+          verifiedAt?: number;
+          // Activity ping — accepted only when already MFA-verified
           lastActivityAt?: number;
         };
+
+        const patch = session as SecurePatch;
+        const emailLower = (token.email as string).trim().toLowerCase();
         const now = Date.now();
 
-        if (patch.mfaVerified === true) {
+        // Allow MFA verification after TOTP challenge (/auth/mfa page)
+        if (
+          patch.mfaVerifiedProof &&
+          typeof patch.verifiedAt === "number" &&
+          verifyMfaProof(emailLower, "verify", patch.mfaVerifiedProof, patch.verifiedAt)
+        ) {
           token.mfaVerified = true;
-          token.mfaVerifiedAt = now;
-          token.lastActivityAt = now;
+          token.mfaVerifiedAt = patch.verifiedAt;
+          token.lastActivityAt = patch.verifiedAt;
         }
 
-        if (patch.mfaEnabled === true) {
+        // Allow setting mfaVerified immediately after enabling MFA
+        if (
+          patch.mfaEnabledProof &&
+          typeof patch.verifiedAt === "number" &&
+          verifyMfaProof(emailLower, "enable", patch.mfaEnabledProof, patch.verifiedAt)
+        ) {
           token.mfaEnabled = true;
           token.mfaVerified = true;
-          token.mfaVerifiedAt = now;
-          token.lastActivityAt = now;
+          token.mfaVerifiedAt = patch.verifiedAt;
+          token.lastActivityAt = patch.verifiedAt;
         }
 
-        if (patch.mfaEnabled === false) {
-          token.mfaEnabled = false;
-          token.mfaVerified = true;
-          delete token.mfaVerifiedAt;
-          delete token.lastActivityAt;
-        }
+        // Disabling MFA: no proof needed here because /api/auth/mfa/disable
+        // already updates the DB. The NEXT jwt callback invocation reads
+        // mfaEnabled=false from DB and sets mfaVerified=true automatically.
+        // Calling update({}) from MFASetup is enough to trigger that refresh.
 
-        if (typeof patch.lastActivityAt === "number") {
+        // Activity ping: only accepted when the token is already in a
+        // verified state to prevent inactivity-window bypass.
+        if (
+          typeof patch.lastActivityAt === "number" &&
+          patch.lastActivityAt > 0 &&
+          patch.lastActivityAt <= now + 5_000 && // no future timestamps
+          (!token.mfaEnabled || token.mfaVerified)
+        ) {
           token.lastActivityAt = patch.lastActivityAt;
         }
-      }
-
-      if (token.mfaEnabled && token.mfaVerified && !isMfaTrustValid(token)) {
-        token.mfaVerified = false;
       }
 
       return token;

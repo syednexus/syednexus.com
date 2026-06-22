@@ -12,9 +12,15 @@ createAdminSessionToken
 
 } from "@/lib/auth";
 
-
+import { isRateLimited } from "@/lib/rateLimit";
 
 export async function POST(req:Request){
+
+
+// Rate limit: 10 attempts per 15 minutes per IP
+if (isRateLimited(req, "admin:login", 10, 15 * 60 * 1000)) {
+  return NextResponse.json({ error: "Too many login attempts" }, { status: 429 });
+}
 
 
 try{
