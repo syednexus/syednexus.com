@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/auth";
 import MFASetup from "@/components/security/MFASetup";
+import { shouldRequireMfaChallenge } from "@/lib/security/mfaSession";
 
 export default async function VaultSecurityPage() {
   const session = await getServerSession(authOptions);
@@ -11,7 +12,7 @@ export default async function VaultSecurityPage() {
     redirect("/?vault=denied");
   }
 
-  if (session.user.mfaEnabled && !session.user.mfaVerified) {
+  if (shouldRequireMfaChallenge(session.user)) {
     redirect("/auth/mfa?callbackUrl=/vault/security");
   }
 

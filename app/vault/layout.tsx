@@ -1,7 +1,6 @@
 import Link from "next/link";
 
-
-
+import VaultActivityPing from "@/components/security/VaultActivityPing";
 
 export default function VaultLayout({
 
@@ -19,7 +18,7 @@ return(
 
 <>
 
-
+<VaultActivityPing />
 
 <div
 

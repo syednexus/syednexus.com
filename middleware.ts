@@ -2,6 +2,8 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { shouldRequireMfaChallenge } from "@/lib/security/mfaSession";
+
 export async function middleware(req: NextRequest) {
   const token = await getToken({
     req,
@@ -14,10 +16,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(signIn);
   }
 
-  const mfaEnabled = Boolean(token.mfaEnabled);
-  const mfaVerified = Boolean(token.mfaVerified);
-
-  if (mfaEnabled && !mfaVerified) {
+  if (shouldRequireMfaChallenge(token)) {
     const mfaUrl = new URL("/auth/mfa", req.url);
     mfaUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
     return NextResponse.redirect(mfaUrl);

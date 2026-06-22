@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
+import { shouldRequireMfaChallenge } from "@/lib/security/mfaSession";
+
 export default function MFAChallengeClient() {
   const { data: session, status, update } = useSession();
   const router = useRouter();
@@ -19,7 +21,7 @@ export default function MFAChallengeClient() {
       router.replace("/?vault=denied");
       return;
     }
-    if (!session.user.mfaEnabled || session.user.mfaVerified) {
+    if (!shouldRequireMfaChallenge(session.user)) {
       router.replace(callbackUrl);
     }
   }, [session, router, callbackUrl]);

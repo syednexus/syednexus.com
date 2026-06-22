@@ -24,6 +24,7 @@ const {data:session}=useSession();
 
 const router=useRouter();
 
+const dragContainerRef = useRef<HTMLDivElement>(null);
 
 const [open,setOpen]=useState(false);
 const [command,setCommand]=useState("");
@@ -1083,9 +1084,21 @@ transition
 
 {open &&
 
+<>
+
+{/* Viewport constraint layer — keeps panel inside screen */}
+<div
+ref={dragContainerRef}
+className="pointer-events-none fixed inset-0"
+style={{zIndex:49}}
+/>
+
 <motion.div
 
 drag
+dragConstraints={dragContainerRef}
+dragMomentum={false}
+dragElastic={0}
 
 initial={{
 
@@ -1568,6 +1581,8 @@ autoFocus
 
 
 </motion.div>
+
+</>
 
 }
 

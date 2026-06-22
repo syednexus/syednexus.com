@@ -1,12 +1,13 @@
 "use client";
 
-
 import {
 
 useEffect,
 useState
 
 } from "react";
+
+import dynamic from "next/dynamic";
 
 import { useSession } from "next-auth/react";
 
@@ -20,29 +21,31 @@ import { AccessLevel } from "@/types/access";
 
 import { useNexus } from "@/context/NexusContext";
 
+// Gateway is the landing screen — load eagerly
 import NexusGateway from "@/components/nexus/gateway/NexusGateway";
 
-import DefenderConsole from "@/components/defender/DefenderConsole";
+// Heavy system panels — load only when navigated to
+const DefenderConsole = dynamic(() => import("@/components/defender/DefenderConsole"), { ssr: false });
 
-import NexusLab from "@/components/lab/NexusLab";
+const NexusLab = dynamic(() => import("@/components/lab/NexusLab"), { ssr: false });
 
-import MedCore from "@/components/medcore/MedCore";
+const MedCore = dynamic(() => import("@/components/medcore/MedCore"), { ssr: false });
 
-import NexusBlogs from "@/components/blogs/NexusBlogs";
+const NexusBlogs = dynamic(() => import("@/components/blogs/NexusBlogs"), { ssr: false });
 
 
-// GLOBAL COMPONENTS
+// GLOBAL COMPONENTS — defer so initial paint is fast
 
-import NexusCore from "@/components/nexus/core/NexusCore";
+const NexusCore = dynamic(() => import("@/components/nexus/core/NexusCore"), { ssr: false });
 
-import SystemSwitcher from "@/components/core/SystemSwitcher";
+const SystemSwitcher = dynamic(() => import("@/components/core/SystemSwitcher"), { ssr: false });
 
-import NexusCommand from "@/components/NexusCommand";
+const NexusCommand = dynamic(() => import("@/components/NexusCommand"), { ssr: false });
 
 
 // ENGINES
 
-import MissionEngine from "@/components/nexus/mission/MissionEngine";
+const MissionEngine = dynamic(() => import("@/components/nexus/mission/MissionEngine"), { ssr: false });
 
 
 

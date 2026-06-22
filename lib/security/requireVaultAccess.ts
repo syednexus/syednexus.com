@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 
 import { authOptions } from "@/auth";
+import { shouldRequireMfaChallenge } from "@/lib/security/mfaSession";
 
 export type VaultAccessSession = {
   email: string;
@@ -10,11 +11,6 @@ export type VaultAccessSession = {
   mfaEnabled: boolean;
   mfaVerified: boolean;
 };
-
-function isVaultUnlocked(mfaEnabled: boolean, mfaVerified: boolean): boolean {
-  if (!mfaEnabled) return true;
-  return mfaVerified === true;
-}
 
 export async function getVaultAccess(
   req?: NextRequest
@@ -28,18 +24,17 @@ export async function getVaultAccess(
     ? await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
     : null;
 
-  const mfaEnabled = Boolean(token?.mfaEnabled ?? session.user.mfaEnabled);
-  const mfaVerified = Boolean(token?.mfaVerified ?? session.user.mfaVerified);
+  const mfaToken = token ?? session.user;
 
-  if (!isVaultUnlocked(mfaEnabled, mfaVerified)) {
+  if (shouldRequireMfaChallenge(mfaToken)) {
     return null;
   }
 
   return {
     email: session.user.email,
     role: "OWNER",
-    mfaEnabled,
-    mfaVerified
+    mfaEnabled: Boolean(mfaToken.mfaEnabled),
+    mfaVerified: Boolean(mfaToken.mfaVerified)
   };
 }
 
@@ -49,7 +44,7 @@ export async function requireOwner() {
     return null;
   }
 
-  if (session.user.mfaEnabled && !session.user.mfaVerified) {
+  if (shouldRequireMfaChallenge(session.user)) {
     return null;
   }
 
@@ -59,9 +54,20 @@ export async function requireOwner() {
 export function vaultAccessDeniedReason(
   role: string | undefined,
   mfaEnabled?: boolean,
-  mfaVerified?: boolean
+  mfaVerified?: boolean,
+  mfaVerifiedAt?: number,
+  lastActivityAt?: number
 ): "auth" | "mfa" | null {
   if (role !== "OWNER") return "auth";
-  if (mfaEnabled && !mfaVerified) return "mfa";
+  if (
+    shouldRequireMfaChallenge({
+      mfaEnabled,
+      mfaVerified,
+      mfaVerifiedAt,
+      lastActivityAt
+    })
+  ) {
+    return "mfa";
+  }
   return null;
 }
