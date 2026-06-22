@@ -1,553 +1,194 @@
 "use client";
 
-
 import Link from "next/link";
-
-import { useNexusSound } from "./NexusSound";
+import { useEffect, useRef, useState } from "react";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 import NexusFeedback from "./NexusFeedback";
-
-
+import { useNexusSound } from "./NexusSound";
 import {
-
-signIn,
-
-signOut,
-
-useSession
-
-} from "next-auth/react";
-
-
-
-
-
-
-
-
-export default function NexusHeader(){
-
-
-
-const {
-
-data:session,
-
-status
-
-}=useSession();
-
-const isOwner =
-session?.user?.role === "OWNER";
-
-void isOwner;
-
-const {
-
-enabled,
-
-toggleSound
-
-}=useNexusSound();
-
-
-
-
-
-
-
-
-
-return (
-
-<header
-
-className="
-
-fixed
-top-0
-left-0
-right-0
-
-z-50
-
-bg-black/80
-
-backdrop-blur
-
-border-b
-border-green-900/40
-
-"
-
->
-
-
-<div
-
-className="
-
-max-w-7xl
-
-mx-auto
-
-px-6
-
-py-4
-
-
-flex
-
-items-center
-
-justify-between
-
-"
-
->
-
-
-
-
-
-{/* LOGO */}
-
-
-<Link
-
-href="/"
-
-className="
-
-text-green-400
-
-font-bold
-
-tracking-widest
-
-"
-
->
-
-SYED NEXUS
-
-</Link>
-
-
-
-
-
-
-
-
-
-
-{/* NAVIGATION */}
-
-
-<nav
-
-className="
-
-hidden
-
-md:flex
-
-gap-6
-
-text-sm
-
-text-gray-400
-
-"
-
->
-
-
-<Link
-
-href="/"
-
-className="hover:text-green-400 transition"
-
->
-
-Home
-
-</Link>
-
-
-
-
-
-<Link
-
-href="/portfolio"
-
-className="hover:text-green-400 transition"
-
->
-
-Portfolio
-
-</Link>
-
-
-
-
-
-
-<Link
-
-href="/soc"
-
-className="hover:text-green-400 transition"
-
->
-
-SOC
-
-</Link>
-
-
-
-
-
-
-<Link
-
-href="/lab"
-
-className="hover:text-green-400 transition"
-
->
-
-Lab
-
-</Link>
-
-
-
-
-
-
-<Link
-
-href="/games"
-
-className="hover:text-green-400 transition"
-
->
-
-Games
-
-</Link>
-
-
-
-
-
-
-<Link
-
-href="/blogs"
-
-className="hover:text-green-400 transition"
-
->
-
-Blog
-
-</Link>
-
-
-
-</nav>
-
-
-
-
-
-
-
-
-
-{/* ACTIONS */}
-
-
-<div
-
-className="
-
-flex
-
-items-center
-
-gap-3
-
-"
-
->
-
-
-
-<NexusFeedback />
-
-
-
-
-
-
-
-<button
-
-onClick={toggleSound}
-
-
-className="
-
-border
-
-border-green-700
-
-
-px-3
-
-py-1
-
-
-rounded
-
-
-text-xs
-
-text-green-400
-
-
-hover:bg-green-950
-
-
-transition
-
-"
-
->
-
-
-{
-
-enabled
-
-?
-
-"SOUND ON"
-
-:
-
-"SOUND OFF"
-
+  HEADER_NAV,
+  HEADER_NAV_FLAT,
+  isNavGroup,
+  type HeaderNavGroup
+} from "@/lib/nexusNavigation";
+
+function LabsDropdown({
+  group,
+  onNavigate
+}: {
+  group: HeaderNavGroup;
+  onNavigate?: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onClickOutside(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(current => !current)}
+        className="flex items-center gap-1 text-gray-400 transition hover:text-green-400"
+        aria-expanded={open}
+      >
+        {group.label}
+        <span className="text-[10px] text-gray-600">{open ? "▴" : "▾"}</span>
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full z-50 mt-2 min-w-[10rem] rounded-lg border border-green-900/60 bg-black/95 py-1 shadow-lg">
+          {group.items.map(item => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="block px-4 py-2 text-sm text-gray-400 hover:bg-green-950/50 hover:text-green-300"
+              onClick={() => {
+                setOpen(false);
+                onNavigate?.();
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
-
-</button>
-
-
-
-
-
-
-
-
-
-{/* AUTH AREA */}
-
-
-
-{
-
-status==="loading"
-
-?
-
-(
-
-<span
-
-className="
-
-text-green-400
-
-text-xs
-
-"
-
->
-
-...
-
-</span>
-
-)
-
-
-
-:
-
-!session
-
-?
-
-(
-
-<button
-
-
-onClick={()=>signIn("google")}
-
-
-className="
-
-border
-
-border-green-700
-
-
-px-4
-
-py-1
-
-
-rounded
-
-
-text-green-400
-
-
-hover:bg-green-950
-
-
-transition
-
-"
-
->
-
-Login
-
-</button>
-
-)
-
-
-
-:
-
-(
-
-<div
-
-className="
-
-flex
-
-items-center
-
-gap-3
-
-text-green-400
-
-"
-
->
-
-
-
-<span
-
-className="text-sm"
-
->
-
-
-{
-
-session.user?.name ??
-
-"User"
-
-}
-
-
-</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<button
-
-
-onClick={()=>signOut()}
-
-
-className="
-
-border
-
-border-red-700
-
-
-px-3
-
-py-1
-
-
-rounded
-
-
-text-red-400
-
-"
-
->
-
-Logout
-
-</button>
-
-
-
-
-
-</div>
-
-)
-
-}
-
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-</header>
-
-);
-
-
-
+export default function NexusHeader() {
+  const { data: session, status } = useSession();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const { enabled, toggleSound, volume, setVolume, play } = useNexusSound();
+
+  const click = (fn: () => void) => {
+    play("click");
+    fn();
+  };
+
+  return (
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-green-900/40 bg-black/90 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
+        <Link
+          href="/"
+          className="shrink-0 text-sm font-bold tracking-widest text-green-400 transition hover:text-green-300 sm:text-base"
+          onClick={() => play("click")}
+        >
+          SYED NEXUS
+        </Link>
+
+        <nav className="hidden items-center gap-5 text-sm text-gray-400 lg:flex">
+          {HEADER_NAV.map(entry => {
+            if (isNavGroup(entry)) {
+              return <LabsDropdown key={entry.label} group={entry} />;
+            }
+            return (
+              <Link
+                key={entry.href}
+                href={entry.href}
+                className="whitespace-nowrap transition hover:text-green-400"
+                onClick={() => play("click")}
+              >
+                {entry.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <button
+            type="button"
+            className="rounded border border-green-800 px-2.5 py-1 text-xs text-green-400 lg:hidden"
+            onClick={() => click(() => setMobileOpen(current => !current))}
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? "Close" : "Menu"}
+          </button>
+
+          <NexusFeedback className="hidden sm:inline-flex" />
+
+          <div className="hidden items-center gap-1.5 md:flex">
+            <button
+              type="button"
+              onClick={() => click(toggleSound)}
+              className="rounded border border-green-800 px-2 py-1 text-xs hover:bg-green-950"
+              aria-label={enabled ? "Mute sound" : "Enable sound"}
+            >
+              {enabled ? "🔊" : "🔇"}
+            </button>
+            {enabled && (
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={event => setVolume(parseFloat(event.target.value))}
+                className="w-14 accent-green-500"
+                aria-label="Volume"
+              />
+            )}
+          </div>
+
+          {status === "loading" ? (
+            <span className="text-xs text-gray-600">…</span>
+          ) : !session ? (
+            <button
+              type="button"
+              onClick={() => click(() => signIn("google"))}
+              className="rounded border border-green-700 px-2.5 py-1 text-xs text-green-400 hover:bg-green-950"
+            >
+              Login
+            </button>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <span className="hidden max-w-[7rem] truncate text-xs text-green-500 xl:inline">
+                {session.user?.name?.split(" ")[0] ?? "User"}
+              </span>
+              <button
+                type="button"
+                onClick={() => click(() => signOut())}
+                className="rounded border border-red-900/60 px-2 py-1 text-xs text-red-400 hover:bg-red-950/30"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {mobileOpen && (
+        <nav className="border-t border-green-900/40 bg-black/95 px-4 py-4 lg:hidden">
+          <div className="mb-4 sm:hidden">
+            <NexusFeedback onOpen={() => setMobileOpen(false)} />
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+            {HEADER_NAV_FLAT.map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="py-2 text-gray-400 hover:text-green-400"
+                onClick={() => {
+                  play("click");
+                  setMobileOpen(false);
+                }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      )}
+    </header>
+  );
 }

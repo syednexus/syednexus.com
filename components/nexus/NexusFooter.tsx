@@ -148,6 +148,21 @@ text-gray-400
 
 <Link
 
+href="/nexus"
+
+className="hover:text-green-400"
+
+>
+
+Nexus OS
+
+</Link>
+
+
+
+
+<Link
+
 href="/security"
 
 className="hover:text-green-400"

@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 
 import { GoogleGenAI } from "@google/genai";
+import { getServerSession } from "next-auth";
 
+import { authOptions } from "@/auth";
+import { isRateLimited } from "@/lib/rateLimit";
 import { prisma } from "@/lib/prisma";
-
 
 export const runtime = "nodejs";
 
 export const dynamic = "force-dynamic";
+
+const OFFLINE_MENTOR_REPLY =
+  "Nexus Mentor is in offline mode. Sign in for cloud guidance, or use task hints in the left panel and your analyst notes.";
 
 
 
@@ -121,6 +126,22 @@ export async function POST(req:Request){
 
 
 try{
+
+const session = await getServerSession(authOptions);
+
+if (isRateLimited(req, "ai", 30, 60_000)) {
+  return NextResponse.json({
+    success: true,
+    reply: "Nexus Mentor rate limit reached. Try again in a minute or use built-in task hints."
+  });
+}
+
+if (!session?.user?.email) {
+  return NextResponse.json({
+    success: true,
+    reply: OFFLINE_MENTOR_REPLY
+  });
+}
 
 
 
@@ -481,7 +502,9 @@ reply:"Nexus AI processing failed."
 },
 
 {
-status:200
+
+status:503
+
 }
 
 );

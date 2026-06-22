@@ -1,19 +1,23 @@
-export default function SOC(){
+"use client";
 
-return (
+import Achievements from "@/components/mission/Achievements";
+import DailyChallenge from "@/components/cyber/DailyChallenge";
+import NexusModuleDashboard from "@/components/os/NexusModuleDashboard";
+import { NEXUS_OS_MODULES } from "@/lib/nexusModules";
 
-<main className="min-h-screen bg-black text-green-400 p-10">
+const config = NEXUS_OS_MODULES.soc;
 
-<h1 className="text-4xl">
-SOC Defender
-</h1>
-
-<p>
-Blue Team Simulation Environment Loading...
-</p>
-
-</main>
-
-);
-
+export default function SocModulePage() {
+  return (
+    <NexusModuleDashboard
+      title={config.title}
+      description={config.description}
+      allowedTypes={[...config.allowedTypes]}
+      modulePath="soc"
+      showStats
+      showCategoryFilters
+      headerSlot={<DailyChallenge />}
+      footerSlot={<Achievements />}
+    />
+  );
 }

@@ -8,6 +8,8 @@ useState
 
 } from "react";
 
+import { useSession } from "next-auth/react";
+
 
 // TYPES
 
@@ -16,16 +18,7 @@ import { AccessLevel } from "@/types/access";
 
 // CONTEXT
 
-import {
-
-NexusProvider,
-
-useNexus
-
-} from "@/context/NexusContext";
-
-
-// SYSTEM MODULES
+import { useNexus } from "@/context/NexusContext";
 
 import NexusGateway from "@/components/nexus/gateway/NexusGateway";
 
@@ -39,8 +32,6 @@ import NexusBlogs from "@/components/blogs/NexusBlogs";
 
 
 // GLOBAL COMPONENTS
-
-import NexusAvatar from "@/components/nexus/avatar/NexusAvatar";
 
 import NexusCore from "@/components/nexus/core/NexusCore";
 
@@ -58,15 +49,7 @@ import MissionEngine from "@/components/nexus/mission/MissionEngine";
 
 
 
-
-
-
-
 function NexusRouter(){
-
-
-
-
 
 
 const {
@@ -78,48 +61,48 @@ changeSystem
 }=useNexus();
 
 
-
-
-
-
-
 const [access,setAccess] =
 
 useState<AccessLevel>("visitor");
 
 
+const { data:session, status } =
+useSession();
 
 
 
 
-
-
-
-
-// RESTORE OWNER SESSION FROM COOKIE
+// RESTORE OWNER SESSION (NextAuth or lab cookie)
 
 
 useEffect(()=>{
 
 
+if(status === "loading"){
+
+return;
+
+}
+
 
 async function restoreSession(){
 
+
+if(session?.user?.role === "OWNER"){
+
+setAccess("owner");
+
+return;
+
+}
 
 
 try{
 
 
-
 const response =
 
-await fetch(
-
-"/api/auth/session"
-
-);
-
-
+await fetch("/api/auth/lab-session");
 
 
 const data =
@@ -127,56 +110,33 @@ const data =
 await response.json();
 
 
-
-
-
 if(data.authenticated){
-
-
 
 setAccess("owner");
 
-
-
-}
-
-
-
+return;
 
 }
 
 
+}catch{
 
-catch{
 
+// fall through to visitor
+
+}
 
 
 setAccess("visitor");
 
 
-
 }
-
-
-
-}
-
-
 
 
 restoreSession();
 
 
-
-},[]);
-
-
-
-
-
-
-
-
+},[session,status]);
 
 
 
@@ -184,27 +144,10 @@ restoreSession();
 let screen;
 
 
-
-
-
-
-
-
-
-
-
 switch(currentSystem){
 
 
-
-
-
-
-
-
-
 case "gateway":
-
 
 
 screen=(
@@ -218,21 +161,10 @@ setMode={changeSystem}
 );
 
 
-
 break;
 
 
-
-
-
-
-
-
-
-
-
 case "defender":
-
 
 
 screen=(
@@ -242,22 +174,10 @@ screen=(
 );
 
 
-
 break;
 
 
-
-
-
-
-
-
-
-
-
-
 case "medcore":
-
 
 
 screen=(
@@ -271,22 +191,10 @@ setMode={changeSystem}
 );
 
 
-
 break;
 
 
-
-
-
-
-
-
-
-
-
-
 case "blogs":
-
 
 
 screen=(
@@ -296,22 +204,10 @@ screen=(
 );
 
 
-
 break;
 
 
-
-
-
-
-
-
-
-
-
-
 case "lab":
-
 
 
 screen=(
@@ -329,21 +225,10 @@ setAccess={setAccess}
 );
 
 
-
 break;
 
 
-
-
-
-
-
-
-
-
-
 default:
-
 
 
 screen=(
@@ -357,32 +242,12 @@ setMode={changeSystem}
 );
 
 
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 return(
 
 <>
-
-
-
-
-
-
-
 
 {/* ACTIVE SYSTEM */}
 
@@ -393,15 +258,7 @@ return(
 </div>
 
 
-
-
-
-
-
-
-
 {/* SYSTEM SWITCHER */}
-
 
 {
 
@@ -425,20 +282,9 @@ setMode={changeSystem}
 
 }
 
-
-
-
-
-
-
-
-
-
-
 </>
 
 );
-
 
 
 }
@@ -446,49 +292,16 @@ setMode={changeSystem}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 export default function Home(){
-
-
-
-
-
 
 
 return(
 
-<NexusProvider>
-
-
-
-
-
-
-
-
-
+<>
 
 {/* MAIN NEXUS OS ROUTER */}
 
 <NexusRouter/>
-
-
-
-
-
-
-
-
 
 
 {/* GLOBAL COMMAND PALETTE CTRL + K */}
@@ -496,50 +309,16 @@ return(
 <NexusCommand/>
 
 
-
-
-
-
-
-
-
-
-{/* GLOBAL AI EXPERIENCE */}
-
-<NexusAvatar/>
-
-
-
-
-
 <NexusCore/>
-
-
-
-
-
-
-
-
 
 
 {/* BACKGROUND SERVICES */}
 
 <MissionEngine/>
 
-
-
-
-
-
-
-
-
-
-</NexusProvider>
+</>
 
 );
-
 
 
 }

@@ -1,123 +1,296 @@
-export default function ProjectsSection() {
-
-  const projects = [
-
-    {
-      title: "🌐 Syed Nexus Portfolio",
-      desc:
-        "Personal portfolio project created to learn modern web development and deployment workflows.",
-      points: [
-        "Next.js application",
-        "Git and GitHub version control",
-        "Vercel deployment",
-        "Cloudflare DNS configuration"
-      ]
-    },
+"use client";
 
 
-    {
-      title: "🔐 Cybersecurity Learning Labs",
-      desc:
-        "Hands-on learning environment for practicing cybersecurity concepts and tools.",
-      points: [
-        "Linux fundamentals",
-        "Networking practice",
-        "Web security basics",
-        "Security tools exploration"
-      ]
-    },
-
-
-    {
-      title: "🖥 Nexus Lab (In Progress)",
-      desc:
-        "Personal infrastructure learning project focused on servers, networking and self-hosting.",
-      points: [
-        "Home server planning",
-        "Virtualization learning",
-        "Docker fundamentals",
-        "Security monitoring concepts"
-      ]
-    }
-
-  ];
-
-
-  return (
-
-    <section
-      id="projects"
-      className="px-8 md:px-24 lg:px-40 py-10"
-    >
-
-
-      <h2 className="text-4xl font-bold">
-
-        Projects
-
-      </h2>
+import { useNexusData } from "@/hooks/useNexusData";
 
 
 
-      <div className="grid md:grid-cols-3 gap-6 mt-10">
 
 
-        {projects.map((project)=>(
-
-          <div
-            key={project.title}
-            className="
-            border border-slate-700/60 bg-slate-900/50
-            rounded-xl
-            p-6
-            hover:border-blue-500
-            transition
-            "
-          >
-
-
-            <h3 className="text-xl">
-
-              {project.title}
-
-            </h3>
-
-
-            <p className="mt-3 text-gray-400">
-
-              {project.desc}
-
-            </p>
+export default function ProjectsSection(){
 
 
 
-            <ul className="mt-5 space-y-2 text-gray-400">
+const profile =
+useNexusData();
 
 
-              {project.points.map(point=>(
 
-                <li key={point}>
-
-                  • {point}
-
-                </li>
-
-              ))}
+const projects =
+profile.projects || [];
 
 
-            </ul>
 
 
-          </div>
-
-        ))}
 
 
-      </div>
 
 
-    </section>
+return(
 
-  );
+<section
+
+id="projects"
+
+className="
+px-8
+md:px-24
+lg:px-40
+
+py-10
+"
+
+>
+
+
+<h2
+
+className="
+text-4xl
+font-bold
+"
+
+>
+
+Projects
+
+</h2>
+
+
+
+
+
+
+
+
+
+<div
+
+className="
+grid
+md:grid-cols-3
+gap-6
+mt-10
+"
+
+>
+
+
+{
+
+
+projects.length > 0 ?
+
+
+projects.map((project:any)=>(
+
+
+
+<div
+
+key={project.id || project.name}
+
+className="
+border
+border-slate-700/60
+
+bg-slate-900/50
+
+rounded-xl
+
+p-6
+
+hover:border-blue-500
+
+transition
+"
+
+>
+
+
+
+
+
+<p
+
+className="
+text-xs
+text-blue-400
+"
+
+>
+
+{project.category}
+
+</p>
+
+
+
+
+
+
+<h3
+
+className="
+text-xl
+mt-3
+"
+
+>
+
+{project.name}
+
+</h3>
+
+
+
+
+
+
+
+<p
+
+className="
+mt-3
+text-gray-400
+"
+
+>
+
+{project.description}
+
+</p>
+
+
+
+
+
+
+
+
+
+<div
+
+className="
+flex
+flex-wrap
+gap-2
+
+mt-5
+"
+
+>
+
+
+{
+
+
+project.technologies?.map(
+
+(tech:string)=>(
+
+
+<span
+
+key={tech}
+
+className="
+text-xs
+
+border
+border-blue-500/40
+
+rounded
+
+px-3
+py-1
+
+text-blue-300
+"
+
+>
+
+{tech}
+
+</span>
+
+
+))
+
+
+}
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<p
+
+className="
+mt-5
+text-green-400
+text-sm
+"
+
+>
+
+{project.status}
+
+</p>
+
+
+
+
+
+
+
+</div>
+
+
+
+))
+
+
+
+:
+
+
+
+<p
+
+className="
+text-gray-500
+"
+
+>
+
+No projects available.
+
+</p>
+
+
+
+}
+
+
+
+</div>
+
+
+
+</section>
+
+
+);
+
+
 
 }

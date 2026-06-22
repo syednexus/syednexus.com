@@ -1,62 +1,36 @@
 import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma";
+import { requireOwner } from "@/lib/adminGuard";
 
 
 
 export async function GET(){
 
 
-try{
+const session =
+await requireOwner();
 
 
-const admin =
-await prisma.adminUser.findUnique({
+if(!session){
 
-where:{
+return NextResponse.json(
 
-username:"owner"
+{error:"Unauthorized"},
 
-},
+{status:401}
 
-select:{
-
-username:true,
-
-createdAt:true
+);
 
 }
-
-});
-
 
 
 return NextResponse.json({
 
-database:true,
+status:"ok",
 
-adminExists:!!admin,
-
-admin
+role:session.user?.role ?? null
 
 });
-
-
-}
-
-
-catch(error:any){
-
-
-return NextResponse.json({
-
-database:false,
-
-error:error.message
-
-});
-
-}
 
 
 }

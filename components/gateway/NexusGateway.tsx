@@ -2,321 +2,51 @@
 
 import Link from "next/link";
 
-
-const modules = [
-
-{
-name:"Portfolio",
-desc:"Professional Identity & Journey",
-path:"/portfolio",
-status:"PUBLIC"
-},
-
-{
-name:"SOC Defender",
-desc:"Realistic Blue Team Simulations",
-path:"/soc",
-status:"TRAINING"
-},
-
-{
-name:"Cyber Range",
-desc:"Hands-on Security Labs",
-path:"/lab",
-status:"LAB"
-},
-
-{
-name:"Games",
-desc:"Cyber & Logic Challenges",
-path:"/games",
-status:"PLAY"
-},
-
-{
-name:"Blogs",
-desc:"Research & Articles",
-path:"/blogs",
-status:"PUBLIC"
-},
-
-{
-name:"MedCore",
-desc:"Healthcare Security Research",
-path:"/medcore",
-status:"RESEARCH"
-},
-
-{
-name:"Vault",
-desc:"Private Knowledge System",
-path:"/vault",
-status:"LOCKED"
-},
-
-{
-name:"Security",
-desc:"Nexus Transparency Center",
-path:"/security",
-status:"INFO"
-}
-
-];
-
-
-
-
-
-
-export default function NexusGateway(){
-
-
-return (
-
-<main
-
-className="
-
-min-h-screen
-
-bg-black
-
-text-green-400
-
-
-px-8
-
-py-20
-
-"
-
->
-
-
-
-
-<section
-
-className="
-
-max-w-7xl
-
-mx-auto
-
-"
-
->
-
-
-
-
-
-
-<div
-
-className="mb-14"
-
->
-
-
-<h1
-
-className="
-
-text-6xl
-
-font-bold
-
-tracking-widest
-
-mb-5
-
-"
-
->
-
-NEXUS OS
-
-</h1>
-
-
-
-
-<p
-
-className="
-
-text-gray-400
-
-max-w-3xl
-
-"
-
->
-
-Select an environment. Explore cybersecurity,
-technology, healthcare security and research.
-
-
-</p>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div
-
-className="
-
-grid
-
-grid-cols-1
-
-md:grid-cols-2
-
-lg:grid-cols-4
-
-gap-6
-
-"
-
->
-
-
-{
-
-modules.map((module)=>(
-
-
-<Link
-
-
-href={module.path}
-
-
-key={module.name}
-
-
-className="
-
-group
-
-border
-
-border-green-800/50
-
-rounded-2xl
-
-p-6
-
-
-bg-black/40
-
-
-hover:bg-green-950/20
-
-
-transition
-
-"
-
->
-
-
-
-<span
-
-className="
-
-text-xs
-
-text-gray-500
-
-"
-
->
-
-{module.status}
-
-</span>
-
-
-
-
-
-
-<h3
-
-className="
-
-text-2xl
-
-mt-5
-
-group-hover:text-white
-
-"
-
->
-
-{module.name}
-
-</h3>
-
-
-
-
-
-<p
-
-className="
-
-text-sm
-
-text-gray-400
-
-mt-3
-
-"
-
->
-
-{module.desc}
-
-</p>
-
-
-
-</Link>
-
-
-))
-
-}
-
-
-</div>
-
-
-
-
-
-
-</section>
-
-
-</main>
-
-
-);
-
-
+import { GATEWAY_MODULES } from "@/lib/nexusNavigation";
+
+export default function NexusGateway() {
+  const osHub = GATEWAY_MODULES.find(module => module.path === "/nexus");
+  const modules = GATEWAY_MODULES.filter(module => module.path !== "/nexus");
+
+  return (
+    <main className="min-h-screen bg-black px-5 py-16 font-mono text-green-400 sm:px-8 sm:py-20">
+      <section className="mx-auto max-w-7xl">
+        <div className="mb-10">
+          <h1 className="mb-5 text-4xl font-bold tracking-widest sm:text-6xl">SYED NEXUS</h1>
+          <p className="max-w-3xl text-sm text-gray-400 sm:text-base">
+            Cybersecurity portfolio and interactive training environments. Enter Nexus OS for
+            hands-on labs, or explore public modules below.
+          </p>
+        </div>
+
+        {osHub && (
+          <Link
+            href={osHub.path}
+            className="mb-12 block rounded-2xl border border-green-500 bg-green-950/30 p-8 transition hover:border-green-400 hover:bg-green-950/50"
+          >
+            <span className="text-xs text-green-500">{osHub.status}</span>
+            <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">{osHub.name}</h2>
+            <p className="mt-3 max-w-2xl text-sm text-gray-400">{osHub.desc}</p>
+            <p className="mt-6 text-green-400">▶ ENTER NEXUS OS</p>
+          </Link>
+        )}
+
+        <p className="mb-6 text-xs uppercase tracking-widest text-gray-600">All environments</p>
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {modules.map(module => (
+            <Link
+              key={module.path}
+              href={module.path}
+              className="group rounded-2xl border border-green-800/50 bg-black/40 p-6 transition hover:border-green-600 hover:bg-green-950/20"
+            >
+              <span className="text-xs text-gray-500">{module.status}</span>
+              <h3 className="mt-4 text-xl font-bold group-hover:text-white sm:text-2xl">{module.name}</h3>
+              <p className="mt-3 line-clamp-3 text-sm text-gray-400">{module.desc}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
 }

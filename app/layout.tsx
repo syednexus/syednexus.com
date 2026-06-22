@@ -10,17 +10,48 @@ import NexusFooter from "@/components/nexus/NexusFooter";
 
 import AuthProvider from "@/components/nexus/AuthProvider";
 
+import { NexusDataProvider } from "@/context/NexusDataContext";
+import { MissionsProvider } from "@/context/MissionsContext";
+import { AnalystProvider } from "@/context/AnalystContext";
+import { WorldProvider } from "@/context/WorldContext";
+
 import NexusAvatar from "@/components/nexus/avatar/NexusAvatar";
+
+import AchievementOverlay from "@/components/mission/AchievementOverlay";
+import NexusDataStatusBar from "@/components/mission/NexusDataStatusBar";
 
 import { NexusProvider } from "@/context/NexusContext";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://syednexus.com";
+
 export const metadata: Metadata = {
-
-title:"Syed Nexus | Cybersecurity Journey",
-
-description:
-"Personal portfolio of Syed Mohiuddin - cybersecurity learning journey, projects, homelab and technology exploration."
-
+  title: "Syed Nexus | Cybersecurity Portfolio & Lab",
+  description:
+    "Cybersecurity portfolio, SOC simulations, security research and projects.",
+  metadataBase: new URL(siteUrl),
+  openGraph: {
+    title: "Syed Nexus | Cybersecurity Portfolio & Lab",
+    description:
+      "Cybersecurity portfolio, SOC simulations, security research and projects.",
+    url: siteUrl,
+    siteName: "Syed Nexus",
+    locale: "en_AU",
+    type: "website"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Syed Nexus | Cybersecurity Portfolio & Lab",
+    description:
+      "Cybersecurity portfolio, SOC simulations, security research and projects."
+  },
+  robots: {
+    index: true,
+    follow: true
+  },
+  icons: {
+    icon: "/profile.jpg",
+    apple: "/profile.jpg"
+  }
 };
 
 
@@ -58,12 +89,23 @@ flex-col
 >
 <AuthProvider>
 
+<NexusDataProvider>
+
+<MissionsProvider>
+
+<AnalystProvider>
+
+<WorldProvider>
+
 <NexusProvider>
 
 <NexusSoundProvider>
 
 
 <NexusHeader />
+
+
+<NexusDataStatusBar />
 
 
 <main
@@ -84,12 +126,23 @@ pt-20
 <NexusAvatar />
 
 
+<AchievementOverlay />
+
+
 <CookieConsent />
 
 
 </NexusSoundProvider>
 
 </NexusProvider>
+
+</WorldProvider>
+
+</AnalystProvider>
+
+</MissionsProvider>
+
+</NexusDataProvider>
 
 </AuthProvider>
 

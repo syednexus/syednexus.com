@@ -42,9 +42,9 @@ useState<Activity[]>([]);
 
 useEffect(()=>{
 
+try{
 
-const saved =
-JSON.parse(
+const saved = JSON.parse(
 
 localStorage.getItem("nexus_activity") ||
 
@@ -52,9 +52,13 @@ localStorage.getItem("nexus_activity") ||
 
 );
 
-
 setActivity(saved);
 
+}catch{
+
+setActivity([]);
+
+}
 
 },[]);
 

@@ -3,173 +3,137 @@ generator client {
   output   = "../lib/generated/prisma"
 }
 
-
 datasource db {
   provider = "postgresql"
-
 }
 
 model Identity {
+  id Int @id @default(autoincrement())
 
-id Int @id @default(autoincrement())
+  name String
 
-name String
+  headline String
 
-headline String
+  summary String
 
-summary String
+  location String?
 
-location String?
+  avatar String?
 
-avatar String?
+  email String?
 
-email String?
+  linkedin String?
 
-linkedin String?
+  github String?
 
-github String?
+  resume String?
 
-resume String?
+  createdAt DateTime @default(now())
 
-createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-updatedAt DateTime @updatedAt
-
+  @@index([id])
 }
-
-
 
 model Education {
+  id Int @id @default(autoincrement())
 
-id Int @id @default(autoincrement())
+  degree String
 
-degree String
+  institution String
 
-institution String
+  period String
 
-period String
+  field String?
 
-field String?
-
-focus String
-
+  focus String
 }
-
-
 
 model Experience {
+  id Int @id @default(autoincrement())
 
-id Int @id @default(autoincrement())
+  role String
 
-role String
+  company String
 
-company String
+  period String
 
-period String
+  domain String?
 
-domain String?
-
-details String
-
+  details String
 }
-
-
 
 model Skill {
+  id Int @id @default(autoincrement())
 
-id Int @id @default(autoincrement())
+  category String
 
-category String
-
-name String
-
+  name String
 }
-
-
 
 model Certification {
+  id Int @id @default(autoincrement())
 
-id Int @id @default(autoincrement())
+  name String
 
-name String
+  issuer String
 
-issuer String
+  status String
 
-status String
+  category String?
 
-category String?
-
-skills String
-
+  skills String
 }
-
-
 
 model Project {
+  id Int @id @default(autoincrement())
 
-id Int @id @default(autoincrement())
+  name String
 
-name String
+  category String
 
-category String
+  status String
 
-status String
+  description String
 
-description String
-
-technologies String
-
+  technologies String
 }
 
-
-
 model Blog {
+  id Int @id @default(autoincrement())
 
-id Int @id @default(autoincrement())
+  title String
 
-title String
+  category String
 
-category String
+  content String
 
-content String
+  tags String?
 
-tags String?
-
-date DateTime @default(now())
-
+  date DateTime @default(now())
 }
 
 model AdminUser {
+  id Int @id @default(autoincrement())
 
-id Int @id @default(autoincrement())
+  username String @unique
 
+  passwordHash String
 
-username String @unique
+  recoveryKeyHash String?
 
+  recoveryEmail String?
 
-passwordHash String
+  resetTokenHash String?
 
+  resetExpires DateTime?
 
-recoveryKeyHash String?
+  createdAt DateTime @default(now())
 
-
-recoveryEmail String?
-
-
-resetTokenHash String?
-
-
-resetExpires DateTime?
-
-
-createdAt DateTime @default(now())
-
-
-updatedAt DateTime @updatedAt
-
+  updatedAt DateTime @updatedAt
 }
-model AiMemory {
 
+model AiMemory {
   id Int @id @default(autoincrement())
 
   category String
@@ -179,11 +143,9 @@ model AiMemory {
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
-
 }
 
 model User {
-
   id String @id @default(cuid())
 
   name String?
@@ -194,19 +156,15 @@ model User {
 
   role Role @default(USER)
 
-
   passwordHash String?
-
 
   mfaEnabled Boolean @default(false)
 
   mfaSecret String?
 
-
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
-
 
   accounts Account[]
 
@@ -214,26 +172,23 @@ model User {
 
   loginEvents LoginEvent[]
 
+  missionProgress MissionProgress[]
+
+  achievementUnlocks AchievementUnlock[]
+
+  streak UserStreak?
 }
 
-
-
-
-
 model Account {
-
   id String @id @default(cuid())
 
-
   userId String
-
 
   type String
 
   provider String
 
   providerAccountId String
-
 
   refresh_token String?
 
@@ -249,87 +204,183 @@ model Account {
 
   session_state String?
 
-
-  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
-
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-
 }
 
-
-
-
-
-
 model Session {
-
   id String @id @default(cuid())
-
 
   sessionToken String @unique
 
-
   userId String
-
 
   expires DateTime
 
-
   deviceId String?
-
 
   active Boolean @default(true)
 
-
-  user User @relation(fields:[userId], references:[id], onDelete:Cascade)
-
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-
-
-
-
-
-
-
 model LoginEvent {
-
   id Int @id @default(autoincrement())
-
 
   userId String?
 
-
   email String?
-
 
   success Boolean
 
-
   ip String?
-
 
   createdAt DateTime @default(now())
 
-
-  user User? @relation(fields:[userId], references:[id])
-
+  user User? @relation(fields: [userId], references: [id])
 }
 
-
-
-
-
-
-
-
 enum Role {
+  OWNER
 
-OWNER
+  MANAGER
 
-MANAGER
+  USER
+}
 
-USER
+// =================================
+// NEXUS V3 MISSION ENGINE
+// =================================
 
+model Mission {
+  id Int @id @default(autoincrement())
+
+  title String
+
+  slug String @unique
+
+  type String
+
+  category String
+
+  difficulty String
+
+  description String
+
+  scenario String?
+
+  content String?
+
+  answer String?
+
+  explanation String?
+
+  hints String[] @default([])
+
+  xp Int @default(50)
+
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  progress MissionProgress[]
+
+  dailyChallenges DailyChallenge[]
+}
+
+model MissionProgress {
+  id Int @id @default(autoincrement())
+
+  missionId Int
+
+  userId String
+
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  completed Boolean @default(false)
+
+  score Int @default(0)
+
+  attempts Int @default(0)
+
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([missionId, userId])
+}
+
+// =================================
+// NEXUS ACHIEVEMENT ENGINE
+// =================================
+
+model Achievement {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  description String
+
+  icon String?
+
+  requirement String
+
+  xpRequired Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  unlocked AchievementUnlock[]
+}
+
+model AchievementUnlock {
+  id Int @id @default(autoincrement())
+
+  achievementId Int
+
+  userId String
+
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  unlockedAt DateTime @default(now())
+
+  @@unique([achievementId, userId])
+}
+
+// =================================
+// NEXUS DAILY CHALLENGE
+// =================================
+
+model DailyChallenge {
+  id Int @id @default(autoincrement())
+
+  missionId Int
+
+  date DateTime @db.Date
+
+  createdAt DateTime @default(now())
+
+  mission Mission @relation(fields: [missionId], references: [id], onDelete: Cascade)
+
+  @@unique([date])
+}
+
+model UserStreak {
+  id Int @id @default(autoincrement())
+
+  userId String @unique
+
+  currentStreak Int @default(0)
+
+  longestStreak Int @default(0)
+
+  lastCompletedDate DateTime? @db.Date
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

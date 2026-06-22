@@ -1,5 +1,8 @@
 import { cookies } from "next/headers";
 import crypto from "crypto";
+import { getServerSession } from "next-auth";
+
+import { authOptions } from "@/auth";
 
 
 const sessionCookieName =
@@ -159,18 +162,24 @@ maxAge:sessionMaxAge
 export async function isAdmin(){
 
 
+const session =
+await getServerSession(authOptions);
+
+
+if(session?.user?.role === "OWNER"){
+
+return true;
+
+}
+
+
 const cookieStore =
 await cookies();
 
 
-
-return (
-
-verifyAdminSessionToken(
+return verifyAdminSessionToken(
 
 cookieStore.get(sessionCookieName)?.value
-
-)
 
 );
 

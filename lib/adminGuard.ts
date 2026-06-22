@@ -1,90 +1,14 @@
-import { getServerSession } from "next-auth";
+export { requireOwner } from "@/lib/security/requireVaultAccess";
 
-import { authOptions } from "@/auth";
+import { requireOwner as requireOwnerSession } from "@/lib/security/requireVaultAccess";
 
-
-
-
-export async function requireOwner(){
-
-
-const session =
-await getServerSession(authOptions);
-
-
-
-if(
-
-!session ||
-
-session.user?.role !== "OWNER"
-
-){
-
-
-return null;
-
-
+/** Owner session with Vault MFA satisfied (if MFA is enabled). */
+export async function requireAdmin() {
+  return await requireOwnerSession();
 }
 
-
-
-return session;
-
-
-}
-
-
-
-
-
-
-
-export async function requireManager(){
-
-
-const session =
-await getServerSession(authOptions);
-
-
-
-if(
-
-!session ||
-
-(
-
-session.user?.role !== "OWNER"
-
-&&
-
-session.user?.role !== "MANAGER"
-
-
-)
-
-){
-
-
-return null;
-
-
-}
-
-
-
-return session;
-
-
-}
-
-// Legacy compatibility
-// V2 admin = V3 owner
-
-export async function requireAdmin(){
-
-
-return await requireOwner();
-
-
+export async function requireManager() {
+  const session = await requireOwnerSession();
+  if (!session) return null;
+  return session;
 }

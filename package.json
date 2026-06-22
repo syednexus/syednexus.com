@@ -10,11 +10,19 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "seed:missions": "tsx prisma/seed/runMissionPacks.ts",
+    "seed:attack": "tsx prisma/seed/attackLabPack001.ts",
+    "seed:cyber": "tsx prisma/seed/cyberRangePack001.ts",
+    "seed:games": "tsx prisma/seed/gamePack001.ts",
+    "seed:practical": "tsx prisma/seed/practicalPack001.ts",
+    "seed:blogs": "tsx -e \"import('dotenv/config'); import { PrismaPg } from '@prisma/adapter-pg'; import { PrismaClient } from './lib/generated/prisma/client'; import { seedBlogPack001 } from './prisma/seed/blogPack001'; const a=new PrismaPg({connectionString:process.env.DATABASE_URL}); const p=new PrismaClient({adapter:a}); seedBlogPack001(p).finally(()=>p.$disconnect());\""
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
     "@google/genai": "^2.8.0",
+    "@neondatabase/serverless": "^1.1.0",
+    "@prisma/adapter-neon": "^7.8.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@swc/helpers": "^0.5.23",
@@ -29,7 +37,8 @@
     "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

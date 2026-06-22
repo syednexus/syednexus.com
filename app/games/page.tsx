@@ -1,19 +1,19 @@
-export default function Games(){
+"use client";
 
-return (
+import PracticalModuleHub from "@/components/practical/PracticalModuleHub";
+import { NEXUS_OS_MODULES } from "@/lib/nexusModules";
 
-<main className="min-h-screen bg-black text-green-400 p-10">
+const config = NEXUS_OS_MODULES.games;
 
-<h1 className="text-4xl">
-Nexus Games
-</h1>
-
-<p>
-Cyber challenges coming online.
-</p>
-
-</main>
-
-);
-
+export default function GamesModulePage() {
+  return (
+    <PracticalModuleHub
+      module="games"
+      title={config.title}
+      description={config.description}
+      allowedTypes={[...config.allowedTypes]}
+      modulePath="games"
+      accentClass="text-green-400"
+    />
+  );
 }

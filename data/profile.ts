@@ -23,18 +23,15 @@ resume:"/Resume.pdf",
 
 headline:
 
-"Master of Cybersecurity Student | Interim Operations Supervisor | Healthcare & Cybersecurity Professional",
+"Master of Cybersecurity Student | Junior Analyst | Operations Background",
 
 summary:`
-Multidisciplinary professional combining healthcare,
-operations leadership, fraud investigation and cybersecurity.
+I am building a career in cybersecurity while completing my Master of Cybersecurity.
+My background spans pharmacy, Amazon delivery station operations, and risk investigation.
 
-Experienced across Amazon operations, risk investigation,
-customer systems and pharmaceutical sciences.
-
-Currently developing cybersecurity expertise in
-security operations, vulnerability assessment,
-network security, web security and penetration testing.
+I focus on practical learning: SOC workflows, Linux, networking, vulnerability assessment,
+and hands-on labs (TryHackMe, home lab projects). I document what I learn and what I am
+still working to improve—aiming for clear, honest growth as a junior security professional.
 `
 
 },
@@ -111,7 +108,7 @@ experience:[
 
 role:"Interim Operations Supervisor",
 
-company:"Amazon DVT1",
+company:"Amazon Delivery Station (DVT1)",
 
 period:"Jan 2026 - Present",
 
@@ -141,7 +138,7 @@ details:[
 
 role:"Delivery Station Associate / TDR Associate",
 
-company:"Amazon DVT1",
+company:"Amazon Delivery Station (DVT1)",
 
 period:"Aug 2024 - Jun 2026",
 
@@ -414,7 +411,7 @@ category:"Cybersecurity",
 status:"Active",
 
 description:
-"Personal cybersecurity identity platform with Sentinel, Lab and MedCore systems.",
+"Personal cybersecurity platform with SOC simulations, practical labs, portfolio, and learning notes.",
 
 technologies:[
 

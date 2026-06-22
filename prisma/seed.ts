@@ -6,6 +6,7 @@ import { PrismaClient } from "../lib/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { profile } from "../data/profile";
+import { seedBlogPack001 } from "./seed/blogPack001";
 
 
 
@@ -380,55 +381,9 @@ project.technologies.join(",")
 
 
 
-// BLOGS
+// BLOGS — production content pack
 
-
-for(const blog of profile.blogs.posts as any[]){
-
-
-await prisma.blog.create({
-
-data:{
-
-
-title:
-
-blog.title ||
-
-blog.name ||
-
-"Untitled",
-
-
-
-category:
-
-blog.category ||
-
-blog.type ||
-
-"General",
-
-
-
-content:
-
-blog.content ||
-
-blog.description ||
-
-blog.summary ||
-
-""
-
-
-}
-
-
-});
-
-
-}
+await seedBlogPack001(prisma);
 
 
 

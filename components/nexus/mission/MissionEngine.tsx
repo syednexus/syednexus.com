@@ -260,17 +260,13 @@ if(progress===100){
 
 unlockAchievement({
 
-
-
 id:"nexus_master",
 
 title:"Nexus Master",
 
 description:"Completed the full Nexus exploration sequence",
 
-icon:"🏆"
-
-
+icon:"◆"
 
 });
 

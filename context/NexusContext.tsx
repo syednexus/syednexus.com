@@ -13,6 +13,8 @@ ReactNode
 
 import { Mode } from "@/types/mode";
 
+import { withAchievementTier } from "@/lib/achievementTier";
+
 
 
 
@@ -62,6 +64,8 @@ title:string;
 description:string;
 
 icon:string;
+
+tier?:"standard" | "specialist";
 
 };
 
@@ -141,6 +145,12 @@ addXP:(amount:number)=>void;
 achievements:Achievement[];
 
 unlockAchievement:(achievement:Achievement)=>void;
+
+recentUnlock:Achievement | null;
+
+celebrateAchievement:(achievement:Achievement)=>void;
+
+clearRecentUnlock:()=>void;
 
 
 };
@@ -399,6 +409,10 @@ const [achievements,setAchievements]=
 useState<Achievement[]>([]);
 
 
+const [recentUnlock,setRecentUnlock]=
+useState<Achievement | null>(null);
+
+
 
 
 
@@ -514,6 +528,32 @@ item
 
 
 
+function celebrateAchievement(
+
+achievement:Achievement
+
+){
+
+
+setRecentUnlock(withAchievementTier(achievement));
+
+
+}
+
+
+
+
+function clearRecentUnlock(){
+
+
+setRecentUnlock(null);
+
+
+}
+
+
+
+
 function unlockAchievement(
 
 achievement:Achievement
@@ -544,6 +584,11 @@ if(exists){
 return prev;
 
 }
+
+
+
+
+queueMicrotask(()=>celebrateAchievement(achievement));
 
 
 
@@ -649,7 +694,13 @@ addXP,
 
 achievements,
 
-unlockAchievement
+unlockAchievement,
+
+recentUnlock,
+
+celebrateAchievement,
+
+clearRecentUnlock
 
 
 
