@@ -282,9 +282,13 @@ max-w-7xl
 
 w-full
 
-px-6
+px-4
 
-py-12
+py-8
+
+sm:px-6
+
+sm:py-12
 
 ">
 
@@ -320,7 +324,9 @@ className="
 
 text-center
 
-mb-14
+mb-8
+
+sm:mb-14
 
 "
 
@@ -333,7 +339,11 @@ mb-14
 
 <h1 className="
 
-text-6xl
+text-3xl
+
+sm:text-5xl
+
+lg:text-6xl
 
 tracking-widest
 
@@ -444,7 +454,7 @@ setMode={setMode}
 
 
 
-<section className="mt-16">
+<section className="mt-10 sm:mt-16">
 
 
 
@@ -486,9 +496,13 @@ grid
 
 grid-cols-1
 
-md:grid-cols-4
+sm:grid-cols-2
 
-gap-8
+lg:grid-cols-4
+
+gap-4
+
+sm:gap-8
 
 ">
 
@@ -541,7 +555,9 @@ border-white/20
 
 rounded-2xl
 
-p-8
+p-5
+
+sm:p-8
 
 bg-white/5
 
@@ -550,6 +566,8 @@ hover:bg-white/10
 transition
 
 text-left
+
+w-full
 
 "
 
@@ -566,7 +584,7 @@ text-left
 
 aria-hidden="true"
 
-className="text-5xl"
+className="text-3xl sm:text-5xl"
 
 >
 
@@ -583,9 +601,13 @@ className="text-5xl"
 
 <h2 className="
 
-text-2xl
+text-xl
 
-mt-6
+sm:text-2xl
+
+mt-4
+
+sm:mt-6
 
 ">
 

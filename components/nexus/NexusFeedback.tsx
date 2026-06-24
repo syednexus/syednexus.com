@@ -91,7 +91,7 @@ export default function NexusFeedback({ className = "", onOpen }: NexusFeedbackP
 
       {open && (
         <div
-          className="fixed inset-0 z-[60] flex items-start justify-center bg-black/70 p-4 pt-24 sm:justify-end sm:pr-6 sm:pt-28"
+          className="fixed inset-0 z-60 flex items-start justify-center bg-black/70 p-4 pt-24 sm:justify-end sm:pr-6 sm:pt-28"
           role="dialog"
           aria-labelledby="feedback-title"
           onClick={() => setOpen(false)}

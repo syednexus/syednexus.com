@@ -1041,12 +1041,16 @@ onClick={()=>setOpen(true)}
 
 className="
 fixed
-left-6
-bottom-6
+left-4
+bottom-4
 z-50
+sm:left-6
+sm:bottom-6
 
-w-14
-h-14
+w-12
+h-12
+sm:w-14
+sm:h-14
 
 rounded-xl
 
@@ -1058,7 +1062,8 @@ border-green-400
 text-green-400
 
 font-mono
-text-xl
+text-lg
+sm:text-xl
 
 shadow-lg
 shadow-green-500/40
@@ -1086,11 +1091,18 @@ transition
 
 <>
 
-{/* Viewport constraint layer — keeps panel inside screen */}
+{/* Viewport constraint layer — keeps panel inside screen on desktop */}
 <div
 ref={dragContainerRef}
 className="pointer-events-none fixed inset-0"
 style={{zIndex:49}}
+/>
+
+{/* Mobile backdrop overlay */}
+<div
+className="fixed inset-0 bg-black/60 sm:hidden"
+style={{zIndex:59}}
+onClick={()=>setOpen(false)}
 />
 
 <motion.div
@@ -1121,27 +1133,33 @@ className="
 
 fixed
 
-left-8
+inset-0
+sm:inset-auto
 
-bottom-24
+sm:left-8
 
-z-50
+sm:bottom-24
+
+z-[60]
 
 
-w-130
+w-full
+sm:w-[520px]
 
-h-112.5
+h-full
+sm:h-[450px]
 
 
 bg-black/95
 
 
-border
+border-0
+sm:border
 
 border-green-500
 
 
-rounded-xl
+sm:rounded-xl
 
 
 font-mono
@@ -1153,6 +1171,9 @@ overflow-hidden
 shadow-2xl
 
 shadow-green-500/20
+
+flex
+flex-col
 
 "
 
@@ -1286,7 +1307,7 @@ text-xl
 
 className="
 
-h-85
+flex-1
 
 p-4
 
@@ -1350,7 +1371,7 @@ className="whitespace-pre-line"
 
 className="
 
-h-13.75
+shrink-0
 
 
 border-t

@@ -10,7 +10,7 @@ export default function NexusOsHub() {
       <section className="mx-auto max-w-7xl">
         <p className="text-xs uppercase tracking-widest text-gray-500">root@nexus:/os#</p>
 
-        <h1 className="mt-4 text-4xl font-bold tracking-widest text-green-300 sm:text-6xl">
+        <h1 className="mt-4 text-2xl font-bold tracking-widest text-green-300 sm:text-4xl lg:text-6xl">
           NEXUS OS
         </h1>
 

@@ -54,7 +54,7 @@ export default function PracticalModuleHub({
 
       <section className="mt-10 rounded-xl border border-green-900/70 bg-green-950/10 p-6">
         <p className="text-xs uppercase tracking-widest text-gray-500">Learning Path</p>
-        <div className="mt-6 grid gap-4 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {path.map(phase => (
             <motion.div
               key={phase.step}

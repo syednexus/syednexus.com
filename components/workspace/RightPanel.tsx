@@ -22,7 +22,7 @@ export default function RightPanel() {
   const isSoc = layout.module === "soc";
 
   return (
-    <aside className="flex w-52 shrink-0 flex-col border-l border-green-900/50 bg-black/40 sm:w-56">
+    <aside className="flex w-full shrink-0 flex-col bg-black/40 lg:w-56">
       <section className="border-b border-green-900/40 p-3">
         <p className="text-[10px] uppercase tracking-wider text-gray-600">Notes</p>
         <textarea

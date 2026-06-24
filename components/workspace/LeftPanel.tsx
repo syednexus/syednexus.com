@@ -13,7 +13,7 @@ export default function LeftPanel() {
   const hints = tasks.map(task => task.hint).filter((hint): hint is string => Boolean(hint));
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col border-r border-green-900/50 bg-black/40 sm:w-60">
+    <aside className="flex w-full shrink-0 flex-col border-b border-green-900/50 bg-black/40 lg:w-60 lg:border-b-0 lg:border-r">
       <div className="flex border-b border-green-900/40 text-[10px] uppercase tracking-wider">
         {(["tasks", "hints", "files"] as Tab[]).map(item => (
           <button

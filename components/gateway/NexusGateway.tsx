@@ -12,7 +12,7 @@ export default function NexusGateway() {
     <main className="min-h-screen bg-black px-5 py-16 font-mono text-green-400 sm:px-8 sm:py-20">
       <section className="mx-auto max-w-7xl">
         <div className="mb-10">
-          <h1 className="mb-5 text-4xl font-bold tracking-widest sm:text-6xl">SYED NEXUS</h1>
+          <h1 className="mb-5 text-2xl font-bold tracking-widest sm:text-4xl lg:text-6xl">SYED NEXUS</h1>
           <p className="max-w-3xl text-sm text-gray-400 sm:text-base">
             Cybersecurity portfolio and interactive training environments. Enter Nexus OS for
             hands-on labs, or explore public modules below.
@@ -22,10 +22,10 @@ export default function NexusGateway() {
         {osHub && (
           <Link
             href={osHub.path}
-            className="mb-12 block rounded-2xl border border-green-500 bg-green-950/30 p-8 transition hover:border-green-400 hover:bg-green-950/50"
+            className="mb-12 block rounded-2xl border border-green-500 bg-green-950/30 p-5 transition hover:border-green-400 hover:bg-green-950/50 sm:p-8"
           >
             <span className="text-xs text-green-500">{osHub.status}</span>
-            <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">{osHub.name}</h2>
+            <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl lg:text-4xl">{osHub.name}</h2>
             <p className="mt-3 max-w-2xl text-sm text-gray-400">{osHub.desc}</p>
             <p className="mt-6 text-green-400">▶ ENTER NEXUS OS</p>
           </Link>

@@ -51,7 +51,7 @@ if(!blog)
 
 return (
 
-<div className="pt-32 px-10">
+<div className="px-4 pt-24 sm:px-10 sm:pt-32">
 
 Loading...
 
@@ -64,7 +64,7 @@ Loading...
 
 return(
 
-<main className="pt-32 px-8 md:px-32">
+<main className="px-4 pt-24 sm:px-8 sm:pt-32 md:px-20 lg:px-32">
 
 
 <p className="text-blue-400">
@@ -75,7 +75,7 @@ return(
 
 
 
-<h1 className="text-5xl font-bold mt-5">
+<h1 className="mt-5 text-2xl font-bold sm:text-4xl lg:text-5xl">
 
 {blog.title}
 

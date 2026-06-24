@@ -101,7 +101,9 @@ className="
 min-h-screen
 bg-black
 text-green-400
-p-10
+px-4
+py-10
+sm:p-10
 font-mono
 "
 
@@ -138,7 +140,9 @@ root@nexus:/vault#
 <h1
 
 className="
-text-5xl
+text-2xl
+sm:text-4xl
+lg:text-5xl
 font-bold
 tracking-widest
 "
@@ -315,6 +319,7 @@ className="
 mt-5
 text-sm
 text-green-500
+overflow-x-auto
 "
 
 >

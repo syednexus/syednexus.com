@@ -53,7 +53,9 @@ className="
 min-h-screen
 bg-black
 text-green-400
-p-10
+px-4
+py-10
+sm:p-10
 font-mono
 "
 
@@ -74,7 +76,9 @@ root@nexus:/admin/content#
 <h1
 
 className="
-text-5xl
+text-2xl
+sm:text-4xl
+lg:text-5xl
 font-bold
 mt-5
 "

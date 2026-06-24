@@ -25,12 +25,16 @@ return(
 className="
 fixed
 top-24
-left-5
+left-2
+right-2
+sm:left-5
+sm:right-auto
 
 z-40
 
 flex
-gap-3
+flex-wrap
+gap-2
 "
 
 >

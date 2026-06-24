@@ -21,7 +21,7 @@ export default function SkillsMapPage() {
     <main className="min-h-screen bg-black px-5 py-16 font-mono text-green-400 sm:px-8">
       <section className="mx-auto max-w-3xl">
         <p className="text-xs uppercase tracking-widest text-gray-600">Nexus OS // Career path</p>
-        <h1 className="mt-4 text-4xl font-bold text-green-300">Skill Tree</h1>
+        <h1 className="mt-4 text-2xl font-bold text-green-300 sm:text-4xl">Skill Tree</h1>
         <p className="mt-4 text-gray-500">
           Unlock nodes by completing missions and earning XP. Your progress: {xpDisplay} XP · {completedDisplay} missions
         </p>

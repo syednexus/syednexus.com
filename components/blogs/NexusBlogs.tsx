@@ -36,9 +36,10 @@ return(
 id="blogs"
 
 className="
-px-8
-md:px-24
-lg:px-40
+px-4
+sm:px-8
+md:px-16
+lg:px-24
 
 py-10
 "
@@ -51,7 +52,8 @@ py-10
 <h2
 
 className="
-text-4xl
+text-2xl
+sm:text-4xl
 font-bold
 "
 
