@@ -13,10 +13,15 @@ export default function WorldHud({ compact = false }: { compact?: boolean }) {
     reputationLabel,
     activeSlot,
     setActiveSlot,
-    slotLabel
+    slotLabel,
+    isSuperMode
   } = useWorld();
 
-  const creditsDisplay = formatDynamicStat(mounted, formatCredits(credits), "— CR");
+  const creditsDisplay = formatDynamicStat(
+    mounted,
+    formatCredits(credits, { superMode: isSuperMode }),
+    "— CR"
+  );
   const repDisplay = formatDynamicStat(mounted, reputation, "—");
   const slotName = formatDynamicStat(mounted, slotLabel(activeSlot), "—");
 
@@ -35,6 +40,9 @@ export default function WorldHud({ compact = false }: { compact?: boolean }) {
       <span className="text-amber-400">{creditsDisplay}</span>
       <span className="text-cyan-400">REP {repDisplay}</span>
       {mounted && <span className="text-gray-500">{reputationLabel}</span>}
+      {mounted && isSuperMode && (
+        <span className="text-red-400 uppercase tracking-wider">Super</span>
+      )}
       <div className="flex gap-1">
         {SAVE_SLOTS.map(slot => (
           <button

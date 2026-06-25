@@ -1,4 +1,5 @@
 import { profile as fallbackProfile } from "@/data/profile";
+import { resolveAvatarUrl } from "@/lib/avatarUrl";
 
 export type NexusProfile = typeof fallbackProfile;
 
@@ -69,7 +70,8 @@ function normalizeNexusResponse(json: Record<string, unknown>): NexusProfile {
           : fallbackProfile.identity.email,
         linkedin: (identitySource.linkedin as string) || "",
         github: (identitySource.github as string) || "",
-        resume: (identitySource.resume as string) || ""
+        resume: (identitySource.resume as string) || "",
+        avatar: resolveAvatarUrl(identitySource.avatar as string | null | undefined)
       }
     : fallbackProfile.identity;
 

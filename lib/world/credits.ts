@@ -37,7 +37,11 @@ export function addCredits(credits: number, amount: number): number {
   return credits + amount;
 }
 
-export function formatCredits(value: number): string {
+export function formatCredits(value: number, options?: { superMode?: boolean }): string {
+  if (options?.superMode) {
+    return "∞ CR";
+  }
+
   return `${value} CR`;
 }
 

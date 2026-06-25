@@ -13,6 +13,7 @@ import {
 
 import { useAnalyst } from "@/context/AnalystContext";
 import { useMissions } from "@/context/MissionsContext";
+import { useSession } from "next-auth/react";
 import {
   createAnalyticsEvent,
   summarizeAnalytics,
@@ -58,6 +59,9 @@ import type {
   SaveSlotId,
   WorldPersistedState
 } from "@/lib/world/types";
+import {
+  isOwnerSuperMode
+} from "@/lib/world/ownerSuperMode";
 
 type WorldContextValue = {
   state: WorldPersistedState;
@@ -86,6 +90,7 @@ type WorldContextValue = {
   recordToolUse: (missionSlug: string, tool: string) => void;
   recordTaskComplete: (missionSlug: string, taskId: number) => void;
   spendCreditsFor: (reason: CreditSpendReason) => boolean;
+  isSuperMode: boolean;
   isChainUnlockedFor: (prerequisiteSlug?: string) => boolean;
   getChainArtifacts: () => WorldPersistedState["slots"]["A"]["chainArtifacts"];
   resolveCareerEventById: (eventId: string) => void;
@@ -125,8 +130,11 @@ function updateSlot(
 export function WorldProvider({ children }: { children: ReactNode }) {
   const analyst = useAnalyst();
   const missions = useMissions();
+  const { data: session } = useSession();
   const [state, setState] = useState<WorldPersistedState>(() => createDefaultWorldState());
   const hydrated = useRef(false);
+
+  const isSuperMode = isOwnerSuperMode(session?.user?.role);
 
   useEffect(() => {
     setState(loadWorldState());
@@ -291,6 +299,8 @@ export function WorldProvider({ children }: { children: ReactNode }) {
 
   const spendCreditsFor = useCallback(
     (reason: CreditSpendReason) => {
+      if (isSuperMode) return true;
+
       const cost = CREDIT_COSTS[reason];
       if (!canAfford(slot.credits, cost)) return false;
       persist(current =>
@@ -305,18 +315,19 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       );
       return true;
     },
-    [persist, slot.credits]
+    [isSuperMode, persist, slot.credits]
   );
 
   const isChainUnlockedFor = useCallback(
     (prerequisiteSlug?: string) => {
+      if (isSuperMode) return true;
       if (!prerequisiteSlug) return true;
       const serverSlugs = missions
         .filter(mission => analyst.completedMissionIds.includes(mission.id))
         .map(mission => mission.slug);
       return serverSlugs.includes(prerequisiteSlug);
     },
-    [missions, analyst.completedMissionIds]
+    [isSuperMode, missions, analyst.completedMissionIds]
   );
 
   const getChainArtifacts = useCallback(() => slot.chainArtifacts, [slot.chainArtifacts]);
@@ -405,6 +416,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       recordToolUse,
       recordTaskComplete,
       spendCreditsFor,
+      isSuperMode,
       isChainUnlockedFor,
       getChainArtifacts,
       resolveCareerEventById,
@@ -433,6 +445,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       recordToolUse,
       recordTaskComplete,
       spendCreditsFor,
+      isSuperMode,
       isChainUnlockedFor,
       getChainArtifacts,
       resolveCareerEventById,

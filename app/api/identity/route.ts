@@ -43,8 +43,11 @@ const MAX_AVATAR_SIZE =
 
 
 
-const jpegDataUrlPattern =
-/^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/;
+const imageDataUrlPattern =
+/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+const staticAvatarPathPattern =
+/^\/(?:uploads\/avatar\.(?:jpe?g|png|webp)|profile\.jpg)(?:\?v=\d+)?$/i;
 
 
 
@@ -95,23 +98,7 @@ return false;
 if(value.startsWith("/")){
 
 
-return (
-
-!value.includes("..")
-
-&&
-
-(
-
-value.endsWith(".jpg")
-
-||
-
-value.endsWith(".jpeg")
-
-)
-
-);
+return !value.includes("..") && staticAvatarPathPattern.test(value);
 
 
 }
@@ -120,7 +107,7 @@ value.endsWith(".jpeg")
 
 
 
-return jpegDataUrlPattern.test(value);
+return imageDataUrlPattern.test(value);
 
 
 }

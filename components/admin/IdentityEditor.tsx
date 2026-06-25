@@ -4,6 +4,8 @@
 import { useEffect,useState } from "react";
 
 import NexusToast from "@/components/core/NexusToast";
+import { refreshAppData } from "@/lib/refreshAppData";
+import { resolveAvatarUrl } from "@/lib/avatarUrl";
 
 
 
@@ -192,6 +194,8 @@ async function save(){
 try{
 
 
+const res=
+
 await fetch(
 
 "/api/identity",
@@ -216,11 +220,36 @@ body:JSON.stringify(identity)
 
 
 
+if(!res.ok){
+
+const data=await res.json().catch(()=>({}));
+
+notify(
+
+typeof data.error==="string"
+
+? data.error
+
+: "Database save failed"
+
+);
+
+
+return;
+
+}
+
+
+
+
 notify(
 
 "Identity saved to Nexus Database"
 
 );
+
+
+refreshAppData();
 
 
 
@@ -497,7 +526,7 @@ notify(
 
 
 
-function uploadImage(
+async function uploadImage(
 
 e:React.ChangeEvent<HTMLInputElement>
 
@@ -519,24 +548,13 @@ return;
 
 
 
-const isJpeg=
 
-file.type==="image/jpeg"
-
-&&
-
-/\.(jpe?g)$/i.test(file.name);
-
-
-
-
-
-if(!isJpeg){
+if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
 
 
 notify(
 
-"Profile picture must be JPG/JPEG"
+"Profile picture must be JPG, PNG, or WebP"
 
 );
 
@@ -548,8 +566,6 @@ return;
 
 
 }
-
-
 
 
 
@@ -575,33 +591,161 @@ return;
 
 
 
+const form=
 
-
-const reader=
-
-new FileReader();
-
+new FormData();
 
 
 
-reader.onload=()=>{
+form.append(
+
+"avatar",
+
+file
+
+);
 
 
-setIdentity({
+
+
+try{
+
+
+const res=
+
+await fetch(
+
+"/api/upload/avatar",
+
+{
+
+method:"POST",
+
+body:form
+
+}
+
+);
+
+
+
+
+
+if(!res.ok){
+
+notify(
+
+"Avatar upload rejected"
+
+);
+
+
+return;
+
+
+}
+
+
+
+
+const data=
+
+await res.json();
+
+
+
+
+
+if(!data.success || !data.path){
+
+notify(
+
+"Avatar upload failed"
+
+);
+
+
+return;
+
+
+}
+
+
+
+
+const updated={
 
 ...identity,
 
-avatar:reader.result as string
-
-});
-
+avatar:data.path
 
 };
 
 
 
 
-reader.readAsDataURL(file);
+setIdentity(updated);
+
+
+
+
+
+await fetch(
+
+"/api/identity",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+
+body:JSON.stringify(updated)
+
+}
+
+);
+
+
+
+
+
+notify(
+
+"Profile picture updated"
+
+);
+
+
+refreshAppData();
+
+
+
+
+
+}
+
+
+catch(error){
+
+
+console.error(error);
+
+
+notify(
+
+"Avatar upload error"
+
+);
+
+
+}
+
 
 
 }
@@ -672,7 +816,7 @@ IDENTITY DATABASE MANAGER
 
 <img
 
-src={identity.avatar || "/profile.jpg"}
+src={resolveAvatarUrl(identity.avatar)}
 
 alt={identity.name || "Profile"}
 
@@ -697,7 +841,7 @@ object-cover
 
 type="file"
 
-accept=".jpg,.jpeg,image/jpeg"
+accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
 
 onChange={uploadImage}
 

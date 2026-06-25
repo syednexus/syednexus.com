@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 import { AVATAR_MODULE_ROUTES } from "@/lib/nexusNavigation";
+import { setOwnerSuperModeFlag } from "@/lib/world/ownerSuperMode";
 
 
 export default function NexusAvatar(){
@@ -624,10 +625,7 @@ setOwnerMode(true);
 setDirectory("/root");
 
 
-localStorage.setItem(
-"nexus-root",
-"true"
-);
+setOwnerSuperModeFlag(true);
 
 
 response=
@@ -675,10 +673,7 @@ setOwnerMode(true);
 setDirectory("/root");
 
 
-localStorage.setItem(
-"nexus-root",
-"true"
-);
+setOwnerSuperModeFlag(true);
 
 
 response=
