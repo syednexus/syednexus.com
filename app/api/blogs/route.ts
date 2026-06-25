@@ -33,7 +33,7 @@ export async function GET() {
 // OWNER CREATE / UPDATE
 export async function POST(req: Request) {
   try {
-    if (!(await requireAdmin())) {
+    if (!(await requireAdmin(req))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
 // OWNER DELETE
 export async function DELETE(req: Request) {
   try {
-    if (!(await requireAdmin())) {
+    if (!(await requireAdmin(req))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

@@ -103,3 +103,28 @@ export function endWeekReview(score: number): string {
 export function isFriday(state: CareerWeekState): boolean {
   return state.dayIndex >= 4;
 }
+
+export function isCurrentCareerWeek(week: CareerWeekState | null | undefined): boolean {
+  if (!week) return false;
+  return week.weekId === currentWeekId();
+}
+
+/** Start a new week when the stored weekId is from a prior ISO week. */
+export function rolloverCareerWeekIfNeeded(
+  stored: CareerWeekState | null,
+  reputation: number
+): { week: CareerWeekState | null; rolled: boolean; archived: CareerWeekState | null } {
+  if (!stored) {
+    return { week: null, rolled: false, archived: null };
+  }
+
+  if (isCurrentCareerWeek(stored)) {
+    return { week: stored, rolled: false, archived: null };
+  }
+
+  return {
+    week: createCareerWeek(reputation),
+    rolled: true,
+    archived: stored
+  };
+}

@@ -7,7 +7,10 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 import { AVATAR_MODULE_ROUTES } from "@/lib/nexusNavigation";
-import { setOwnerSuperModeFlag } from "@/lib/world/ownerSuperMode";
+import { resolveOwnerSudoGate } from "@/lib/auth/ownerAccess";
+import { isOwnerSessionComplete } from "@/lib/auth/ownerAccess";
+import { nexusAudio, playSound } from "@/lib/audio/nexusAudio";
+import { triggerVisualFeedback } from "@/lib/ui/visualFeedback";
 
 
 export default function NexusAvatar(){
@@ -21,7 +24,7 @@ completeObjective
 }=useNexus();
 
 
-const {data:session}=useSession();
+const {data:session, status}=useSession();
 
 const router=useRouter();
 
@@ -71,30 +74,22 @@ behavior:"smooth"
 
 useEffect(()=>{
 
-
-if(session?.user?.role === "OWNER"){
-
-if(localStorage.getItem("nexus-root")==="true"){
-
-setOwnerMode(true);
-
-setDirectory("/root");
-
-}
-
-return;
-
-}
-
-
-localStorage.removeItem("nexus-root");
+if(!isOwnerSessionComplete(session?.user)){
 
 setOwnerMode(false);
 
 setDirectory("~");
 
+}
 
 },[session]);
+
+
+
+
+useEffect(() => {
+  nexusAudio.configure({ ownerShellActive: ownerMode });
+}, [ownerMode]);
 
 
 
@@ -124,8 +119,67 @@ return ownerMode ?
 
 
 
-async function executeCommand(){
+async function logSudoAttempt(command: string, gate: ReturnType<typeof resolveOwnerSudoGate>) {
+  const success = gate.status === "granted";
 
+  try {
+    await fetch("/api/security/sudo-attempt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        command,
+        success,
+        reason: gate.status
+      })
+    });
+  } catch {
+    // audit logging must not block terminal UX
+  }
+}
+
+async function activateOwnerRootShell(command: string): Promise<string> {
+  playSound("sudo.request");
+
+  const gate = resolveOwnerSudoGate(session?.user, status === "authenticated");
+
+  if (gate.status === "signin") {
+    void logSudoAttempt(command, gate);
+    window.setTimeout(() => {
+      window.location.href = "/api/auth/signin";
+    }, 400);
+    return "OWNER AUTHENTICATION REQUIRED. REDIRECTING...";
+  }
+
+  if (gate.status === "denied") {
+    void logSudoAttempt(command, gate);
+    playSound("sudo.denied");
+    triggerVisualFeedback("error");
+    return "ACCESS DENIED. OWNER ACCOUNT REQUIRED.";
+  }
+
+  if (gate.status === "mfa") {
+    void logSudoAttempt(command, gate);
+    window.setTimeout(() => {
+      router.push("/auth/mfa");
+    }, 400);
+    return "MFA VERIFICATION REQUIRED.";
+  }
+
+  setOwnerMode(true);
+  setDirectory("/root");
+  void logSudoAttempt(command, gate);
+  playSound("sudo.accepted");
+  triggerVisualFeedback("terminal-granted");
+  return `
+Root shell visual mode activated
+
+Owner super mode: ACTIVE
+(∞ CR, chain bypass — owner session verified)
+`;
+}
+
+
+async function executeCommand(){
 
 const cmd =
 command.toLowerCase().trim();
@@ -350,6 +404,8 @@ else if(cmd==="whoami"){
 response =
 ownerMode ?
 "root":
+isOwnerSessionComplete(session?.user) ?
+"syed (owner super mode active)":
 "syed";
 
 }
@@ -617,40 +673,7 @@ response=
 
 else if(cmd==="sudo su"){
 
-if(session?.user?.role==="OWNER"){
-
-
-setOwnerMode(true);
-
-setDirectory("/root");
-
-
-setOwnerSuperModeFlag(true);
-
-
-response=
-`
-Privilege escalation successful
-
-root@nexus activated
-`;
-
-}
-
-
-else{
-
-
-response=
-`
-Access denied
-
-User not in sudoers file
-`;
-
-
-}
-
+response = await activateOwnerRootShell("sudo su");
 
 }
 
@@ -665,35 +688,7 @@ User not in sudoers file
 
 else if(cmd==="nexus shadow ascend"){
 
-if(session?.user?.role==="OWNER"){
-
-
-setOwnerMode(true);
-
-setDirectory("/root");
-
-
-setOwnerSuperModeFlag(true);
-
-
-response=
-`
-Identity verified
-
-Nexus root shell unlocked
-`;
-
-}
-
-
-else{
-
-
-response=
-"ACCESS DENIED";
-
-
-}
+response = await activateOwnerRootShell("nexus shadow ascend");
 
 }
 
@@ -957,11 +952,6 @@ else if(cmd==="exit"){
 setOwnerMode(false);
 
 setDirectory("~");
-
-
-localStorage.removeItem(
-"nexus-root"
-);
 
 
 response=

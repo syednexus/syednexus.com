@@ -53,8 +53,8 @@ path:"/vault/admin"
 },
 
 {
-title:"VAULT SECURITY",
-desc:"Owner MFA and access controls",
+title:"SECURITY CENTER",
+desc:"MFA controls, audit telemetry, and threat alerts",
 status:"HARDENED",
 path:"/vault/security"
 },

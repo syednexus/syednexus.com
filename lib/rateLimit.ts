@@ -1,43 +1,33 @@
+import { logSecurityEvent } from "@/lib/security/securityLogger";
+import { getClientIp } from "@/lib/security/requestContext";
+
 type RateLimitEntry = {
-  count:number;
-  resetAt:number;
+  count: number;
+  resetAt: number;
 };
 
-const attempts = new Map<string,RateLimitEntry>();
+const attempts = new Map<string, RateLimitEntry>();
 
-function getClientIp(req:Request){
-  const forwardedFor =
-  req.headers.get("x-forwarded-for");
-
-  if(forwardedFor){
-    return forwardedFor.split(",")[0]?.trim() || "unknown";
-  }
-
-  return (
-  req.headers.get("x-real-ip") ||
-  "unknown"
-  );
+export function getClientIpFromRequest(req: Request): string {
+  return getClientIp(req);
 }
 
 export function isRateLimited(
-  req:Request,
-  scope:string,
-  limit:number,
-  windowMs:number
-){
-  const now =
-  Date.now();
+  req: Request,
+  scope: string,
+  limit: number,
+  windowMs: number
+): boolean {
+  const now = Date.now();
+  const ip = getClientIp(req);
+  const key = `${scope}:${ip}`;
 
-  const key =
-  `${scope}:${getClientIp(req)}`;
+  const current = attempts.get(key);
 
-  const current =
-  attempts.get(key);
-
-  if(!current || current.resetAt <= now){
-    attempts.set(key,{
-      count:1,
-      resetAt:now + windowMs
+  if (!current || current.resetAt <= now) {
+    attempts.set(key, {
+      count: 1,
+      resetAt: now + windowMs
     });
 
     return false;
@@ -45,11 +35,25 @@ export function isRateLimited(
 
   current.count += 1;
 
-  if(current.count > limit){
+  if (current.count > limit) {
+    void logSecurityEvent({
+      eventType: "RATE_LIMIT_TRIGGERED",
+      severity: "HIGH",
+      ipAddress: ip,
+      userAgent: req.headers.get("user-agent"),
+      endpoint: new URL(req.url).pathname,
+      metadata: {
+        scope,
+        attemptCount: current.count,
+        limit,
+        windowMs
+      }
+    });
+
     return true;
   }
 
-  attempts.set(key,current);
+  attempts.set(key, current);
 
   return false;
 }

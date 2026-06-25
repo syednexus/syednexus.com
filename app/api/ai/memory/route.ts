@@ -2,19 +2,19 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 
-import { isAdmin } from "@/lib/auth";
+import { requireAdmin } from "@/lib/adminGuard";
 
 
 
 
 
-export async function GET(){
+export async function GET(req: Request){
 
 
 try{
 
 
-if(!(await isAdmin())){
+if(!(await requireAdmin(req))){
 
 
 return NextResponse.json(
@@ -99,7 +99,7 @@ try{
 
 
 
-if(!(await isAdmin())){
+if(!(await requireAdmin(req))){
 
 
 return NextResponse.json(

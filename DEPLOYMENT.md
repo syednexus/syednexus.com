@@ -35,7 +35,9 @@ cp .env.example .env
 | `OWNER_EMAIL` | Yes | Google account granted OWNER/Vault access |
 | `NEXUS_SECRET` | Yes | Encrypts MFA secrets and sensitive vault data |
 | `NEXT_PUBLIC_SITE_URL` | Yes | Canonical URL for sitemap/OpenGraph |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | Optional | AI mentor features |
+| `GEMINI_API_KEY` | Optional | AI mentor features (`/api/ai`, Nexus Mentor) |
+| `ADMIN_PASSWORD` | Seed only | Lab admin password when running `npm run seed` |
+| `SECURITY_LOG_RETENTION_DAYS` | Optional | Days to keep audit logs (default `90`; see §13) |
 | `ALLOW_DB_SEED` | Seed only | Must be `true` to run `npm run seed` |
 
 Never commit `.env`. `.env.example` is safe to commit.
@@ -77,6 +79,14 @@ npm run seed:practical
 Blog pack is included in the main `npm run seed` via `blogPack001`.
 
 ## 5. Production build
+
+Generate adaptive sound assets (required for Nexus audio feedback):
+
+```bash
+npm run sounds:generate
+```
+
+This writes WAV files under `public/sounds/`. Re-run after changing the sound map.
 
 ```bash
 npm run build
@@ -124,7 +134,43 @@ After MFA is enabled, every Vault visit requires a second factor at `/auth/mfa`.
 
 ## 10. Security notes
 
-- `/vault/**` is middleware-protected (OWNER + MFA when enabled)
-- Admin APIs use `requireAdmin()` (owner + MFA satisfied)
+- `/vault/**` is protected by `proxy.ts` (OWNER + MFA when enabled)
+- Admin APIs use `requireAdmin(req)` (owner + MFA satisfied)
 - Mission answers are server-validated only
 - Set strong `NEXTAUTH_SECRET` and `NEXUS_SECRET` in production
+
+## 11. Security audit deploy checklist
+
+After deploying security monitoring changes:
+
+1. Run `npx prisma migrate deploy` so the `SecurityLog` table exists.
+2. Sign in as owner with MFA and open `/vault/security` (or use the **Security audit** link in the vault nav).
+3. Confirm `/api/security/logs` returns **401** when unauthenticated (browser or `curl` without session).
+4. Trigger a test event (wrong MFA code, forbidden admin API, or lab login failure) and verify it appears in the dashboard.
+5. Confirm logs are owner-only — no public routes expose audit data.
+6. Optional: export filtered logs as JSON/CSV from the dashboard for offline review.
+
+## 12. Post-deploy smoke tests
+
+- [ ] QR Code Phishing mission: submit answer, open Nexus Mentor — response wraps inside panel (no horizontal scroll)
+- [ ] `/vault/security` loads for owner + MFA; critical alert banner shows when rules fire
+- [ ] Failed lab password attempt creates `LOGIN_FAILED` in audit log
+- [ ] Mission workstation: **Notes** tab (mobile) or right panel (desktop) shows **Submit finding**
+
+## 13. Security log retention
+
+Audit logs grow over time. Purge entries older than 90 days (configurable):
+
+```bash
+# Linux/macOS — add to cron (weekly)
+SECURITY_LOG_RETENTION_DAYS=90 npm run security:purge-logs
+
+# Windows PowerShell
+$env:SECURITY_LOG_RETENTION_DAYS="90"; npm run security:purge-logs
+```
+
+Or run directly: `npm run security:purge-logs`
+
+## 14. CI
+
+GitHub Actions runs `tsc`, `npm run build`, and Playwright on push/PR (`.github/workflows/ci.yml`). Install browsers locally with `npx playwright install chromium` before `npm run test:e2e`.

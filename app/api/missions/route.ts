@@ -151,7 +151,7 @@ try{
 
 
 
-if(!(await requireAdmin())){
+if(!(await requireAdmin(req))){
 
 
 return NextResponse.json(
@@ -372,7 +372,7 @@ export async function DELETE(req:Request){
 try{
 
 
-if(!(await requireAdmin())){
+if(!(await requireAdmin(req))){
 
 
 return NextResponse.json(

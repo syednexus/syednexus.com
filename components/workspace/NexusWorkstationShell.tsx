@@ -13,7 +13,7 @@ type MobileTab = "briefing" | "tools" | "notes";
 const MOBILE_TABS: { id: MobileTab; label: string }[] = [
   { id: "briefing", label: "Briefing" },
   { id: "tools", label: "Tools" },
-  { id: "notes", label: "Notes" }
+  { id: "notes", label: "Submit" }
 ];
 
 export default function NexusWorkstationShell() {
@@ -44,19 +44,19 @@ export default function NexusWorkstationShell() {
       </div>
 
       {/* Panels */}
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:flex-row">
 
         {/* ── Left panel: tasks / hints / files ─────────────────────── */}
         {/* Mobile: shown only when "briefing" tab is active */}
-        <div className={`min-h-0 flex-1 lg:contents ${mobileTab === "briefing" ? "flex flex-col" : "hidden"} lg:flex`}>
+        <div className={`min-h-0 min-w-0 flex-1 overflow-hidden lg:contents ${mobileTab === "briefing" ? "flex flex-col" : "hidden"} lg:flex`}>
           <LeftPanel />
         </div>
 
         {/* ── Main canvas: tool windows ─────────────────────────────── */}
         {/* Mobile: shown only when "tools" tab is active */}
         <div
-          className={`relative min-w-0 bg-[radial-gradient(circle_at_20%_20%,#0a1a0a,#050805_55%)] lg:flex-1 lg:min-h-0 ${
-            mobileTab === "tools" ? "flex flex-1 flex-col" : "hidden lg:flex lg:flex-col"
+          className={`relative min-h-0 min-w-0 flex-1 overflow-hidden bg-[radial-gradient(circle_at_20%_20%,#0a1a0a,#050805_55%)] lg:min-h-0 ${
+            mobileTab === "tools" ? "flex flex-col" : "hidden lg:flex lg:flex-col"
           }`}
         >
           <WindowManager />
@@ -65,11 +65,13 @@ export default function NexusWorkstationShell() {
         {/* ── Right panel: notes / evidence / submit ────────────────── */}
         {/* Mobile: shown only when "notes" tab is active */}
         <div
-          className={`shrink-0 border-green-900/50 lg:flex lg:flex-col lg:border-l ${
-            mobileTab === "notes" ? "flex flex-1 flex-col border-t" : "hidden"
+          className={`flex min-h-0 min-w-0 max-w-full flex-col overflow-hidden border-green-900/50 lg:w-56 lg:shrink-0 lg:border-l ${
+            mobileTab === "notes" ? "flex flex-1 flex-col border-t" : "hidden lg:flex"
           }`}
         >
-          <RightPanel />
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+            <RightPanel />
+          </div>
           <NexusMentor />
         </div>
 

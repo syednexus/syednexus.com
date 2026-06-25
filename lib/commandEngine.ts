@@ -317,30 +317,16 @@ return{
 
 output:`
 
-Checking privileges...
+Owner authentication required.
 
+Use Nexus Avatar terminal commands:
+  sudo su
+  nexus shadow ascend
 
-Vault integrity verified.
-
-Identity confirmed.
-
-
-Privilege escalation successful.
-
-
-WELCOME ROOT
-
-
-New commands unlocked:
-
-open profile
-open projects
-open skills
-
+This lab shell cannot grant Vault or owner access.
+Google OWNER login + MFA is required.
 
 `,
-
-unlock:"ROOT"
 
 };
 

@@ -17,7 +17,7 @@ try{
 
 // OWNER ONLY
 
-if(!(await requireAdmin())){
+if(!(await requireAdmin(req))){
 
 
 return NextResponse.json(

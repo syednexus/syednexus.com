@@ -4,7 +4,7 @@
 import { motion } from "framer-motion";
 
 import { useNexus } from "@/context/NexusContext";
-import { useNexusSound } from "@/components/nexus/NexusSound";
+import { useSound } from "@/context/SoundContext";
 
 
 
@@ -31,7 +31,7 @@ unlockAchievement
 }=useNexus();
 
 
-const { play } = useNexusSound();
+const { playSound } = useSound();
 
 
 
@@ -41,7 +41,7 @@ const { play } = useNexusSound();
 function advanceMission(){
 
 
-play("click");
+playSound("ui.click");
 
 
 const nextProgress =
@@ -71,7 +71,7 @@ addXP(100);
 if(nextProgress===100){
 
 
-play("success");
+playSound("mission.complete");
 
 
 unlockAchievement({

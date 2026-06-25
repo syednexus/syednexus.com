@@ -152,3 +152,56 @@
   background: rgba(34, 211, 238, .15);
   box-shadow: 0 0 15px rgba(34, 211, 238, .15);
 }
+
+/* ==========================
+   NEXUS VISUAL FEEDBACK
+   ========================== */
+@keyframes nexus-pulse-success {
+  0% { box-shadow: inset 0 0 0 0 rgba(34, 197, 94, 0); }
+  35% { box-shadow: inset 0 0 0 2px rgba(34, 197, 94, 0.55); }
+  100% { box-shadow: inset 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+@keyframes nexus-pulse-error {
+  0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
+  40% { box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.5); }
+  100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+@keyframes nexus-pulse-critical {
+  0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
+  50% { box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.75); }
+  100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+@keyframes nexus-vault-scan {
+  0% { box-shadow: inset 0 0 0 0 rgba(251, 191, 36, 0); }
+  50% { box-shadow: inset 0 0 24px 0 rgba(251, 191, 36, 0.25); }
+  100% { box-shadow: inset 0 0 0 0 rgba(251, 191, 36, 0); }
+}
+
+@keyframes nexus-terminal-granted {
+  0% { box-shadow: inset 0 0 0 0 rgba(168, 85, 247, 0); }
+  45% { box-shadow: inset 0 0 0 2px rgba(168, 85, 247, 0.55); }
+  100% { box-shadow: inset 0 0 0 0 rgba(168, 85, 247, 0); }
+}
+
+body.nexus-visual-active.nexus-visual-success {
+  animation: nexus-pulse-success 650ms ease-out;
+}
+
+body.nexus-visual-active.nexus-visual-error {
+  animation: nexus-pulse-error 650ms ease-out;
+}
+
+body.nexus-visual-active.nexus-visual-critical {
+  animation: nexus-pulse-critical 900ms ease-out;
+}
+
+body.nexus-visual-active.nexus-visual-vault-unlock {
+  animation: nexus-vault-scan 900ms ease-out;
+}
+
+body.nexus-visual-active.nexus-visual-terminal-granted {
+  animation: nexus-terminal-granted 750ms ease-out;
+}

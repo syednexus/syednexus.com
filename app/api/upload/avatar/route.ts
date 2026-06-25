@@ -4,19 +4,20 @@ import path from "path";
 
 import { requireAdmin } from "@/lib/adminGuard";
 import { versionedAvatarPath } from "@/lib/avatarUrl";
+import { getRequestSecurityContext } from "@/lib/security/requestContext";
+import { logSecurityEvent } from "@/lib/security/securityLogger";
+import {
+  extensionForImageFormat,
+  validateImageBuffer
+} from "@/lib/security/validateImageBytes";
 
 const MAX_BYTES = 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-function extensionForMime(mime: string): "jpg" | "png" | "webp" {
-  if (mime === "image/png") return "png";
-  if (mime === "image/webp") return "webp";
-  return "jpg";
-}
-
 export async function POST(req: Request) {
   try {
-    if (!(await requireAdmin())) {
+    const admin = await requireAdmin(req);
+    if (!admin) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -40,7 +41,13 @@ export async function POST(req: Request) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const ext = extensionForMime(file.type);
+    const validated = validateImageBuffer(buffer, file.type);
+
+    if (!validated.ok) {
+      return NextResponse.json({ error: validated.error }, { status: 400 });
+    }
+
+    const ext = extensionForImageFormat(validated.format);
     const uploadDir = path.join(process.cwd(), "public", "uploads");
 
     await mkdir(uploadDir, { recursive: true });
@@ -50,6 +57,22 @@ export async function POST(req: Request) {
 
     const version = Date.now();
     const basePath = `/uploads/${filename}`;
+
+    const context = getRequestSecurityContext(req);
+    void logSecurityEvent({
+      eventType: "FILE_UPLOAD",
+      severity: "LOW",
+      userEmail: admin.user?.email ?? null,
+      ipAddress: context.ipAddress,
+      userAgent: context.userAgent,
+      endpoint: context.endpoint,
+      metadata: {
+        fileType: "avatar",
+        mimeType: file.type,
+        sizeBytes: file.size,
+        format: validated.format
+      }
+    });
 
     return NextResponse.json({
       success: true,

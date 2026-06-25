@@ -55,7 +55,7 @@ export default function NexusWorkstation({
   const org = getOrganization(mission);
 
   return (
-    <section className="mt-6">
+    <section className="mt-6 max-w-full overflow-hidden">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs uppercase tracking-widest text-green-500">
           Nexus Workstation // {org.name} — {layout.vmName}

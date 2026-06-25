@@ -4,8 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireOwner } from "@/lib/security/requireOwner";
 
 /** Owner-only full mission list for vault MissionEditor. */
-export async function GET() {
-  const session = await requireOwner();
+export async function GET(req: Request) {
+  const session = await requireOwner(req);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

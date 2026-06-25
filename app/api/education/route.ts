@@ -125,7 +125,7 @@ try{
 
 
 
-if(!(await requireAdmin())){
+if(!(await requireAdmin(req))){
 
 
 
@@ -351,7 +351,7 @@ try{
 
 
 
-if(!(await requireAdmin())){
+if(!(await requireAdmin(req))){
 
 
 

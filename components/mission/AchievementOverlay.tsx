@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 
 import { useNexus } from "@/context/NexusContext";
-import { useNexusSound } from "@/components/nexus/NexusSound";
+import { useSound } from "@/context/SoundContext";
 import { getAchievementTier } from "@/lib/achievementTier";
 import NexusEventToast from "./NexusEventToast";
 import SpecialistBootUnlock from "./SpecialistBootUnlock";
@@ -14,7 +14,7 @@ type SpecialistPhase = "boot" | "siem";
 
 export default function AchievementOverlay() {
   const { recentUnlock, clearRecentUnlock } = useNexus();
-  const { play } = useNexusSound();
+  const { playSound } = useSound();
   const [specialistPhase, setSpecialistPhase] = useState<SpecialistPhase>("boot");
 
   const tier = recentUnlock
@@ -27,7 +27,7 @@ export default function AchievementOverlay() {
     }
 
     setSpecialistPhase("boot");
-    play(tier === "specialist" ? "specialist" : "achievement");
+    playSound(tier === "specialist" ? "security.critical" : "mission.complete");
 
     if (tier === "standard") {
       const timer = window.setTimeout(() => {
@@ -37,7 +37,7 @@ export default function AchievementOverlay() {
     }
 
     return undefined;
-  }, [recentUnlock, tier, play, clearRecentUnlock]);
+  }, [recentUnlock, tier, playSound, clearRecentUnlock]);
 
   useEffect(() => {
     if (!recentUnlock || tier !== "specialist" || specialistPhase !== "siem") {

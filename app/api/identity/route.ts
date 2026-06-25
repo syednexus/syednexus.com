@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 import { requireAdmin } from "@/lib/adminGuard";
+import { getRequestSecurityContext } from "@/lib/security/requestContext";
+import { logSecurityEvent } from "@/lib/security/securityLogger";
 
 
 
@@ -328,7 +330,11 @@ try{
 
 
 
-if(!(await requireAdmin())){
+const admin = await requireAdmin(req);
+
+
+
+if(!admin){
 
 
 
@@ -492,6 +498,21 @@ data:payload
 
 
 
+
+
+const context = getRequestSecurityContext(req);
+void logSecurityEvent({
+  eventType: "PROFILE_CHANGED",
+  severity: "LOW",
+  userEmail: admin.user?.email ?? null,
+  ipAddress: context.ipAddress,
+  userAgent: context.userAgent,
+  endpoint: context.endpoint,
+  metadata: {
+    updated: existing ? "identity" : "identity_created",
+    fields: Object.keys(payload)
+  }
+});
 
 return NextResponse.json(data);
 

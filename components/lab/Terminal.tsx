@@ -467,7 +467,7 @@ cmd==="nexus --root"
 
 
 
-if(access==="owner"){
+if(access==="owner" || access==="root"){
 
 
 
@@ -492,9 +492,9 @@ return;
 
 addHistory(`
 
-[PRIVILEGE ESCALATION REQUESTED]
+[LAB UNLOCK REQUESTED]
 
-Opening secure authentication gateway...
+Opening lab simulation passphrase gate...
 
 `);
 

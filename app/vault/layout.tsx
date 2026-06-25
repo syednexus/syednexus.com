@@ -1,216 +1,55 @@
-import Link from "next/link";
-
-import VaultActivityPing from "@/components/security/VaultActivityPing";
-
-export default function VaultLayout({
-
-children
-
-}:{
-
-children:React.ReactNode
-
-}){
-
-
-
-return(
-
-<>
-
-<VaultActivityPing />
-
-<div
-
-className="
-fixed
-top-24
-left-2
-right-2
-sm:left-5
-sm:right-auto
-
-z-40
-
-flex
-flex-wrap
-gap-2
-"
-
->
-
-
-
-<Link
-
-href="/vault"
-
-className="
-border
-border-green-600
-
-text-green-400
-
-px-4
-py-2
-
-rounded
-
-bg-black
-
-hover:bg-green-950
-
-transition
-
-font-mono
-
-text-sm
-"
-
->
-
-← Vault
-
-</Link>
-
-
-
-
-
-<Link
-
-href="/vault/security"
-
-className="
-border
-border-amber-600
-
-text-amber-400
-
-px-4
-py-2
-
-rounded
-
-bg-black
-
-hover:bg-amber-950
-
-transition
-
-font-mono
-
-text-sm
-"
-
->
-
-Security
-
-</Link>
-
-
-
-
-
-<Link
-
-href="/vault/admin"
-
-className="
-border
-border-blue-600
-
-text-blue-400
-
-px-4
-py-2
-
-rounded
-
-bg-black
-
-hover:bg-blue-950
-
-transition
-
-font-mono
-
-text-sm
-"
-
->
-
-Admin
-
-</Link>
-
-
-
-
-
-<Link
-
-href="/"
-
-className="
-border
-border-gray-600
-
-text-gray-300
-
-px-4
-py-2
-
-rounded
-
-bg-black
-
-hover:bg-gray-900
-
-transition
-
-font-mono
-
-text-sm
-"
-
->
-
-Home
-
-</Link>
-
-
-
-
-
-</div>
-
-
-
-
-
-<div
-
-className="
-pt-16
-"
-
->
-
-{children}
-
-</div>
-
-
-
-
-</>
-
-
-);
-
-
-
-}
+import Link from "next/link";
+import { getServerSession } from "next-auth";
+
+import { authOptions } from "@/auth";
+import VaultActivityPing from "@/components/security/VaultActivityPing";
+
+export default async function VaultLayout({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  const session = await getServerSession(authOptions);
+  const isOwner = session?.user?.role === "OWNER";
+
+  return (
+    <>
+      <VaultActivityPing />
+
+      <div className="fixed left-2 right-2 top-24 z-40 flex flex-wrap gap-2 sm:left-5 sm:right-auto">
+        <Link
+          href="/vault"
+          className="rounded border border-green-600 bg-black px-4 py-2 font-mono text-sm text-green-400 transition hover:bg-green-950"
+        >
+          ← Vault
+        </Link>
+
+        {isOwner && (
+          <Link
+            href="/vault/security"
+            className="rounded border border-amber-600 bg-black px-4 py-2 font-mono text-sm text-amber-400 transition hover:bg-amber-950"
+          >
+            Security Center
+          </Link>
+        )}
+
+        <Link
+          href="/vault/admin"
+          className="rounded border border-blue-600 bg-black px-4 py-2 font-mono text-sm text-blue-400 transition hover:bg-blue-950"
+        >
+          Admin
+        </Link>
+
+        <Link
+          href="/"
+          className="rounded border border-gray-600 bg-black px-4 py-2 font-mono text-sm text-gray-300 transition hover:bg-gray-900"
+        >
+          Home
+        </Link>
+      </div>
+
+      <div className="pt-16">{children}</div>
+    </>
+  );
+}
+

@@ -384,3 +384,32 @@ model UserStreak {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+// =================================
+// SECURITY AUDIT LOG
+// =================================
+
+model SecurityLog {
+  id Int @id @default(autoincrement())
+
+  eventType String
+
+  severity String
+
+  userEmail String?
+
+  ipAddress String?
+
+  userAgent String?
+
+  endpoint String?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([eventType])
+  @@index([severity])
+  @@index([userEmail])
+}

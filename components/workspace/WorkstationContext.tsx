@@ -17,6 +17,7 @@ import {
 import { actionToToolName } from "@/context/EnvironmentState";
 import type { WorkspaceFile, WorkspaceLayout, WorkspaceWindowId } from "@/lib/workspaceConfig";
 import { uniqueWindowIds } from "@/lib/workspaceConfig";
+import { playSound } from "@/lib/audio/nexusAudio";
 
 export type WorkstationContextValue = {
   mission: PublicMission;
@@ -102,6 +103,13 @@ export function WorkstationProvider({
   const [startTime] = useState(() => Date.now());
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const enteredRef = useRef(false);
+  const autoSubmitRef = useRef(false);
+  const submitPendingRef = useRef(false);
+  const completedTaskIdsRef = useRef(completedTaskIds);
+  const pendingTaskRecordsRef = useRef<number[]>([]);
+  const [taskRecordsTick, setTaskRecordsTick] = useState(0);
+
+  completedTaskIdsRef.current = completedTaskIds;
 
   useEffect(() => {
     if (enteredRef.current) return;
@@ -139,42 +147,59 @@ export function WorkstationProvider({
 
   const completeLab = useCallback(
     (answer: string) => {
-      if (completed || submitting) return;
+      if (completed || submitting || submitPendingRef.current) return;
+      submitPendingRef.current = true;
       onAnswerChange(answer);
       setProgress(100);
-      window.setTimeout(() => onSubmit(), 50);
+      window.setTimeout(() => {
+        onSubmit();
+        submitPendingRef.current = false;
+      }, 50);
     },
     [completed, submitting, onAnswerChange, onSubmit]
   );
 
-  const evaluateTasks = useCallback(
-    (nextActions: TrackedAction[]) => {
-      setCompletedTaskIds(current => {
-        const newlyDone: number[] = [];
-        for (const task of tasks) {
-          if (current.includes(task.id)) continue;
-          if (matchesValidator(task.validator, nextActions)) {
-            newlyDone.push(task.id);
-          }
-        }
-        if (newlyDone.length === 0) return current;
+  const evaluateTasks = useCallback((nextActions: TrackedAction[]) => {
+    const current = completedTaskIdsRef.current;
+    const newlyDone: number[] = [];
 
-        const merged = [...current, ...newlyDone];
-        const total = tasks.length || 1;
-        setProgress(Math.min(95, Math.round((merged.length / total) * 100)));
-        for (const id of newlyDone) {
-          world.recordTaskComplete(mission.slug, id);
-        }
-        return merged;
-      });
-    },
-    [tasks, mission.slug, world]
-  );
+    for (const task of tasks) {
+      if (current.includes(task.id)) continue;
+      if (matchesValidator(task.validator, nextActions)) {
+        newlyDone.push(task.id);
+      }
+    }
+
+    if (newlyDone.length === 0) return;
+
+    const merged = [...current, ...newlyDone];
+    completedTaskIdsRef.current = merged;
+    pendingTaskRecordsRef.current.push(...newlyDone);
+    setCompletedTaskIds(merged);
+    setProgress(Math.min(95, Math.round((merged.length / (tasks.length || 1)) * 100)));
+    setTaskRecordsTick(tick => tick + 1);
+  }, [tasks]);
 
   useEffect(() => {
-    if (completed || submitting || tasks.length === 0) return;
+    evaluateTasks(actions);
+  }, [actions, evaluateTasks]);
+
+  useEffect(() => {
+    if (pendingTaskRecordsRef.current.length === 0) return;
+
+    const toRecord = [...pendingTaskRecordsRef.current];
+    pendingTaskRecordsRef.current = [];
+
+    for (const id of toRecord) {
+      world.recordTaskComplete(mission.slug, id);
+    }
+  }, [taskRecordsTick, mission.slug, world]);
+
+  useEffect(() => {
+    if (completed || submitting || tasks.length === 0 || autoSubmitRef.current) return;
     const allDone = tasks.every(task => completedTaskIds.includes(task.id));
     if (allDone && analystAnswer.trim()) {
+      autoSubmitRef.current = true;
       completeLab(analystAnswer.trim());
     }
   }, [completedTaskIds, tasks, completed, submitting, analystAnswer, completeLab]);
@@ -183,13 +208,9 @@ export function WorkstationProvider({
     (type: ActionType, value: string) => {
       const tool = actionToToolName(createAction(type, value));
       if (tool) world.recordToolUse(mission.slug, tool);
-      setActions(current => {
-        const next = [...current, createAction(type, value)];
-        window.setTimeout(() => evaluateTasks(next), 0);
-        return next;
-      });
+      setActions(current => [...current, createAction(type, value)]);
     },
-    [evaluateTasks, mission.slug, world]
+    [mission.slug, world]
   );
 
   const addEvidence = useCallback(
@@ -197,16 +218,16 @@ export function WorkstationProvider({
       setEvidence(current => (current.includes(item) ? current : [...current, item]));
       trackAction("evidence", item);
       setProgress(current => Math.min(95, current + 8));
+      playSound("evidence.collect");
     },
     [trackAction]
   );
 
   const submitAnalystAnswer = useCallback(() => {
-    if (!analystAnswer.trim()) return;
+    if (completed || submitting || submitPendingRef.current || !analystAnswer.trim()) return;
     trackAction("finding_submitted", analystAnswer);
     completeLab(analystAnswer.trim());
-    onAnalystSubmit?.();
-  }, [analystAnswer, onAnalystSubmit, trackAction, completeLab]);
+  }, [analystAnswer, trackAction, completeLab, completed, submitting]);
 
   const value = useMemo(
     () => ({

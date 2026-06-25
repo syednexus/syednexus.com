@@ -6,6 +6,7 @@ import { useEffect,useState } from "react";
 import NexusToast from "@/components/core/NexusToast";
 import { refreshAppData } from "@/lib/refreshAppData";
 import { resolveAvatarUrl } from "@/lib/avatarUrl";
+import { fetchIdentity, saveIdentity, type IdentityRecord } from "@/lib/identityApi";
 
 
 
@@ -110,28 +111,19 @@ async function loadIdentity(){
 try{
 
 
-const res=
-
-await fetch("/api/identity");
+const result = await fetchIdentity();
 
 
+if(!result.ok){
 
-const data=
+notify(result.error);
 
-await res.json();
-
-
-
-
-
-if(data){
-
-
-setIdentity(data);
-
+return;
 
 }
 
+
+setIdentity(result.data);
 
 
 }
@@ -141,6 +133,8 @@ catch(error){
 
 
 console.error(error);
+
+notify("Could not load identity");
 
 
 }
@@ -194,52 +188,21 @@ async function save(){
 try{
 
 
-const res=
-
-await fetch(
-
-"/api/identity",
-
-{
-
-method:"POST",
-
-headers:{
-
-"Content-Type":"application/json"
-
-},
+const result = await saveIdentity(identity);
 
 
-body:JSON.stringify(identity)
+if(!result.ok){
 
-}
-
-);
-
-
-
-
-if(!res.ok){
-
-const data=await res.json().catch(()=>({}));
-
-notify(
-
-typeof data.error==="string"
-
-? data.error
-
-: "Database save failed"
-
-);
-
+notify(result.error);
 
 return;
 
 }
 
 
+
+
+setIdentity(result.data);
 
 
 notify(
@@ -439,34 +402,19 @@ resume:data.path
 setIdentity(updated);
 
 
+const saved = await saveIdentity(updated);
 
 
+if(!saved.ok){
 
+notify(saved.error);
 
-await fetch(
-
-"/api/identity",
-
-{
-
-method:"POST",
-
-headers:{
-
-"Content-Type":"application/json"
-
-},
-
-
-body:JSON.stringify(updated)
+return;
 
 }
 
-);
 
-
-
-
+setIdentity(saved.data);
 
 
 notify(
@@ -474,6 +422,9 @@ notify(
 "Resume uploaded and saved"
 
 );
+
+
+refreshAppData();
 
 
 
@@ -687,32 +638,19 @@ avatar:data.path
 setIdentity(updated);
 
 
+const saved = await saveIdentity(updated);
 
 
+if(!saved.ok){
 
-await fetch(
+notify(saved.error);
 
-"/api/identity",
-
-{
-
-method:"POST",
-
-headers:{
-
-"Content-Type":"application/json"
-
-},
-
-
-body:JSON.stringify(updated)
+return;
 
 }
 
-);
 
-
-
+setIdentity(saved.data);
 
 
 notify(

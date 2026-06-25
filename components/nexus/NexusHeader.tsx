@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 
+import NexusAudioSettings from "./NexusAudioSettings";
 import NexusFeedback from "./NexusFeedback";
-import { useNexusSound } from "./NexusSound";
+import { useSound } from "@/context/SoundContext";
 import {
   HEADER_NAV,
   HEADER_NAV_FLAT,
@@ -22,6 +23,7 @@ function LabsDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const { playSound } = useSound();
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
@@ -37,7 +39,10 @@ function LabsDropdown({
     <div ref={ref} className="relative">
       <button
         type="button"
-        onClick={() => setOpen(current => !current)}
+        onClick={() => {
+          playSound("ui.click");
+          setOpen(current => !current);
+        }}
         className="flex items-center gap-1 text-gray-400 transition hover:text-green-400"
         aria-expanded={open}
       >
@@ -52,6 +57,7 @@ function LabsDropdown({
               href={item.href}
               className="block px-4 py-2 text-sm text-gray-400 hover:bg-green-950/50 hover:text-green-300"
               onClick={() => {
+                playSound("ui.click");
                 setOpen(false);
                 onNavigate?.();
               }}
@@ -68,13 +74,20 @@ function LabsDropdown({
 export default function NexusHeader() {
   const { data: session, status } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [audioOpen, setAudioOpen] = useState(false);
+  const audioRef = useRef<HTMLDivElement>(null);
 
-  const { enabled, toggleSound, volume, setVolume, play } = useNexusSound();
+  const { playSound } = useSound();
 
-  const click = (fn: () => void) => {
-    play("click");
-    fn();
-  };
+  useEffect(() => {
+    function onClickOutside(event: MouseEvent) {
+      if (audioRef.current && !audioRef.current.contains(event.target as Node)) {
+        setAudioOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
 
   return (
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-green-900/40 bg-black/90 backdrop-blur-md">
@@ -82,7 +95,7 @@ export default function NexusHeader() {
         <Link
           href="/"
           className="shrink-0 text-sm font-bold tracking-widest text-green-400 transition hover:text-green-300 sm:text-base"
-          onClick={() => play("click")}
+          onClick={() => playSound("ui.click")}
         >
           SYED NEXUS
         </Link>
@@ -97,7 +110,7 @@ export default function NexusHeader() {
                 key={entry.href}
                 href={entry.href}
                 className="whitespace-nowrap transition hover:text-green-400"
-                onClick={() => play("click")}
+                onClick={() => playSound("ui.click")}
               >
                 {entry.label}
               </Link>
@@ -109,43 +122,35 @@ export default function NexusHeader() {
           <button
             type="button"
             className="rounded border border-green-800 px-2.5 py-1.5 text-green-400 lg:hidden"
-            onClick={() => click(() => setMobileOpen(current => !current))}
+            onClick={() => {
+              playSound("ui.click");
+              setMobileOpen(current => !current);
+            }}
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
           >
-            {mobileOpen ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
+            {mobileOpen ? "✕" : "☰"}
           </button>
 
           <NexusFeedback className="hidden sm:inline-flex" />
 
-          <div className="hidden items-center gap-1.5 md:flex">
+          <div ref={audioRef} className="relative hidden md:block">
             <button
               type="button"
-              onClick={() => click(toggleSound)}
+              onClick={() => {
+                playSound("ui.panel.open");
+                setAudioOpen(current => !current);
+              }}
               className="rounded border border-green-800 px-2 py-1 text-xs hover:bg-green-950"
-              aria-label={enabled ? "Mute sound" : "Enable sound"}
+              aria-expanded={audioOpen}
+              aria-label="Nexus audio settings"
             >
-              {enabled ? "🔊" : "🔇"}
+              Audio
             </button>
-            {enabled && (
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={volume}
-                onChange={event => setVolume(parseFloat(event.target.value))}
-                className="w-14 accent-green-500"
-                aria-label="Volume"
-              />
+            {audioOpen && (
+              <div className="absolute right-0 top-full z-50 mt-2 w-56">
+                <NexusAudioSettings />
+              </div>
             )}
           </div>
 
@@ -154,7 +159,10 @@ export default function NexusHeader() {
           ) : !session ? (
             <button
               type="button"
-              onClick={() => click(() => signIn("google"))}
+              onClick={() => {
+                playSound("ui.click");
+                void signIn("google");
+              }}
               className="rounded border border-green-700 px-2.5 py-1 text-xs text-green-400 hover:bg-green-950"
             >
               Login
@@ -166,7 +174,10 @@ export default function NexusHeader() {
               </span>
               <button
                 type="button"
-                onClick={() => click(() => signOut())}
+                onClick={() => {
+                  playSound("ui.click");
+                  void signOut();
+                }}
                 className="rounded border border-red-900/60 px-2 py-1 text-xs text-red-400 hover:bg-red-950/30"
               >
                 Logout
@@ -181,6 +192,9 @@ export default function NexusHeader() {
           <div className="mb-4 sm:hidden">
             <NexusFeedback onOpen={() => setMobileOpen(false)} />
           </div>
+          <div className="mb-4">
+            <NexusAudioSettings compact />
+          </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
             {HEADER_NAV_FLAT.map(item => (
               <Link
@@ -188,7 +202,7 @@ export default function NexusHeader() {
                 href={item.href}
                 className="py-2 text-gray-400 hover:text-green-400"
                 onClick={() => {
-                  play("click");
+                  playSound("ui.click");
                   setMobileOpen(false);
                 }}
               >

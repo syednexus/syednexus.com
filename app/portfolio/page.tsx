@@ -11,6 +11,8 @@ import dynamic from "next/dynamic";
 
 import { useSession } from "next-auth/react";
 
+import { isOwnerSessionComplete } from "@/lib/auth/ownerAccess";
+
 
 // TYPES
 
@@ -75,7 +77,7 @@ useSession();
 
 
 
-// RESTORE OWNER SESSION (NextAuth or lab cookie)
+// OWNER session (Google + MFA) or lab simulation cookie only
 
 
 useEffect(()=>{
@@ -91,7 +93,7 @@ return;
 async function restoreSession(){
 
 
-if(session?.user?.role === "OWNER"){
+if(isOwnerSessionComplete(session?.user)){
 
 setAccess("owner");
 
@@ -115,7 +117,7 @@ await response.json();
 
 if(data.authenticated){
 
-setAccess("owner");
+setAccess("root");
 
 return;
 

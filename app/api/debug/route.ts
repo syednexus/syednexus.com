@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 
 import { requireOwner } from "@/lib/adminGuard";
 
-export async function GET() {
+export async function GET(req: Request) {
   // Hard-block in production — debug endpoint must never be reachable live
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const session = await requireOwner();
+  const session = await requireOwner(req);
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

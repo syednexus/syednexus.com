@@ -21,9 +21,11 @@ function getProofSecret(): string {
  * The proof encodes the action type and a 1-minute time window so
  * replays outside the window are rejected.
  */
+export type MfaProofAction = "verify" | "enable" | "activity";
+
 export function generateMfaProof(
   email: string,
-  action: "verify" | "enable",
+  action: MfaProofAction,
   timestamp: number
 ): string {
   const windowSlot = Math.floor(timestamp / 60_000);
@@ -39,7 +41,7 @@ export function generateMfaProof(
  */
 export function verifyMfaProof(
   email: string,
-  action: "verify" | "enable",
+  action: MfaProofAction,
   proof: string,
   timestamp: number
 ): boolean {

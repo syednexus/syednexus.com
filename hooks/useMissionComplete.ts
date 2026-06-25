@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
-import { useNexusSound } from "@/components/nexus/NexusSound";
+import { useSound } from "@/context/SoundContext";
 import { useNexus } from "@/context/NexusContext";
 import { useWorldOptional } from "@/context/WorldContext";
 import { refreshAppData } from "@/lib/refreshAppData";
@@ -64,8 +64,9 @@ export function useMissionComplete(mission: PublicMission | null) {
   const [submitting, setSubmitting] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [debrief, setDebrief] = useState<string | null>(null);
+  const submitLockRef = useRef(false);
 
-  const { play } = useNexusSound();
+  const { playSound, triggerVisual } = useSound();
   const { celebrateAchievement } = useNexus();
   const world = useWorldOptional();
 
@@ -76,13 +77,19 @@ export function useMissionComplete(mission: PublicMission | null) {
       return { success: false, message };
     }
 
+    if (submitLockRef.current || submitting || completed) {
+      return { success: false, message: "ACCESS DENIED ❌ SUBMISSION IN PROGRESS" };
+    }
+
     if (!answer.trim()) {
       const message = "ACCESS DENIED ❌ SUBMIT YOUR FINDING";
       setResult(message);
-      play("alert");
+      playSound("answer.wrong");
+      triggerVisual("error");
       return { success: false, message };
     }
 
+    submitLockRef.current = true;
     setSubmitting(true);
 
     try {
@@ -122,7 +129,9 @@ export function useMissionComplete(mission: PublicMission | null) {
 
       setResult(message);
       setCompleted(true);
-      play("success");
+      playSound("answer.correct");
+      playSound("mission.complete");
+      triggerVisual("success");
 
       if (xpAwarded > 0) {
         celebrateAchievement({
@@ -143,12 +152,15 @@ export function useMissionComplete(mission: PublicMission | null) {
           ? "ACCESS DENIED ❌ TRY AGAIN"
           : "ACCESS DENIED ❌ SAVE FAILED";
       setResult(message);
-      play("alert");
+      playSound("answer.wrong");
+      playSound("mission.failed");
+      triggerVisual("error");
       return { success: false, message };
     } finally {
+      submitLockRef.current = false;
       setSubmitting(false);
     }
-  }, [mission, answer, play, celebrateAchievement, world]);
+  }, [mission, answer, playSound, triggerVisual, celebrateAchievement, world, submitting, completed]);
 
   const reset = useCallback(() => {
     setAnswer("");

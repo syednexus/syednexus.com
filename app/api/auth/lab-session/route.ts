@@ -2,27 +2,11 @@ import { NextResponse } from "next/server";
 
 import { cookies } from "next/headers";
 
-import { verifyAdminSessionToken } from "@/lib/auth";
+import { verifyLabSessionToken } from "@/lib/auth/labSession";
 
+export async function GET() {
+  const cookieStore = await cookies();
+  const authenticated = verifyLabSessionToken(cookieStore.get("nexus_lab")?.value);
 
-
-export async function GET(){
-
-
-const cookieStore =
-await cookies();
-
-
-const authenticated =
-verifyAdminSessionToken(
-
-cookieStore.get("nexus_admin")?.value
-
-);
-
-
-
-return NextResponse.json({authenticated});
-
-
+  return NextResponse.json({ authenticated, scope: authenticated ? "lab" : null });
 }

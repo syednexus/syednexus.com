@@ -1,33 +1,15 @@
-export const OWNER_SUPER_MODE_KEY = "nexus-root";
+import type { OwnerSessionUser } from "@/lib/auth/ownerAccess";
+import { isOwnerSessionComplete } from "@/lib/auth/ownerAccess";
 
-export function readOwnerSuperModeFlag(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-
-  return localStorage.getItem(OWNER_SUPER_MODE_KEY) === "true";
+/** Owner session with MFA satisfied — unlimited credits and chain bypass. */
+export function isOwnerSuperMode(user: OwnerSessionUser | null | undefined): boolean {
+  return isOwnerSessionComplete(user);
 }
 
-export function setOwnerSuperModeFlag(active: boolean) {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  if (active) {
-    localStorage.setItem(OWNER_SUPER_MODE_KEY, "true");
-  } else {
-    localStorage.removeItem(OWNER_SUPER_MODE_KEY);
-  }
-
-  window.dispatchEvent(new Event("nexus-owner-super-mode"));
-}
-
-/** Owner session gets unlimited credits, chain bypass, and mentor freebies. */
-export function isOwnerSuperMode(role: string | undefined): boolean {
-  return role === "OWNER";
-}
-
-/** CLI root shell styling — optional `sudo su` / `nexus shadow ascend`. */
-export function isOwnerRootShell(role: string | undefined, rootFlag: boolean): boolean {
-  return role === "OWNER" && rootFlag;
+/** Root shell visual styling in NexusAvatar terminal (session-gated, not persisted). */
+export function isOwnerRootShell(
+  user: OwnerSessionUser | null | undefined,
+  rootShellActive: boolean
+): boolean {
+  return isOwnerSessionComplete(user) && rootShellActive;
 }

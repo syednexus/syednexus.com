@@ -122,7 +122,7 @@ try{
 
 
 
-if(!(await requireAdmin())){
+if(!(await requireAdmin(req))){
 
 
 return NextResponse.json(
@@ -339,7 +339,7 @@ try{
 
 
 
-if(!(await requireAdmin())){
+if(!(await requireAdmin(req))){
 
 
 return NextResponse.json(

@@ -3,8 +3,17 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 import { prisma } from "@/lib/prisma";
+import {
+  getAuthConfigurationIssues,
+  isAuthConfigured,
+  logAuthConfigurationIssues
+} from "@/lib/auth/validateAuthConfig";
 import { isMfaTrustValid } from "@/lib/security/mfaSession";
 import { verifyMfaProof } from "@/lib/security/mfaProof";
+import { logSecurityEvent } from "@/lib/security/securityLogger";
+import { authErrorPagePath } from "@/lib/auth/safeAuthError";
+
+logAuthConfigurationIssues();
 
 function ownerEmail(): string | undefined {
   return process.env.OWNER_EMAIL?.trim().toLowerCase();
@@ -15,26 +24,62 @@ function isOwnerEmail(email: string | null | undefined): boolean {
   return email.trim().toLowerCase() === ownerEmail();
 }
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim() ?? "";
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim() ?? "";
+
 export const authOptions: NextAuthOptions = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!
-    })
-  ],
+  providers: isAuthConfigured()
+    ? [
+        GoogleProvider({
+          clientId: googleClientId,
+          clientSecret: googleClientSecret
+        })
+      ]
+    : [],
+
+  pages: {
+    error: "/auth/error"
+  },
 
   callbacks: {
     async signIn({ user }) {
-      if (!user?.email) return false;
+      if (!user?.email) {
+        void logSecurityEvent({
+          eventType: "LOGIN_FAILED",
+          severity: "MEDIUM",
+          metadata: { reason: "missing_email", provider: "google" }
+        });
+        return false;
+      }
 
-      await prisma.user.upsert({
-        where: { email: user.email },
-        update: {},
-        create: {
-          email: user.email,
-          name: user.name || "Unknown",
-          role: isOwnerEmail(user.email) ? "OWNER" : "USER"
-        }
+      const owner = isOwnerEmail(user.email);
+
+      try {
+        await prisma.user.upsert({
+          where: { email: user.email },
+          update: {},
+          create: {
+            email: user.email,
+            name: user.name || "Unknown",
+            role: owner ? "OWNER" : "USER"
+          }
+        });
+      } catch (error) {
+        console.error("[auth] Database unavailable during Google sign-in", error);
+        void logSecurityEvent({
+          eventType: "LOGIN_FAILED",
+          severity: "HIGH",
+          userEmail: user.email,
+          metadata: { reason: "database_unavailable", provider: "google" }
+        });
+        return authErrorPagePath("DatabaseUnavailable");
+      }
+
+      void logSecurityEvent({
+        eventType: "LOGIN_SUCCESS",
+        severity: owner ? "MEDIUM" : "LOW",
+        userEmail: user.email,
+        metadata: { provider: "google", owner }
       });
 
       return true;
@@ -44,28 +89,44 @@ export const authOptions: NextAuthOptions = {
       const email = (user?.email ?? token.email) as string | undefined;
 
       if (email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email },
-          select: { role: true, mfaEnabled: true }
-        });
+        let dbUser: { role: string; mfaEnabled: boolean } | null = null;
+        let dbLookupFailed = false;
+
+        try {
+          dbUser = await prisma.user.findUnique({
+            where: { email },
+            select: { role: true, mfaEnabled: true }
+          });
+        } catch (error) {
+          dbLookupFailed = true;
+          console.error("[auth] Database lookup failed during JWT refresh", error);
+        }
 
         if (isOwnerEmail(email) || dbUser?.role === "OWNER") {
           token.role = "OWNER";
-          token.mfaEnabled = dbUser?.mfaEnabled ?? false;
 
-          if (!(dbUser?.mfaEnabled ?? false)) {
-            // MFA not enabled in DB → no challenge needed
-            token.mfaVerified = true;
-            delete token.mfaVerifiedAt;
-            delete token.lastActivityAt;
-          } else if (user) {
-            // Initial login and MFA is enabled → require fresh TOTP challenge
-            token.mfaVerified = false;
-            delete token.mfaVerifiedAt;
-            delete token.lastActivityAt;
-          } else if (token.mfaVerified && !isMfaTrustValid(token)) {
-            // Trust window (2h inactive / 12h absolute) expired
-            token.mfaVerified = false;
+          if (dbLookupFailed || dbUser === null) {
+            // Fail closed: never assume MFA is disabled when DB state is unknown
+            if (user) {
+              token.mfaEnabled = true;
+              token.mfaVerified = false;
+              delete token.mfaVerifiedAt;
+              delete token.lastActivityAt;
+            }
+          } else {
+            token.mfaEnabled = dbUser.mfaEnabled;
+
+            if (!dbUser.mfaEnabled) {
+              token.mfaVerified = true;
+              delete token.mfaVerifiedAt;
+              delete token.lastActivityAt;
+            } else if (user) {
+              token.mfaVerified = false;
+              delete token.mfaVerifiedAt;
+              delete token.lastActivityAt;
+            } else if (token.mfaVerified && !isMfaTrustValid(token)) {
+              token.mfaVerified = false;
+            }
           }
         } else {
           delete token.role;
@@ -89,8 +150,9 @@ export const authOptions: NextAuthOptions = {
           mfaEnabledProof?: string;
           // Timestamp at which the proof was issued (for window validation)
           verifiedAt?: number;
-          // Activity ping — accepted only when already MFA-verified
+          // Activity ping — requires server HMAC from /api/auth/mfa/activity
           lastActivityAt?: number;
+          activityProof?: string;
         };
 
         const patch = session as SecurePatch;
@@ -106,6 +168,20 @@ export const authOptions: NextAuthOptions = {
           token.mfaVerified = true;
           token.mfaVerifiedAt = patch.verifiedAt;
           token.lastActivityAt = patch.verifiedAt;
+
+          void logSecurityEvent({
+            eventType: "MFA_SUCCESS",
+            severity: "LOW",
+            userEmail: emailLower,
+            metadata: { source: "session_update", action: "verify" }
+          });
+
+          void logSecurityEvent({
+            eventType: "OWNER_ACCESS_GRANTED",
+            severity: "LOW",
+            userEmail: emailLower,
+            metadata: { source: "mfa_verify" }
+          });
         }
 
         // Allow setting mfaVerified immediately after enabling MFA
@@ -125,12 +201,15 @@ export const authOptions: NextAuthOptions = {
         // mfaEnabled=false from DB and sets mfaVerified=true automatically.
         // Calling update({}) from MFASetup is enough to trigger that refresh.
 
-        // Activity ping: only accepted when the token is already in a
-        // verified state to prevent inactivity-window bypass.
+        // Activity ping: server-issued proof required (same pattern as MFA verify)
         if (
+          patch.activityProof &&
           typeof patch.lastActivityAt === "number" &&
+          typeof patch.verifiedAt === "number" &&
+          patch.lastActivityAt === patch.verifiedAt &&
           patch.lastActivityAt > 0 &&
-          patch.lastActivityAt <= now + 5_000 && // no future timestamps
+          patch.lastActivityAt <= now + 5_000 &&
+          verifyMfaProof(emailLower, "activity", patch.activityProof, patch.verifiedAt) &&
           (!token.mfaEnabled || token.mfaVerified)
         ) {
           token.lastActivityAt = patch.lastActivityAt;
@@ -155,5 +234,7 @@ export const authOptions: NextAuthOptions = {
     }
   },
 
-  secret: process.env.NEXTAUTH_SECRET
+  secret: process.env.NEXTAUTH_SECRET?.trim()
 };
+
+export { getAuthConfigurationIssues, isAuthConfigured };

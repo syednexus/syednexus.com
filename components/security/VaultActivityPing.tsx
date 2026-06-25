@@ -43,10 +43,19 @@ export default function VaultActivityPing() {
         });
         if (!response.ok) return;
 
-        const data = (await response.json()) as { lastActivityAt?: number };
+        const data = (await response.json()) as {
+          lastActivityAt?: number;
+          verifiedAt?: number;
+          activityProof?: string;
+        };
         const lastActivityAt = data.lastActivityAt ?? now;
+        const verifiedAt = data.verifiedAt ?? lastActivityAt;
         lastPingAtRef.current = lastActivityAt;
-        await updateRef.current({ lastActivityAt });
+        await updateRef.current({
+          lastActivityAt,
+          verifiedAt,
+          activityProof: data.activityProof
+        });
       } catch {
         // ignore transient network errors
       } finally {

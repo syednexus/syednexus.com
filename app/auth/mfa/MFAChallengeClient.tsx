@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { shouldRequireMfaChallenge } from "@/lib/security/mfaSession";
+import { useSound } from "@/context/SoundContext";
 
 export default function MFAChallengeClient() {
   const { data: session, status, update } = useSession();
@@ -22,6 +23,7 @@ export default function MFAChallengeClient() {
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { playSound, triggerVisual } = useSound();
 
   const redirectIfReady = useCallback(() => {
     if (session?.user?.role !== "OWNER") {
@@ -63,11 +65,15 @@ export default function MFAChallengeClient() {
 
       if (!response.ok) {
         setError(data.error ?? "Verification failed");
+        playSound("mfa.failed");
+        triggerVisual("error");
         return;
       }
 
-      // Pass server-signed proof so jwt callback can safely set mfaVerified=true
       await update({ mfaVerifiedProof: data.mfaProof, verifiedAt: data.verifiedAt });
+      playSound("mfa.success");
+      playSound("vault.unlock");
+      triggerVisual("vault-unlock");
       router.replace(callbackUrl);
     } catch {
       setError("Network error — try again");
@@ -112,6 +118,13 @@ export default function MFAChallengeClient() {
             {submitting ? "Verifying…" : "Unlock Vault"}
           </button>
         </form>
+
+        <p className="mt-6 text-sm text-gray-500">
+          Lost authenticator?{" "}
+          <a href="/auth/recovery" className="text-purple-300 hover:underline">
+            Use owner recovery key
+          </a>
+        </p>
       </section>
     </main>
   );

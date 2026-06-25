@@ -39,7 +39,7 @@ export default function MissionPlayerPage() {
   }
 
   return (
-    <main className="min-h-screen bg-black px-4 py-8 font-mono text-green-400 sm:px-6 sm:py-10 lg:px-10">
+    <main className="min-h-screen overflow-x-hidden bg-black px-4 py-8 font-mono text-green-400 sm:px-6 sm:py-10 lg:px-10">
       <button
         type="button"
         onClick={() => router.back()}

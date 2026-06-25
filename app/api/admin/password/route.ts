@@ -4,11 +4,9 @@ import bcrypt from "bcrypt";
 
 import { prisma } from "@/lib/prisma";
 
-import { isAdmin } from "@/lib/auth";
-
-
-
-
+import { requireAdmin } from "@/lib/adminGuard";
+import { getRequestSecurityContext } from "@/lib/security/requestContext";
+import { logSecurityEvent } from "@/lib/security/securityLogger";
 
 export async function POST(req:Request){
 
@@ -17,7 +15,9 @@ try{
 
 
 
-if(!(await isAdmin())){
+const adminSession = await requireAdmin(req);
+
+if(!adminSession){
 
 
 return NextResponse.json(
@@ -32,6 +32,9 @@ status:401
 
 
 }
+
+const ownerEmail = adminSession.user?.email ?? null;
+const auditContext = getRequestSecurityContext(req);
 
 
 
@@ -171,6 +174,14 @@ admin.passwordHash
 if(!valid){
 
 
+void logSecurityEvent({
+  eventType: "LOGIN_FAILED",
+  severity: "HIGH",
+  userEmail: ownerEmail,
+  ...auditContext,
+  metadata: { reason: "admin_password_wrong", action: "password_change" }
+});
+
 return NextResponse.json(
 {
 success:false,
@@ -236,6 +247,14 @@ passwordHash:hash
 
 
 
+
+void logSecurityEvent({
+  eventType: "PROFILE_CHANGED",
+  severity: "HIGH",
+  userEmail: ownerEmail,
+  ...auditContext,
+  metadata: { action: "admin_password_updated" }
+});
 
 return NextResponse.json({
 

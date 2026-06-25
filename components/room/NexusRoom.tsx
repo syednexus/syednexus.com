@@ -6,6 +6,7 @@ import type { PracticalMissionProps } from "@/components/engine/PracticalMission
 import NexusWorkstation from "@/components/workspace/NexusWorkstation";
 import ReportBuilder from "@/components/report/ReportBuilder";
 import WorldHud from "@/components/world/WorldHud";
+import { playSound } from "@/lib/audio/nexusAudio";
 import { useWorld } from "@/context/WorldContext";
 import { parseRoomConfig } from "@/lib/roomConfig";
 import { chainPositionLabel, isChainUnlocked } from "@/lib/world/incidentChain";
@@ -108,7 +109,10 @@ export default function NexusRoom(props: NexusRoomProps) {
         <button
           type="button"
           disabled={!chainReady}
-          onClick={() => setPhase("lab")}
+          onClick={() => {
+            playSound("mission.start");
+            setPhase("lab");
+          }}
           className="mt-10 w-full border border-green-500 px-8 py-3 text-green-400 transition hover:bg-green-950 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
         >
           ▶ {chainReady ? "Start room" : "Chain locked"}

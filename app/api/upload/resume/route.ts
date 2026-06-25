@@ -5,6 +5,8 @@ import { writeFile,mkdir } from "fs/promises";
 import path from "path";
 
 import { requireAdmin } from "@/lib/adminGuard";
+import { getRequestSecurityContext } from "@/lib/security/requestContext";
+import { logSecurityEvent } from "@/lib/security/securityLogger";
 
 
 
@@ -18,9 +20,10 @@ try{
 
 
 
-if(!(await requireAdmin())){
+const admin = await requireAdmin(req);
 
 
+if(!admin){
 return NextResponse.json(
 
 {
@@ -260,6 +263,21 @@ buffer
 
 
 
+
+const context = getRequestSecurityContext(req);
+void logSecurityEvent({
+  eventType: "FILE_UPLOAD",
+  severity: "LOW",
+  userEmail: admin.user?.email ?? null,
+  ipAddress: context.ipAddress,
+  userAgent: context.userAgent,
+  endpoint: context.endpoint,
+  metadata: {
+    fileType: "resume",
+    mimeType: file.type,
+    sizeBytes: file.size
+  }
+});
 
 return NextResponse.json({
 

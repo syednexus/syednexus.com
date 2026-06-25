@@ -24,8 +24,10 @@ import {
   advanceCareerDay,
   createCareerWeek,
   endWeekReview,
+  isCurrentCareerWeek,
   isFriday,
   resolveCareerEvent,
+  rolloverCareerWeekIfNeeded,
   weekdayLabel
 } from "@/lib/world/careerWeek";
 import {
@@ -127,6 +129,42 @@ function updateSlot(
   };
 }
 
+function applyCareerWeekRollover(
+  worldState: WorldPersistedState,
+  reputation: number
+): WorldPersistedState {
+  const active = worldState.activeSlot;
+  const slot = worldState.slots[active];
+  const { week, rolled, archived } = rolloverCareerWeekIfNeeded(slot.careerWeek, reputation);
+
+  if (!rolled || !week) {
+    return worldState;
+  }
+
+  return {
+    ...worldState,
+    slots: {
+      ...worldState.slots,
+      [active]: {
+        ...slot,
+        careerWeek: week,
+        analytics: archived
+          ? trimAnalytics([
+              ...slot.analytics,
+              createAnalyticsEvent("drop_off", {
+                payload: {
+                  archive: "career_week",
+                  weekId: archived.weekId,
+                  score: archived.performanceScore
+                }
+              })
+            ])
+          : slot.analytics
+      }
+    }
+  };
+}
+
 export function WorldProvider({ children }: { children: ReactNode }) {
   const analyst = useAnalyst();
   const missions = useMissions();
@@ -134,10 +172,10 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<WorldPersistedState>(() => createDefaultWorldState());
   const hydrated = useRef(false);
 
-  const isSuperMode = isOwnerSuperMode(session?.user?.role);
+  const isSuperMode = isOwnerSuperMode(session?.user ?? null);
 
   useEffect(() => {
-    setState(loadWorldState());
+    setState(applyCareerWeekRollover(loadWorldState(), 0));
     hydrated.current = true;
   }, []);
 
@@ -151,6 +189,12 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     () => computeReputation(analyst.xp, analyst.completed),
     [analyst.xp, analyst.completed]
   );
+
+  useEffect(() => {
+    if (!hydrated.current) return;
+    setState(current => applyCareerWeekRollover(current, reputation));
+  }, [reputation]);
+
   const reputationTier = getReputationTier(reputation);
 
   const persist = useCallback((updater: (current: WorldPersistedState) => WorldPersistedState) => {
@@ -333,7 +377,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   const getChainArtifacts = useCallback(() => slot.chainArtifacts, [slot.chainArtifacts]);
 
   const ensureCareerWeek = useCallback((): CareerWeekState => {
-    if (slot.careerWeek && slot.careerWeek.weekId === createCareerWeek(reputation).weekId) {
+    if (slot.careerWeek && isCurrentCareerWeek(slot.careerWeek)) {
       return slot.careerWeek;
     }
     return createCareerWeek(reputation);
@@ -361,7 +405,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   }, [ensureCareerWeek, persist, reputation]);
 
   const initCareerWeekIfNeeded = useCallback(() => {
-    if (slot.careerWeek) return;
+    if (slot.careerWeek && isCurrentCareerWeek(slot.careerWeek)) return;
     const week = createCareerWeek(reputation);
     persist(current => updateSlot(current, s => ({ ...s, careerWeek: week })));
   }, [slot.careerWeek, persist, reputation]);
