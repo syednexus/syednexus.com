@@ -2,16 +2,24 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import SecurityTimeline from "@/components/security/SecurityTimeline";
 import {
   downloadTextFile,
   securityLogsToCsv,
   type ExportableSecurityLog
 } from "@/lib/security/exportSecurityLogs";
+import type { MitreBreakdownEntry } from "@/lib/security/mitreMapper";
 import {
   SECURITY_EVENT_TYPES,
   SECURITY_SEVERITIES
 } from "@/lib/security/securityEvents";
 import { useSound } from "@/context/SoundContext";
+
+type ThreatScore = {
+  score: number;
+  level: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  reasons: string[];
+};
 
 type SecurityStats = {
   storageReady?: boolean;
@@ -21,8 +29,13 @@ type SecurityStats = {
   failedLogins: number;
   mfaFailures: number;
   blockedApis: number;
+  apiProbes: number;
+  sudoAttempts: number;
   recoveryEvents: number;
   criticalAlerts: number;
+  threatScore: ThreatScore;
+  mitreBreakdown: MitreBreakdownEntry[];
+  timeline: ExportableSecurityLog[];
   recentCriticalAlerts: ExportableSecurityLog[];
 };
 
@@ -34,6 +47,19 @@ function alertMessage(log: SecurityLogRow): string {
     return metadata.message;
   }
   return `${log.eventType} detected`;
+}
+
+function threatScoreClass(level: ThreatScore["level"]): string {
+  switch (level) {
+    case "CRITICAL":
+      return "text-red-400 border-red-700/60";
+    case "HIGH":
+      return "text-amber-400 border-amber-700/60";
+    case "MEDIUM":
+      return "text-yellow-300 border-yellow-700/50";
+    default:
+      return "text-green-400 border-green-700/50";
+  }
 }
 
 export default function SecurityDashboard() {
@@ -144,24 +170,30 @@ export default function SecurityDashboard() {
 
   const cards = stats
     ? [
-        { label: "Events today", value: stats.totalToday },
+        {
+          label: "Threat score",
+          value: stats.threatScore?.score ?? 0,
+          suffix: stats.threatScore?.level ?? "LOW",
+          highlight: true
+        },
         { label: "Failed logins", value: stats.failedLogins },
         { label: "MFA failures", value: stats.mfaFailures },
-        { label: "Blocked APIs", value: stats.blockedApis },
-        { label: "Recovery events", value: stats.recoveryEvents },
-        { label: "Security alerts", value: stats.criticalAlerts }
+        { label: "API probes", value: stats.apiProbes ?? stats.blockedApis },
+        { label: "Sudo attempts", value: stats.sudoAttempts ?? 0 },
+        { label: "Critical alerts", value: stats.criticalAlerts }
       ]
     : [];
 
   const criticalBanner = stats?.recentCriticalAlerts ?? [];
+  const timeline = stats?.timeline ?? logs;
 
   return (
     <section className="mt-12 space-y-8">
       <div>
-        <p className="text-xs uppercase tracking-widest text-cyan-500">Security Monitoring</p>
-        <h2 className="mt-2 text-2xl font-bold text-green-300">Audit Dashboard</h2>
+        <p className="text-xs uppercase tracking-widest text-cyan-500">SOC Command Center</p>
+        <h2 className="mt-2 text-2xl font-bold text-green-300">Security Operations Dashboard</h2>
         <p className="mt-2 text-sm text-gray-500">
-          Owner-only security telemetry. Sensitive secrets are never stored.
+          Owner-only telemetry. Secrets, tokens, and credentials are never stored.
         </p>
       </div>
 
@@ -184,15 +216,29 @@ export default function SecurityDashboard() {
         </div>
       )}
 
-      {loading && <p className="text-sm text-gray-500">Loading audit data…</p>}
+      {loading && <p className="text-sm text-gray-500">Loading SOC data…</p>}
+
+      {stats?.threatScore && (
+        <div
+          className={`rounded-xl border bg-black/40 p-4 ${threatScoreClass(stats.threatScore.level)}`}
+        >
+          <p className="text-xs uppercase tracking-widest opacity-80">Current threat posture</p>
+          <div className="mt-2 flex flex-wrap items-end gap-4">
+            <p className="text-4xl font-bold">{stats.threatScore.score}</p>
+            <p className="text-sm uppercase tracking-widest">{stats.threatScore.level}</p>
+          </div>
+          <ul className="mt-3 space-y-1 text-xs opacity-90">
+            {stats.threatScore.reasons.map(reason => (
+              <li key={reason}>• {reason}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {criticalBanner.length > 0 && (
-        <div
-          role="alert"
-          className="rounded-xl border border-red-700/60 bg-red-950/30 p-4"
-        >
+        <div role="alert" className="rounded-xl border border-red-700/60 bg-red-950/30 p-4">
           <p className="text-xs font-bold uppercase tracking-widest text-red-400">
-            Security alerts — last 24 hours
+            Critical alerts — last 24 hours
           </p>
           <ul className="mt-3 space-y-2">
             {criticalBanner.map(alert => (
@@ -215,24 +261,56 @@ export default function SecurityDashboard() {
       {stats && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {cards.map(card => (
-            <div
-              key={card.label}
-              className="rounded-xl border border-green-900/40 bg-black/40 p-4"
-            >
+            <div key={card.label} className="rounded-xl border border-green-900/40 bg-black/40 p-4">
               <p className="text-xs uppercase text-gray-500">{card.label}</p>
               <p
                 className={`mt-2 text-3xl ${
-                  card.label === "Security alerts" && card.value > 0
+                  card.label === "Critical alerts" && card.value > 0
                     ? "text-red-400"
-                    : "text-amber-400"
+                    : card.highlight
+                      ? threatScoreClass(stats.threatScore.level).split(" ")[0]
+                      : "text-amber-400"
                 }`}
               >
                 {card.value}
+                {"suffix" in card && card.suffix ? (
+                  <span className="ml-2 text-sm uppercase text-gray-500">{card.suffix}</span>
+                ) : null}
               </p>
             </div>
           ))}
         </div>
       )}
+
+      {stats?.mitreBreakdown && stats.mitreBreakdown.length > 0 && (
+        <section className="rounded-xl border border-purple-900/40 bg-black/30 p-4">
+          <p className="text-xs uppercase tracking-widest text-purple-400">MITRE ATT&CK mapping</p>
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead className="text-xs uppercase text-gray-500">
+                <tr>
+                  <th className="px-3 py-2">Category</th>
+                  <th className="px-3 py-2">Technique</th>
+                  <th className="px-3 py-2">Count</th>
+                  <th className="px-3 py-2">Share</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.mitreBreakdown.map(entry => (
+                  <tr key={`${entry.category}-${entry.technique}`} className="border-t border-green-900/20">
+                    <td className="px-3 py-2 text-purple-300">{entry.category}</td>
+                    <td className="px-3 py-2 text-gray-300">{entry.technique}</td>
+                    <td className="px-3 py-2 text-green-300">{entry.count}</td>
+                    <td className="px-3 py-2 text-gray-400">{entry.percentage}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      <SecurityTimeline logs={timeline} />
 
       <div className="flex flex-wrap gap-3">
         <select

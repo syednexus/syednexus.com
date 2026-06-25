@@ -21,7 +21,7 @@ export default async function VaultSecurityPage() {
     <main className="min-h-screen bg-black p-10 pt-28 font-mono text-green-400">
       <section className="mx-auto max-w-6xl">
         <p className="text-xs text-gray-500">root@nexus:/vault/security#</p>
-        <h1 className="mt-4 text-3xl font-bold">Vault Security</h1>
+        <h1 className="mt-4 text-3xl font-bold">SOC Command Center</h1>
         <p className="mt-2 text-sm text-gray-500">
           Configure TOTP two-factor authentication and review security audit telemetry.
         </p>

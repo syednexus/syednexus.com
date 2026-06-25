@@ -129,7 +129,7 @@ try{
 
 const session = await getServerSession(authOptions);
 
-if (isRateLimited(req, "ai", 30, 60_000)) {
+if (await isRateLimited(req, "ai", 30, 60_000)) {
   return NextResponse.json({
     success: true,
     reply: "Nexus Mentor rate limit reached. Try again in a minute or use built-in task hints."

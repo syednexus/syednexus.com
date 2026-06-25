@@ -3,14 +3,10 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 import { prisma } from "@/lib/prisma";
-import {
-  getAuthConfigurationIssues,
-  isAuthConfigured,
-  logAuthConfigurationIssues
-} from "@/lib/auth/validateAuthConfig";
+import { getAuthConfigurationIssues, isAuthConfigured, logAuthConfigurationIssues } from "@/lib/auth/validateAuthConfig";
+import { logSecurityEvent } from "@/lib/security/securityLogger";
 import { isMfaTrustValid } from "@/lib/security/mfaSession";
 import { verifyMfaProof } from "@/lib/security/mfaProof";
-import { logSecurityEvent } from "@/lib/security/securityLogger";
 import { authErrorPagePath } from "@/lib/auth/safeAuthError";
 
 logAuthConfigurationIssues();

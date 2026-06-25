@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useWorkstation } from "@/components/workspace/WorkstationContext";
 import { parsePracticalConfig } from "@/lib/practicalConfig";
+import EvidenceViewer from "@/components/forensics/EvidenceViewer";
 
 function toHexPreview(content: string) {
   return content
@@ -14,10 +15,21 @@ function toHexPreview(content: string) {
 }
 
 export default function FileExplorerWindow() {
-  const { layout, mission, selectedFile, setSelectedFile, addEvidence, completeLab, trackAction, completed, submitting } =
-    useWorkstation();
+  const {
+    layout,
+    mission,
+    selectedFile,
+    setSelectedFile,
+    addEvidence,
+    completeLab,
+    trackAction,
+    completed,
+    submitting,
+    evidence
+  } = useWorkstation();
   const practical = parsePracticalConfig(mission);
   const hashInfo = practical.forensics?.hash;
+  const showForensicsViewer = layout.module === "forensics" || Boolean(practical.forensics);
   const [hashInput, setHashInput] = useState("");
   const [folder, setFolder] = useState<"case" | "logs" | "memory" | "artifacts">("case");
 
@@ -126,6 +138,10 @@ export default function FileExplorerWindow() {
           </>
         ) : (
           <p className="text-gray-600">Select a file from the evidence folder.</p>
+        )}
+
+        {showForensicsViewer && (
+          <EvidenceViewer mission={mission} selectedFile={selectedFile} evidence={evidence} />
         )}
       </div>
     </div>

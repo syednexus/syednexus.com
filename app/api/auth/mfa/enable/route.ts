@@ -12,7 +12,7 @@ import { logSecurityEvent } from "@/lib/security/securityLogger";
 
 export async function POST(req: Request) {
   // Rate limit: 5 attempts per 15 minutes per IP
-  if (isRateLimited(req, "mfa:enable", 5, 15 * 60 * 1000)) {
+  if (await isRateLimited(req, "mfa:enable", 5, 15 * 60 * 1000)) {
     return NextResponse.json(
       { error: "Too many attempts — wait 15 minutes" },
       { status: 429 }

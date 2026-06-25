@@ -10,7 +10,7 @@ import { logSecurityEvent } from "@/lib/security/securityLogger";
 import { isRateLimited } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
-  if (isRateLimited(req, "mfa:disable", 5, 15 * 60 * 1000)) {
+  if (await isRateLimited(req, "mfa:disable", 5, 15 * 60 * 1000)) {
     return NextResponse.json({ error: "Too many attempts — wait 15 minutes" }, { status: 429 });
   }
 

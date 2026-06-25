@@ -12,7 +12,7 @@ import { logSecurityEvent } from "@/lib/security/securityLogger";
 export async function POST(req: Request) {
   const context = getRequestSecurityContext(req);
 
-  if (isRateLimited(req, "mfa:verify", 5, 15 * 60 * 1000)) {
+  if (await isRateLimited(req, "mfa:verify", 5, 15 * 60 * 1000)) {
     return NextResponse.json(
       { error: "Too many attempts — wait 15 minutes" },
       { status: 429 }

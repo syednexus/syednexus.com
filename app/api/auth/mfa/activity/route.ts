@@ -8,7 +8,7 @@ import { isRateLimited } from "@/lib/rateLimit";
 import { shouldRequireMfaChallenge } from "@/lib/security/mfaSession";
 
 export async function POST(req: Request) {
-  if (isRateLimited(req, "mfa:activity", 30, 15 * 60 * 1000)) {
+  if (await isRateLimited(req, "mfa:activity", 30, 15 * 60 * 1000)) {
     return NextResponse.json({ error: "Too many activity pings" }, { status: 429 });
   }
 

@@ -1,15 +1,6 @@
 import type { NextConfig } from "next";
 
-const isProd = process.env.NODE_ENV === "production";
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://syednexus.com";
-
-// Allowed external connect origins for CSP
-const connectSrc = [
-  "'self'",
-  "https://api.resend.com",
-  "https://generativelanguage.googleapis.com",
-  "https://accounts.google.com"
-].join(" ");
+import { getProductionSecurityHeaders, siteUrl } from "@/lib/security/securityHeaders";
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -18,43 +9,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/:path*",
-        headers: [
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-DNS-Prefetch-Control", value: "off" },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()"
-          },
-          // HSTS — only in production; forces HTTPS for 1 year
-          ...(isProd
-            ? [
-                {
-                  key: "Strict-Transport-Security",
-                  value: "max-age=31536000; includeSubDomains; preload"
-                }
-              ]
-            : []),
-          // Content Security Policy
-          // unsafe-inline/unsafe-eval are needed for Next.js hydration and
-          // Tailwind CSS-in-JS. Production apps should migrate to nonces.
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' 'unsafe-inline'",
-              `img-src 'self' data: https: blob:`,
-              "font-src 'self' data:",
-              `connect-src ${connectSrc}`,
-              "media-src 'self' blob:",
-              "frame-ancestors 'self'",
-              "base-uri 'self'",
-              "form-action 'self'"
-            ].join("; ")
-          }
-        ]
+        headers: getProductionSecurityHeaders()
       }
     ];
   },
@@ -85,3 +40,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+export { siteUrl };

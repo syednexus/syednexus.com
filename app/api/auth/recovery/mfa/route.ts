@@ -10,7 +10,7 @@ import { getRequestSecurityContext } from "@/lib/security/requestContext";
 import { logSecurityEvent } from "@/lib/security/securityLogger";
 
 export async function POST(req: Request) {
-  if (isRateLimited(req, "owner:mfa-recovery", 3, 60 * 60 * 1000)) {
+  if (await isRateLimited(req, "owner:mfa-recovery", 3, 60 * 60 * 1000)) {
     return NextResponse.json(
       { success: false, error: "Too many recovery attempts — wait 60 minutes" },
       { status: 429 }

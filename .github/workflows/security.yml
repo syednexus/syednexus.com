@@ -1,17 +1,15 @@
-name: CI
+name: Security
 
 on:
   push:
     branches: [main, master]
   pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
 
 jobs:
-  build:
+  security-audit:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .
-
     steps:
       - uses: actions/checkout@v4
 
@@ -23,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: npm audit
+      - name: npm audit (production)
         run: npm audit --omit=dev --audit-level=high
         continue-on-error: true
 
@@ -32,10 +30,14 @@ jobs:
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
 
-      - name: Generate Prisma client
+      - name: Prisma generate
         run: npx prisma generate
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        if: github.event_name == 'pull_request'
 
       - name: Typecheck
         run: npx tsc --noEmit
@@ -43,7 +45,7 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Production build
+      - name: Build
         run: npm run build
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
@@ -57,7 +59,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
-      - name: E2E tests
+      - name: Playwright E2E
         run: npm run test:e2e
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci

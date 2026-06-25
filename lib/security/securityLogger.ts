@@ -112,6 +112,15 @@ export async function logSecurityEvent(
       }
     }
 
+    if (input.ipAddress) {
+      try {
+        const { recordThreatReputation } = await import("@/lib/security/threatReputation");
+        void recordThreatReputation(input);
+      } catch (reputationError) {
+        console.error("[securityLogger] Threat reputation update failed", reputationError);
+      }
+    }
+
     return true;
   } catch (error) {
     if (

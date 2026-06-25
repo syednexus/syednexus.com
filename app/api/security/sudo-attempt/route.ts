@@ -8,7 +8,7 @@ import { getRequestSecurityContext } from "@/lib/security/requestContext";
 import { logSecurityEvent } from "@/lib/security/securityLogger";
 
 export async function POST(req: Request) {
-  if (isRateLimited(req, "security:sudo-attempt", 30, 15 * 60 * 1000)) {
+  if (await isRateLimited(req, "security:sudo-attempt", 30, 15 * 60 * 1000)) {
     return NextResponse.json({ error: "Too many sudo audit requests" }, { status: 429 });
   }
 

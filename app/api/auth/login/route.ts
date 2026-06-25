@@ -11,7 +11,7 @@ import { getRequestSecurityContext } from "@/lib/security/requestContext";
 import { logSecurityEvent } from "@/lib/security/securityLogger";
 
 export async function POST(req: Request) {
-  if (isRateLimited(req, "lab:unlock", 10, 15 * 60 * 1000)) {
+  if (await isRateLimited(req, "lab:unlock", 10, 15 * 60 * 1000)) {
     return NextResponse.json({ error: "Too many unlock attempts" }, { status: 429 });
   }
 

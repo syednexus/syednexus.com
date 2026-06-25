@@ -1,3 +1,5 @@
+import { logSecurityEvent } from "@/lib/security/securityLogger";
+
 export type AuthConfigIssue = {
   variable: string;
   hint: string;
@@ -51,4 +53,13 @@ export function logAuthConfigurationIssues(): void {
     "[auth] Google OAuth redirect URI must include:",
     `${process.env.NEXTAUTH_URL?.trim() || "NEXTAUTH_URL"}/api/auth/callback/google`
   );
+
+  void logSecurityEvent({
+    eventType: "CONFIG_WARNING",
+    severity: "HIGH",
+    metadata: {
+      source: "auth_config",
+      missing: issues.map(issue => issue.variable)
+    }
+  });
 }
