@@ -1,35 +1,40 @@
 import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/prisma";
 import { logSecurityEvent } from "@/lib/security/securityLogger";
+import { buildPlatformHealthPayload } from "@/lib/security/platformHealth";
 
 export async function GET(req: Request) {
-  const timestamp = new Date().toISOString();
-  let database = false;
+  const payload = await buildPlatformHealthPayload(req);
+  const dockerProbe = payload.signals.dockerProbe;
 
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    database = true;
-  } catch (error) {
-    console.error("[health] Database check failed", error);
-  }
-
-  const auditHeader = req.headers.get("x-docker-healthcheck");
-  if (auditHeader === "1" && database) {
+  if (dockerProbe && payload.database) {
     void logSecurityEvent({
       eventType: "DOCKER_HEALTH_CHECK",
       severity: "LOW",
       endpoint: "/api/health",
-      metadata: { status: "ok", source: "docker" }
+      metadata: { status: payload.status, source: "docker" }
     });
   }
 
-  if (!database) {
-    return NextResponse.json(
-      { status: "degraded", database: false, timestamp },
-      { status: 503 }
-    );
+  if (!payload.database || payload.redis === "unavailable") {
+    void logSecurityEvent({
+      eventType: "HEALTH_CHECK",
+      severity: payload.database ? "MEDIUM" : "HIGH",
+      endpoint: "/api/health",
+      metadata: {
+        status: payload.status,
+        database: payload.database,
+        redis: payload.redis,
+        rls: payload.rls,
+        environment: payload.environment,
+        dockerProbe
+      }
+    });
   }
 
-  return NextResponse.json({ status: "ok", database: true, timestamp });
+  if (!payload.database) {
+    return NextResponse.json(payload, { status: 503 });
+  }
+
+  return NextResponse.json(payload);
 }

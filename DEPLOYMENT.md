@@ -171,6 +171,23 @@ $env:SECURITY_LOG_RETENTION_DAYS="90"; npm run security:purge-logs
 
 Or run directly: `npm run security:purge-logs`
 
-## 14. CI
+## 14. Production Security Checklist
+
+Before marking production as hardened, confirm:
+
+- [ ] Cloudflare configured (WAF / proxy in front of origin)
+- [ ] Redis configured (`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`)
+- [ ] RLS enabled (`DATABASE_RLS_ENABLED=true` when Postgres row-level policies are deployed; app-level owner guards are always active)
+- [ ] Docker healthy (`/api/health` returns `status: ok` with `x-docker-healthcheck: 1`)
+- [ ] Security dashboard healthy (`/vault/security` → Platform Security Status card all green/yellow as expected)
+- [ ] OAuth configured (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `NEXTAUTH_URL`)
+- [ ] MFA enabled for owner (`/vault/security`)
+- [ ] Health endpoint passing (`GET /api/health` includes `database`, `redis`, `rls`, `environment`, `version`)
+- [ ] Upload validation enabled (avatar/resume reject invalid MIME/signature; responses include `X-Content-Type-Options: nosniff`)
+- [ ] Rate limiting enabled (feedback: 1 request / IP / 30 minutes; returns HTTP 429 + `Retry-After`)
+- [ ] Safe URL validation enabled (identity `github`, `linkedin`, `resume` rejected on save if unsafe)
+- [ ] Security audit logging enabled (`INVALID_URL_REJECTED`, `RATE_LIMIT_TRIGGERED`, `HEALTH_CHECK`, `UPLOAD_VALIDATION_FAILED`, `CONFIG_WARNING`)
+
+## 15. CI
 
 GitHub Actions runs `tsc`, `npm run build`, and Playwright on push/PR (`.github/workflows/ci.yml`). Install browsers locally with `npx playwright install chromium` before `npm run test:e2e`.

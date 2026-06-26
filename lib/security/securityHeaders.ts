@@ -12,6 +12,12 @@ export function getSecurityConnectSrc(): string {
 }
 
 export function buildContentSecurityPolicy(): string {
+  // TODO(CSP): Remove 'unsafe-inline' from script-src once all inline scripts use nonces.
+  //   Requires: Next.js nonce middleware, SoundContext init, any inline <script> in app/layout.
+  // TODO(CSP): Remove 'unsafe-eval' from script-src after auditing dynamic code paths.
+  //   Likely required today by: @react-three/fiber / three.js shader compilation, dev tooling.
+  // TODO(CSP): Remove 'unsafe-inline' from style-src when Framer Motion and Tailwind runtime
+  //   styles are migrated to hashed static CSS or nonce-backed style attributes.
   return [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'",

@@ -1,6 +1,11 @@
 import { logSecurityEvent } from "@/lib/security/securityLogger";
 import { getClientIp } from "@/lib/security/requestContext";
-import { isRedisAvailable, redisExpire, redisGet, redisIncrBy, redisSet, threatReputationKey } from "@/lib/security/redisClient";
+import {
+  isRedisAvailable,
+  redisExpire,
+  redisIncrBy,
+  redisTtl
+} from "@/lib/security/redisClient";
 
 type RateLimitEntry = {
   count: number;
@@ -51,20 +56,51 @@ async function redisRateLimited(
   return count > limit;
 }
 
-export async function isRateLimited(
+async function getRetryAfterSeconds(
+  key: string,
+  windowMs: number,
+  now: number
+): Promise<number> {
+  try {
+    if (await isRedisAvailable()) {
+      const ttl = await redisTtl(key);
+      if (ttl > 0) {
+        return ttl;
+      }
+    }
+  } catch {
+    // Fall back to in-memory window below.
+  }
+
+  const current = attempts.get(key);
+  if (current) {
+    return Math.max(1, Math.ceil((current.resetAt - now) / 1000));
+  }
+
+  return Math.max(1, Math.ceil(windowMs / 1000));
+}
+
+export type RateLimitResult = {
+  limited: boolean;
+  retryAfterSeconds?: number;
+};
+
+export async function checkRateLimit(
   req: Request,
   scope: string,
   limit: number,
   windowMs: number
-): Promise<boolean> {
+): Promise<RateLimitResult> {
   const now = Date.now();
   const ip = getClientIp(req);
   const key = `ratelimit:${scope}:${ip}`;
 
   let limited = false;
+  let backend: "redis" | "memory" = "memory";
 
   try {
     if (await isRedisAvailable()) {
+      backend = "redis";
       limited = await redisRateLimited(key, limit, windowMs);
     } else {
       limited = await memoryRateLimited(key, limit, windowMs, now);
@@ -75,6 +111,7 @@ export async function isRateLimited(
   }
 
   if (limited) {
+    const retryAfterSeconds = await getRetryAfterSeconds(key, windowMs, now);
     void logSecurityEvent({
       eventType: "RATE_LIMIT_TRIGGERED",
       severity: "HIGH",
@@ -85,10 +122,21 @@ export async function isRateLimited(
         scope,
         limit,
         windowMs,
-        backend: (await isRedisAvailable()) ? "redis" : "memory"
+        backend,
+        retryAfterSeconds
       }
     });
+    return { limited: true, retryAfterSeconds };
   }
 
-  return limited;
+  return { limited: false };
+}
+
+export async function isRateLimited(
+  req: Request,
+  scope: string,
+  limit: number,
+  windowMs: number
+): Promise<boolean> {
+  return (await checkRateLimit(req, scope, limit, windowMs)).limited;
 }

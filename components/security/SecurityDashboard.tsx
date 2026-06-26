@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import SecurityTimeline from "@/components/security/SecurityTimeline";
+import PlatformSecurityStatus from "@/components/security/PlatformSecurityStatus";
 import {
   downloadTextFile,
   securityLogsToCsv,
@@ -205,6 +206,8 @@ export default function SecurityDashboard() {
           {error}
         </div>
       )}
+
+      <PlatformSecurityStatus />
 
       {stats?.storageReady === false && !error && (
         <div

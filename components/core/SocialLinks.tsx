@@ -2,6 +2,7 @@
 
 
 import { useNexusData } from "@/hooks/useNexusData";
+import { safeExternalHref } from "@/lib/security/safeHref";
 
 
 
@@ -39,7 +40,7 @@ mt-5
 
 <a
 
-href={identity.linkedin}
+href={safeExternalHref(identity.linkedin)}
 
 target="_blank"
 
@@ -78,7 +79,7 @@ text-sm
 
 <a
 
-href={identity.github}
+href={safeExternalHref(identity.github)}
 
 target="_blank"
 
@@ -117,7 +118,7 @@ text-sm
 
 <a
 
-href={identity.resume}
+href={safeExternalHref(identity.resume)}
 
 target="_blank"
 

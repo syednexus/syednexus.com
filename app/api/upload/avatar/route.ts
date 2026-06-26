@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 
@@ -6,45 +5,73 @@ import { requireAdmin } from "@/lib/adminGuard";
 import { versionedAvatarPath } from "@/lib/avatarUrl";
 import { getRequestSecurityContext } from "@/lib/security/requestContext";
 import { logSecurityEvent } from "@/lib/security/securityLogger";
+import { jsonUploadResponse, logUploadValidationFailed } from "@/lib/security/uploadResponse";
 import {
   extensionForImageFormat,
-  validateImageBuffer
+  mimeForImageFormat,
+  validateImageBuffer,
+  type ImageFormat
 } from "@/lib/security/validateImageBytes";
 
 const MAX_BYTES = 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
+function normalizeDeclaredMime(type: string): string {
+  const normalized = type.trim().toLowerCase();
+  if (!normalized) return "";
+  if (normalized === "image/jpg" || normalized === "image/pjpeg") {
+    return "image/jpeg";
+  }
+  return normalized;
+}
+
+function isAllowedImageMime(type: string, detectedFormat: ImageFormat | null): boolean {
+  const normalized = normalizeDeclaredMime(type);
+  if (normalized && ALLOWED_TYPES.has(normalized)) {
+    return true;
+  }
+  return !normalized && detectedFormat !== null;
+}
+
 export async function POST(req: Request) {
   try {
     const admin = await requireAdmin(req);
     if (!admin) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return jsonUploadResponse({ error: "Unauthorized" }, 401);
     }
 
     const data = await req.formData();
     const file = data.get("avatar") as File | null;
 
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
-    }
-
-    if (!ALLOWED_TYPES.has(file.type)) {
-      return NextResponse.json(
-        { error: "Only JPG, PNG, or WebP images are allowed" },
-        { status: 400 }
-      );
+      logUploadValidationFailed(req, "avatar", "No file uploaded", admin.user?.email);
+      return jsonUploadResponse({ error: "No file uploaded" }, 400);
     }
 
     if (file.size > MAX_BYTES) {
-      return NextResponse.json({ error: "Maximum file size is 1MB" }, { status: 400 });
+      logUploadValidationFailed(req, "avatar", "File exceeds size limit", admin.user?.email);
+      return jsonUploadResponse({ error: "Maximum file size is 1MB" }, 400);
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const validated = validateImageBuffer(buffer, file.type);
+    const detectedFormat = validateImageBuffer(buffer, "");
+    const format = detectedFormat.ok ? detectedFormat.format : null;
+
+    if (!isAllowedImageMime(file.type, format)) {
+      logUploadValidationFailed(req, "avatar", "Invalid MIME type", admin.user?.email);
+      return jsonUploadResponse(
+        { error: "Only JPG, PNG, or WebP images are allowed" },
+        400
+      );
+    }
+
+    const declaredMime = normalizeDeclaredMime(file.type) || (format ? mimeForImageFormat(format) : "");
+    const validated = validateImageBuffer(buffer, declaredMime);
 
     if (!validated.ok) {
-      return NextResponse.json({ error: validated.error }, { status: 400 });
+      logUploadValidationFailed(req, "avatar", validated.error, admin.user?.email);
+      return jsonUploadResponse({ error: validated.error }, 400);
     }
 
     const ext = extensionForImageFormat(validated.format);
@@ -74,13 +101,13 @@ export async function POST(req: Request) {
       }
     });
 
-    return NextResponse.json({
+    return jsonUploadResponse({
       success: true,
       path: versionedAvatarPath(basePath, version),
       version
     });
   } catch (error) {
     console.error("AVATAR UPLOAD ERROR", error);
-    return NextResponse.json({ error: "Avatar upload failed" }, { status: 500 });
+    return jsonUploadResponse({ error: "Avatar upload failed" }, 500);
   }
 }

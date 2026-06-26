@@ -79,6 +79,15 @@ export async function redisExpire(key: string, ttlSeconds: number): Promise<void
   await upstashCommand(["EXPIRE", key, ttlSeconds]);
 }
 
+export async function redisTtl(key: string): Promise<number> {
+  const result = await upstashCommand(["TTL", key]);
+  const ttl = Number(result);
+  if (!Number.isFinite(ttl) || ttl < 0) {
+    return 0;
+  }
+  return ttl;
+}
+
 export async function redisGet(key: string): Promise<string | null> {
   const result = await upstashCommand(["GET", key]);
   if (result === null || result === undefined) return null;

@@ -500,7 +500,25 @@ return;
 
 
 
-if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
+function isAllowedProfileImage(file: File): boolean {
+  const allowedTypes = new Set([
+    "image/jpeg",
+    "image/jpg",
+    "image/pjpeg",
+    "image/png",
+    "image/webp"
+  ]);
+  const mime = file.type.trim().toLowerCase();
+  if (mime && allowedTypes.has(mime)) {
+    return true;
+  }
+  return /\.(jpe?g|png|webp)$/i.test(file.name);
+}
+
+
+
+
+if(!isAllowedProfileImage(file)){
 
 
 notify(
@@ -584,15 +602,18 @@ body:form
 
 if(!res.ok){
 
-notify(
+const errorBody = await res.json().catch(() => null);
+const message =
+  errorBody &&
+  typeof errorBody === "object" &&
+  "error" in errorBody &&
+  typeof (errorBody as { error?: unknown }).error === "string"
+    ? (errorBody as { error: string }).error
+    : "Avatar upload rejected";
 
-"Avatar upload rejected"
-
-);
-
+notify(message);
 
 return;
-
 
 }
 

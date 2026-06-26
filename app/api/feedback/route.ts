@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 
+import { checkRateLimit } from "@/lib/rateLimit";
 import { sendFeedbackEmail } from "@/lib/sendFeedbackEmail";
 
 const VALID_CATEGORIES = ["bug", "general", "feature", "lab", "security", "other"] as const;
-type FeedbackCategory = typeof VALID_CATEGORIES[number];
+type FeedbackCategory = (typeof VALID_CATEGORIES)[number];
+
+const FEEDBACK_RATE_LIMIT = 1;
+const FEEDBACK_WINDOW_MS = 30 * 60 * 1000;
 
 function sanitizeCategory(value: unknown): FeedbackCategory {
-  const v = String(value ?? "").trim().toLowerCase();
+  const v = String(value ?? "")
+    .trim()
+    .toLowerCase();
   return (VALID_CATEGORIES as readonly string[]).includes(v)
     ? (v as FeedbackCategory)
     : "general";
@@ -14,6 +20,19 @@ function sanitizeCategory(value: unknown): FeedbackCategory {
 
 export async function POST(req: Request) {
   try {
+    const rateLimit = await checkRateLimit(req, "feedback", FEEDBACK_RATE_LIMIT, FEEDBACK_WINDOW_MS);
+    if (rateLimit.limited) {
+      return NextResponse.json(
+        { error: "Too many feedback submissions. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfterSeconds ?? Math.ceil(FEEDBACK_WINDOW_MS / 1000))
+          }
+        }
+      );
+    }
+
     const body = await req.json();
 
     const message = String(body.message ?? "").trim();
@@ -21,7 +40,7 @@ export async function POST(req: Request) {
     const category = sanitizeCategory(body.category);
     const page = String(body.page ?? "")
       .trim()
-      .replace(/[\r\n]/g, "") // prevent header injection
+      .replace(/[\r\n]/g, "")
       .slice(0, 200);
 
     if (message.length < 5 || message.length > 2000) {

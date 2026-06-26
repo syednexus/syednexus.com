@@ -1,4 +1,4 @@
-import ProfileEditor from "@/components/vault/ProfileEditor";
+import IdentityEditor from "@/components/admin/IdentityEditor";
 
 
 
@@ -51,7 +51,7 @@ Update Nexus Identity Core.
 </p>
 
 
-<ProfileEditor />
+<IdentityEditor />
 
 
 </section>
